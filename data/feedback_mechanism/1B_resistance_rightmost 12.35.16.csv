@@ -1,0 +1,238 @@
+Student,Text,No evidence,Target phenomena,Set-up conditions,Entities,Activities,Properties,Organization,Chaining
+C,Ok. Perfect. Now the second part.,1,0,0,0,0,0,0,0
+S,I need to read the second part. Something about gas.,1,0,0,0,0,0,0,0
+M,Gas specific heat.,1,0,0,0,0,0,0,0
+S,Define an experiment complete with instr - oh my god - instrumentation to determine specific heats of a gas using a resistance heater.,1,0,0,0,0,0,0,0
+C,What?,1,0,0,0,0,0,0,0
+L,Yeah what?,1,0,0,0,0,0,0,0
+S,This does not seem short.,1,0,0,0,0,0,0,0
+M,Ok.,1,0,0,0,0,0,0,0
+L,So resistance heater um makes me think of some more efficiency stuff.,1,0,0,0,0,0,0,0
+S,So just like a heat pump?,1,0,0,0,0,0,0,0
+C,Yeah...It could be.,1,0,0,0,0,0,0,0
+M,It could just be electricity power. Like do you rememeber in the beginning of the semester when we did those really simple ones where they just had work coming in?,1,0,0,0,0,0,0,0
+C,Yes.,1,0,0,0,0,0,0,0
+S,What a good time.,1,0,0,0,0,0,0,0
+C,I liked those ones. Those were fun.,1,0,0,0,0,0,0,0
+M,Ok. So determine specific heats. We need temperatures -,0,1,0,0,0,0,0,0
+L,So we need a thermometer to see when it raises a degree.,0,0,1,0,0,0,0,0
+C,Items needed. Ok. Um.,0,0,1,0,0,0,0,0
+L,It's like in Harry Potter when the guy writes messages.,1,0,0,0,0,0,0,0
+C,For temperatures.,1,0,0,0,0,0,0,0
+L,Ok it's my test where she told me you need to write neater.,1,0,0,0,0,0,0,0
+C,Damn.,1,0,0,0,0,0,0,0
+L,"In dynamics, she said try to organize this please.",1,0,0,0,0,0,0,0
+S,Just try.,1,0,0,0,0,0,0,0
+L,She wrote me like a whole little paragraph.,1,0,0,0,0,0,0,0
+C,Oh no.,1,0,0,0,0,0,0,0
+S,Is that the professor that's going to be listening to this?,1,0,0,0,0,0,0,0
+L,No. Well maybe. Who listens to this? I actually think yeah.,1,0,0,0,0,0,0,0
+S,Ok so I guess we start with...,1,0,0,0,0,0,0,0
+M,"If we take a closed system, and we heat it up.",1,0,0,0,0,0,0,0
+L,"So we need to know how much gas is in there - like mass of the gas, right?",0,0,0,0,1,0,0,0
+S,Yeah what the gas -,0,0,0,1,0,0,0,0
+L,In a closed system.,0,0,1,0,0,0,0,0
+S,- is? I guess we need to know that.,1,0,0,0,0,0,0,0
+L,Oh yeah what it is for sure is good.,1,0,0,0,0,0,0,0
+M,Yeah.,1,0,0,0,0,0,0,0
+C,"How do we determine that, is there like a tool?",0,0,1,0,0,0,0,0
+S,So like we just need like energy and mass.,1,0,0,0,0,0,0,0
+L,So we can just say what gas it is. I don't know what gas it should be. Nitrogen.,0,0,0,1,0,0,0,0
+C,Um. Nitrogen?,0,0,0,1,0,0,0,0
+L,Gas.,0,0,0,1,0,0,0,0
+C,Um items needed.,0,0,0,1,0,0,0,0
+L,don't know.,1,0,0,0,0,0,0,0
+C,Thermometer for temperatures.,0,0,0,1,0,0,0,0
+L,It's in the air. It's mostly the air. Um.,0,0,0,1,0,0,0,0
+M,"So if we assume it's ideal, we only need to find the one to find both.",1,0,0,0,0,0,0,0
+S,Right.,1,0,0,0,0,0,0,0
+M,So it's probably easier to find -,1,0,0,0,0,0,0,0
+L,So -,1,0,0,0,0,0,0,0
+M,- the constant volume one because internal energy is -,1,0,0,0,0,0,0,0
+L,Yeah we can have - we can have like a -,1,0,0,0,0,0,0,0
+M,- easier than enthalpy. Yeah and we're doing - yeah.,1,0,0,0,0,0,0,0
+C,I like the constant volume ones.,1,0,0,0,0,0,0,0
+S,Yeah. So we need like a container for the gas.,0,0,1,0,0,0,0,0
+L,Mhm.,1,0,0,0,0,0,0,0
+S,It's a constant volume.,1,0,0,0,0,0,0,0
+C,Ok. Container.,1,0,0,0,0,0,0,0
+L,So it's a rigid container.,0,0,1,0,0,0,0,0
+C,Rigid container.,1,0,0,0,0,0,0,0
+L,And... that's in every problem.,1,0,0,0,0,0,0,0
+L,Um we'll have a thermometer.,0,0,1,0,0,0,0,0
+M,So then it would also be a closed system.,1,0,0,0,0,0,0,0
+S,Mhm.,1,0,0,0,0,0,0,0
+C,Maintain,1,0,0,0,0,0,0,0
+L,And - So we'll know like the - we'll have a barometer. Pressure gauge. Is that what that's called?,0,0,1,0,0,0,0,0
+C,Constant...volume...,1,0,0,0,0,0,0,0
+S,Mhm.,1,0,0,0,0,0,0,0
+L,So with barometer we can measure like the initial pressure and then using ideal gas law we can find the mass of the gas from that.,0,0,1,0,0,0,0,0
+C,Pressure... Initial....,1,0,0,0,0,0,0,0
+S,Know the mass of the gas.,1,0,0,0,0,0,0,0
+L,How would we know mass of gas? You don't know how dense it is.,1,0,0,0,0,0,0,0
+S,Evacuate the container and then weigh that. Add the gas.,0,0,0,1,0,0,0,0
+L,Oh boy.,1,0,0,0,0,0,0,0
+C,Good work.,1,0,0,0,0,0,0,0
+S,"Yeah I guess we can barometer, thermometer.",0,0,1,0,0,0,0,0
+L,So then we'll calculate the mass and we know the mass - the starting mass.,1,0,0,0,0,0,0,0
+C,Ok.,1,0,0,0,0,0,0,0
+M,And then we...,1,0,0,0,0,0,0,0
+C,So do we need like some sort of mass measuring thing?,0,0,1,0,0,0,0,0
+L,"Well if we know temp - initial temperature, pressure, and volume, then you can just find the mass.",1,0,0,0,0,0,0,0
+C,Oh then you can find the mass.,1,0,0,0,0,0,0,0
+M,And we know what type of gas it is.,1,0,0,0,0,0,0,0
+S,Yeah.,1,0,0,0,0,0,0,0
+C,"Yeah I wrote down nitrogen gas for items needed. Um ok. So. First, find volume.",1,0,0,0,0,0,0,0
+M,"So we can just use the equation q minus w equals the change in internal temperature, which is the integral of constant volume specific heat over temperature.",1,0,0,0,0,0,0,0
+S,That sounded good.,1,0,0,0,0,0,0,0
+M,Hm?,1,0,0,0,0,0,0,0
+S,That sounded good.,1,0,0,0,0,0,0,0
+C,Ok what equation?,1,0,0,0,0,0,0,0
+M,So this one I think.,1,0,0,0,0,0,0,0
+C,equals...T2 T1 c ... T. Perfect.,1,0,0,0,0,0,0,0
+M,Um and then just q minus w is change in internal temperature.,1,0,0,0,0,0,0,0
+C,q minus w equals delta E.,1,0,0,0,0,0,0,0
+M,Yeah.,1,0,0,0,0,0,0,0
+C,"How did we - and then how the experiment will... ok first find - I said first find volume, temperature, and presssure to get mass.",1,0,0,0,0,0,0,0
+M,What do we do with the integral?,1,0,0,0,0,0,0,0
+C,You need these equations.,1,0,0,0,0,0,0,0
+S,So I mean I guess like the first step is figuring out the mass. We like talked about how to do that.,1,0,0,0,0,0,0,0
+L,Yeah.,1,0,0,0,0,0,0,0
+C,"Yeah I did first find volume, temperature, and pressure to get mass.",1,0,0,0,0,0,0,0
+L,So then we just need a way - a way to measure like how much energy is going in.,1,0,0,0,0,0,0,0
+C,Mm.,1,0,0,0,0,0,0,0
+M,There must be some electrical thing.,1,0,0,0,0,0,0,0
+L,So we can say it's - so we'll say it's like electrical. Is that work? Electrical work?,1,0,0,0,0,0,0,0
+C,Yeah I think.,1,0,0,0,0,0,0,0
+M,Yeah with the resistance.,1,0,0,0,0,0,0,0
+L,I get confused with what's work.,1,0,0,0,0,0,0,0
+C,Yeah use a resistance heater to measure electrical work? Is that a thing?,0,0,1,0,0,0,0,0
+L,I don't - wait.,1,0,0,0,0,0,0,0
+M,I think you measure the -,1,0,0,0,0,0,0,0
+C,Resistance heater,1,0,0,0,0,0,0,0
+M,- the work of the resistance heater.,1,0,0,0,0,0,0,0
+C,Resistance heater to find electrical work. Use resistance heater. Ok so that's another item we need. The resistance heater.,0,0,1,0,0,0,0,0
+S,What like is a resistance heater? It's just like a heater?,1,0,0,0,0,0,0,0
+C,Use resistance heater.,0,0,1,0,0,0,0,0
+S,With resistance?,0,0,1,0,0,0,0,0
+M,A picture in my mind is just a hot wire.,0,0,1,0,0,0,0,0
+L,That's what I think of too.,1,0,0,0,0,0,0,0
+C,I didn't know what it was.,1,0,0,0,0,0,0,0
+M,But I don't know how accurate that is.,1,0,0,0,0,0,0,0
+C,Ok so use the resistance heater to measure the like energy kind of as -,1,0,0,0,0,0,0,0
+M,To add work.,1,0,0,0,0,0,0,0
+C,To add work and then -,1,0,0,0,0,0,0,0
+L,Yeah we just need to know how much work it's adding.,1,0,0,0,0,0,0,0
+S,It's just adding energy.,1,0,0,0,0,0,0,0
+C,To add a certain amount of work.,1,0,0,0,0,0,0,0
+S,Is it adding work or just like?,1,0,0,0,0,0,0,0
+L,Oh yeah just adding heat.,1,0,0,0,0,0,0,0
+M,I think it depends where you draw the boundary thing. It would be easier if it was work.,1,0,0,0,0,0,0,0
+C,Ok we'll do work.,1,0,0,0,0,0,0,0
+L,"I don't think it matters at all. Cause they're both joules, so we'll treat it the same way.",1,0,0,0,0,0,0,0
+S,Yeah but I just don't wanna write the wrong thing.,1,0,0,0,0,0,0,0
+L,Oh yeah. Yeah no I don't really know what it actually is.,1,0,0,0,0,0,0,0
+C,Yeah these problems are kinda confusing.,1,0,0,0,0,0,0,0
+M,Ok. And then measure the change in temperature.,1,0,0,0,0,0,0,0
+C,"Ok. And based off of that, we can -",1,0,0,0,0,0,0,0
+M,I don't know if we can do anything with the -,1,0,0,0,0,0,0,0
+C,Change in temperature,1,0,0,0,0,0,0,0
+M,- integral.,1,0,0,0,0,0,0,0
+L,I don't really know if we have to use an integral.,1,0,0,0,0,0,0,0
+M,So then we just do the average?,1,0,0,0,0,0,0,0
+L,The average what?,1,0,0,0,0,0,0,0
+M,Like the average specific heat?,1,0,0,0,0,0,0,0
+S,Oh yeah I think yeah.,1,0,0,0,0,0,0,0
+M,Sounds good.,1,0,0,0,0,0,0,0
+C,So. Should I change this to like the average?,1,0,0,0,0,0,0,0
+M,Yeah.,1,0,0,0,0,0,0,0
+C,So that equals what like c.,1,0,0,0,0,0,0,0
+M,c average change in T. Pretty much. Yeah.,1,0,0,0,0,0,0,0
+L,Trying to remember what sources of work are.,1,0,0,0,0,0,0,0
+C,Now that you have - Do you have delta U now? Because the -,1,0,0,0,0,0,0,0
+M,I think we use -,1,0,0,0,0,0,0,0
+C,resistance heater?,1,0,0,0,0,0,0,0
+M,We equal these two equations.,1,0,0,0,0,0,0,0
+C,Ok. So like just set this equal to.,1,0,0,0,0,0,0,0
+M,I think we can say that it's just U for a closed system.,1,0,0,0,0,0,0,0
+C,Ok set the equations equal to each other.,1,0,0,0,0,0,0,0
+M,Yes.,1,0,0,0,0,0,0,0
+C,Set equations...,1,0,0,0,0,0,0,0
+M,So. Yeah.,1,0,0,0,0,0,0,0
+C,Equal to. Ok so then you have c average delta T. Yes equals like q minus w or delta E.,1,0,0,0,0,0,0,0
+M,"Q minus w yeah. If we insulate the system, we don't have to worry about w. How do we feel about that?",1,0,0,0,0,0,0,0
+S,Yeah. Feel great about that.,1,0,0,0,0,0,0,0
+M,About q.,1,0,0,0,0,0,0,0
+S,q yeah.,1,0,0,0,0,0,0,0
+C,System is insulated. Therefore...,1,0,0,0,0,0,0,0
+L,Yeah and then the w will just be like measured from our experiment somehow.,1,0,0,0,0,0,0,0
+C,Yeah. Oh from the resistance heater. Ok.,1,0,0,0,0,0,0,0
+L,Yeah they can like - digital and gives us.,1,0,0,0,0,0,0,0
+C,Using.,1,0,0,0,0,0,0,0
+S,"Read the number that it gives us, cause it knows.",1,0,0,0,0,0,0,0
+L,It knows everything.,1,0,0,0,0,0,0,0
+C,New equation.,1,0,0,0,0,0,0,0
+L,Hi.,1,0,0,0,0,0,0,0
+S,We're doing this like group homework and they record us talking.,1,0,0,0,0,0,0,0
+L,Yeah. Do you want to say something to the whoever listens to this?,1,0,0,0,0,0,0,0
+S,Oh really boat. Everybody's boat.,1,0,0,0,0,0,0,0
+C,Equation and.,1,0,0,0,0,0,0,0
+S,Stop lifting boats.,1,0,0,0,0,0,0,0
+C,...used for change...,1,0,0,0,0,0,0,0
+M,And then we need to talk about sources of error.,1,0,0,0,0,0,0,0
+C,Ok.,1,0,0,0,0,0,0,0
+M,And how to minimize them.,1,0,0,0,0,0,0,0
+S,Um so we just have to make sure it's like fully insulated as much as it can be.,1,0,0,0,0,0,0,0
+L,[E’s name]. He stopped it. Stop it.,1,0,0,0,0,0,0,0
+S,Um so like just making sure it's like completely insulated like the only gas in the container is nitrogen. Repeated trials.,0,0,0,1,0,0,0,0
+M,Ooh.,1,0,0,0,0,0,0,0
+L,Oh oh that's good. That's always good. Someone's hacking in the stairwell. Just guess who was coughing in the stairs.,1,0,0,0,0,0,0,0
+S,Who was coughing in the stairs?,1,0,0,0,0,0,0,0
+L,[indistinguishable],1,0,0,0,0,0,0,0
+S,That's so good. Recorded also.,1,0,0,0,0,0,0,0
+L,Oh my god.,1,0,0,0,0,0,0,0
+C,Repeated trials. Oh that minimizes error right.,1,0,0,0,0,0,0,0
+S,Do we need to say in our procedure that like also that we're gonna like find cp too?,1,0,0,0,0,0,0,0
+M,This would be - I think those are - Oh yeah we could do that. Yeah we should probably mention that.,1,0,0,0,0,0,0,0
+L,Yeah.,1,0,0,0,0,0,0,0
+S,Yeah like we could just add to the equation like cp equals cv plus R.,1,0,0,0,0,0,0,0
+M,I think these are minimizing the error.,1,0,0,0,0,0,0,0
+C,Yeah I'll just switch this for now.,1,0,0,0,0,0,0,0
+M,Yeah.,1,0,0,0,0,0,0,0
+S,Ok.,1,0,0,0,0,0,0,0
+M,If it's an ideal gas it's eas - it's one equation.,1,0,0,0,0,0,0,0
+S,Yeah cp equals cv plus R. And we have R.,1,0,0,0,0,0,0,0
+C,Yeah.,1,0,0,0,0,0,0,0
+S,So. I just - I don't know if we wanna like add this just to like equations we need.,1,0,0,0,0,0,0,0
+L,Oh we included that thing. I don't know.,1,0,0,0,0,0,0,0
+C,cp equals cv plus R. That's the worst R I've ever drawn. Alright. cp equals cv plus R. Perfect.,1,0,0,0,0,0,0,0
+S,Yeah and that's like...,1,0,0,0,0,0,0,0
+C,Ok and then sources of error.,1,0,0,0,0,0,0,0
+S,Like unaccounted for heat loss. We kind of already talked about insulating.,1,0,0,0,0,0,0,0
+M,Yeah.,1,0,0,0,0,0,0,0
+L,Like the accuracy of the barometer and thermometer.,0,0,1,0,0,0,0,0
+S,Yeah. Also like the fact that we're finding an average.,1,0,0,0,0,0,0,0
+M,Mm.,1,0,0,0,0,0,0,0
+L,Mhm.,1,0,0,0,0,0,0,0
+M,Also the temperature's probably not consistent over the -,1,0,0,0,0,0,0,0
+L,Mhm.,1,0,0,0,0,0,0,0
+S,Being recorded.,1,0,0,0,0,0,0,0
+L,Just doing some thermo.,1,0,0,0,0,0,0,0
+S,Yeah would you like to say anything to the - again I don't know who listens to this.,1,0,0,0,0,0,0,0
+L,Do we think it's the engineering education professor?,1,0,0,0,0,0,0,0
+S,They like record us doing a group problem.,1,0,0,0,0,0,0,0
+C,...listens to it....,1,0,0,0,0,0,0,0
+L,I always forget it's recording and then I say bad things.,1,0,0,0,0,0,0,0
+S,Um is that enough sources of error?,1,0,0,0,0,0,0,0
+C,What was the third one?,1,0,0,0,0,0,0,0
+S,Um. I don't know.,1,0,0,0,0,0,0,0
+L,Um.,1,0,0,0,0,0,0,0
+S,Uh I just - oh the fact that we're finding an average not one at like a specific temperature or point or whatever.,1,0,0,0,0,0,0,0
+L,Hey don't.,1,0,0,0,0,0,0,0
+M,Ok.,1,0,0,0,0,0,0,0
+C,Ok.,1,0,0,0,0,0,0,0
+L,I look like a fool.,1,0,0,0,0,0,0,0
+C,Is there like a spot to submit these?,1,0,0,0,0,0,0,0
+S,What?,1,0,0,0,0,0,0,0
+L,Should I turn off the recording?,1,0,0,0,0,0,0,0
+C,Uh yeah it's like you have to slide it on the side from hold to like on and then press stop.,1,0,0,0,0,0,0,0
