@@ -3,6 +3,8 @@ import copy
 import numpy as np
 from sklearn.model_selection import train_test_split
 import scipy
+import matplotlib.pyplot as plt 
+from pathlib import Path
 # PyTorch
 import torch
 import torchvision
@@ -51,4 +53,20 @@ def use_posterior(self, flag):
             
 def flatten_params(model, excluded_params=["raw_lengthscale", "raw_noise", "raw_outputscale", "raw_sigma", "raw_tau"]):
     return torch.cat([param.view(-1) for name, param in model.named_parameters() if param.requires_grad and name not in excluded_params])
+
+def plot_losses(num_epochs, loss_data, loss_type, lr): 
+
+    if loss_type == "loss":
+        loss_type = "ELBO"
+    else: 
+        loss_type = loss_type
+    plt.figure()
+    plt.plot([i for i in range(num_epochs)], loss_data)
+    plt.title(f"lr: {lr} and loss_type: {loss_type}")
+    plt.xlabel("Number of Iterations")
+    plt.ylabel(loss_type)
+
+    repo_root = Path(__file__).resolve().parents[2]
+    plots_dir = repo_root / "results" / "feedback_mechanism" / f"{loss_type}_{lr}.pdf"
+    plt.savefig(plots_dir)
 
