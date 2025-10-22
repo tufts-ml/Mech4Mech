@@ -3,12 +3,12 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 from utilities.examples import example_end_times_are_proper
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
 )
-from utilities.model import Model
-from utilities.params import AllParameters_JAX, dims_from_params
+from model import Model 
+from params import AllParameters_JAX, dims_from_params
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,

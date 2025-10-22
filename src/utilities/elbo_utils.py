@@ -8,8 +8,8 @@ import numpy as np
 import jax.numpy as jnp
 import jax_dataclasses as jdc
 
-from utilities.model import Model
-from utilities.params import (
+from model import Model 
+from params import (
     AllParameters_JAX,
     SystemTransitionParameters_JAX,
     EntityTransitionParameters_MetaSwitch_JAX,
@@ -26,7 +26,7 @@ from utilities.types import (
     NumpyArray1D,
     NumpyArray2D,
 )
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
 )
@@ -35,8 +35,7 @@ from utilities.examples import (
     get_initialization_times,
     get_non_initialization_times,
 )
-from utilities.util import evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant
-from utilities.util import normalize_log_potentials_by_axis_JAX
+from utilities.util import evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, normalize_log_potentials_by_axis_JAX
 
 def calc_elbo(
     params: AllParameters_JAX,

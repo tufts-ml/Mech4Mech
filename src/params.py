@@ -7,14 +7,13 @@ from typing import Union
 import jax.numpy as jnp
 import jax_dataclasses as jdc
 import numpy as np
-#import torch
 from jax import vmap
 
 from utilities.covariances import (
     cholesky_nzvals_from_covariance_JAX,
     covariance_from_cholesky_nzvals_JAX,
 )
-from utilities.model import Model
+from model import Model
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,

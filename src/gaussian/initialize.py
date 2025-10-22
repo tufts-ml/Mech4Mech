@@ -9,9 +9,8 @@ import sklearn
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
-from metrics import compute_regime_labeling_accuracy
-from utilities.model import Model
-from utilities.params import (
+from model import Model 
+from params import (
     AllParameters_JAX,
     ContinuousStateParameters_Gaussian_JAX,
     Dims,
@@ -29,11 +28,9 @@ from utilities.types import (
     NumpyArray2D,
     NumpyArray3D,
 )
-from utilities.util import make_fixed_sticky_tpm_JAX
+from utilities.util import make_fixed_sticky_tpm_JAX, make_sample_weights_which_mask_the_initial_timestep_for_each_event
 from utilities.examples import example_end_times_are_proper
-from utilities.util import (
-    make_sample_weights_which_mask_the_initial_timestep_for_each_event,
-)
+
 
 from initialize import (
     InitializationResults,
@@ -42,14 +39,10 @@ from initialize import (
     ResultsFromTopHalfInit,
     initialization_results_from_raw_initialization_results,
 )
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
-    HMM_Posterior_Summary_JAX,
-    compute_closed_form_M_step_on_posterior_summaries,
+    HMM_Posterior_Summary_JAX
 )
-from utilities.kmeans import plot_kmeans_on_2d_data
-
-#from utilities.steps_in_state import plot_steps_assigned_to_state
 
 from maximization_step import (
     M_Step_Toggle_Value,
@@ -58,6 +51,7 @@ from maximization_step import (
     run_M_step_for_IP,
     run_M_step_for_STP_in_closed_form,
     run_M_step_for_STP_via_gradient_descent,
+    compute_closed_form_M_step_on_posterior_summaries
 )
 from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
 
@@ -235,15 +229,6 @@ def make_kmeans_preinitialization_of_CSP_JAX(
             warnings.simplefilter(action="ignore", category=FutureWarning)
             kms[j] = KMeans(K, random_state=120).fit(data_for_kmeans[:, j, :], sample_weight=weights_for_kmeans[:, j])
 
-    # ### Plot K-means fits
-    if plotbose:
-        plot_kmeans_on_2d_data(
-            data_for_kmeans,
-            weights_for_kmeans,
-            kms,
-            save_dir,
-        )
-
     ### Initialize parameters by running separate vector autoregressions within each cluster.
 
     # For each state, initialize CSP via a (multivariate-outcome) linear regression
@@ -270,9 +255,6 @@ def make_kmeans_preinitialization_of_CSP_JAX(
 
             outcomes_jk = continuous_states[outcome_indices_jk, j, :]
             predictors_jk = continuous_states[predictor_indices_jk, j, :]
-            # if plotbose:
-            #     plot_steps_assigned_to_state(outcomes_jk, predictors_jk, j, k, save_dir, basename_prefix="init_kmeans")
-
             ### run vector autoregression
             lr = LinearRegression(fit_intercept=True)
             lr.fit(predictors_jk, outcomes_jk)

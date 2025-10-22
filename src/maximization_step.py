@@ -2,13 +2,11 @@ import functools
 import warnings
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional
 
 import jax.numpy as jnp
-import jax_dataclasses as jdc
 import numpy as np
 from dynamax.utils.optimize import run_gradient_descent
-from joblib import Parallel, delayed
 from statsmodels.regression.linear_model import WLS
 from statsmodels.tools.tools import add_constant
 
@@ -16,15 +14,16 @@ from utilities.examples import (
     eligible_transitions_to_next,
     get_initialization_times,
     get_non_initialization_times,
-    only_one_example,
 )
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
-    compute_closed_form_M_step,
+    make_list_from_hmm_posterior_summaries,
+    HMM_Posterior_Summary_NUMPY,
+    HMM_Posterior_Summaries_NUMPY
 )
-from utilities.model import Model
-from utilities.params import (
+from model import Model 
+from params import (
     AllParameters_JAX,
     CSP_Gaussian_with_unconstrained_covariances_from_ordinary_CSP_Gaussian,
     ContinuousStateParameters_Gaussian_JAX,
@@ -44,17 +43,16 @@ from utilities.params import (
     ordinary_STP_from_STP_with_unconstrained_tpms,
 )
 from utilities.util import (
-    make_sample_weights_which_mask_the_initial_timestep_for_each_event,
+    make_sample_weights_which_mask_the_initial_timestep_for_each_event,evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, soften_tpm
 )
-from utilities.util import (
-    evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant,
-)
+
 from utilities.types import (
     JaxNumpyArray2D,
     JaxNumpyArray3D,
     JaxNumpyArray5D,
     NumpyArray1D,
     NumpyArray3D,
+    NumpyArray2D,
 )
 from utilities.util import (
     normalize_log_potentials_by_axis_JAX,
@@ -432,6 +430,90 @@ def compute_cost_for_continuous_state_parameters_with_unconstrained_covariances_
         use_continuous_states,
     )
 
+def compute_closed_form_M_step(
+    posterior_summary: HMM_Posterior_Summary_NUMPY,
+    use_continuous_states: Optional[NumpyArray2D] = None,
+    example_end_times: Optional[NumpyArray1D] = None,
+) -> NumpyArray2D:
+    """
+    Returns:
+        Array of shape (K,K) which is a tpm.
+
+    Remarks:
+        If we have four observations (x1,x2,x3,x4), and the `use_continuous_states` mask is [True,True,False,False],
+        then we only use the pair (x1,x2) when estimating the tpm.  Basically, BOTH points have to have a true usage
+        in order for their contribution to the tpm to count.
+    """
+
+    T, K = np.shape(posterior_summary.expected_regimes)[:2]
+
+    if use_continuous_states is None:
+        use_continuous_states = np.full((T), True)
+
+    if example_end_times is None:
+        example_end_times = np.array([-1, T])
+
+    # Compute tpm
+    tpm_empirical = np.zeros((K, K))
+    for k in range(K):
+        for k_prime in range(K):
+            tpm_empirical[k, k_prime] = np.sum(
+                posterior_summary.expected_joints[:, k, k_prime]
+                * use_continuous_states[1:]
+                * eligible_transitions_to_next(example_end_times),
+                axis=0,
+            ) / np.sum(
+                posterior_summary.expected_regimes[:-1, k]
+                * use_continuous_states[1:]
+                * eligible_transitions_to_next(example_end_times),
+                axis=0,
+            )
+
+    # Add in a small bit of a uniform distribution to bound away from exact ones and zeros.
+    # A better approach is to use a Dirichlet prior and take the posterior.
+    return soften_tpm(tpm_empirical)
+
+
+# TODO: Is there some way to combine `compute_closed_form_M_step`
+# with `compute_closed_form_M_step_on_posterior_summaries` by just vectorizing across
+# any leading dimensions when they exist?
+
+
+def compute_closed_form_M_step_on_posterior_summaries(
+    posterior_summaries: HMM_Posterior_Summaries_NUMPY,
+    use_continuous_states: Optional[NumpyArray2D] = None,
+    example_end_times: Optional[NumpyArray1D] = None,
+) -> NumpyArray3D:
+    """
+    Arguments:
+        use_continuous_states: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that
+            the (t,j)-th element  is 1 if continuous_states[t,j] should be utilized
+            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
+            that info to do the M-step.
+
+    Returns:
+        Array of shape (J,K,K), whose j-th entry is a tpm
+    """
+
+    T, J, K = np.shape(posterior_summaries.expected_regimes)
+
+    if use_continuous_states is None:
+        use_continuous_states = np.full((T, J), True)
+
+    if example_end_times is None:
+        example_end_times = np.array([-1, T])
+
+    posterior_summaries_list = make_list_from_hmm_posterior_summaries(posterior_summaries)
+
+    tpms = [None] * J
+    for j in range(J):
+        tpms[j] = compute_closed_form_M_step(
+            posterior_summaries_list[j], use_continuous_states[:, j], example_end_times
+        )
+
+    return np.array(tpms)
+
 
 ###
 # Run M-steps
@@ -540,7 +622,7 @@ def run_M_step_for_ETP_via_gradient_descent(
         continuous_states=continuous_states,
         VES_summary=VES_summary,
         VEZ_summaries=VEZ_summaries,
-        model=model,
+        model= model,
         example_end_times=example_end_times,
         use_continuous_states=use_continuous_states,
     )

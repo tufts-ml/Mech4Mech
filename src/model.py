@@ -1,24 +1,28 @@
-
-import os
 from enum import Enum
-from utilities.model import Model
-from recurrence import cluster_trigger_system_recurrence_transformation, direction_entity_recurrence_transformation,identity_recurrence_system, identity_recurrence_entity
-from gaussian.transition_and_emission_models import (
-    compute_log_continuous_state_emissions_after_initial_timestep_JAX,
-    compute_log_entity_transition_probability_matrices_JAX,
-    compute_log_initial_continuous_state_emissions_JAX,
-    compute_log_system_transition_probability_matrices_JAX,
-)
+import os
+from dataclasses import dataclass
+from typing import Callable, Optional
 
+@dataclass
+class Model:
+    """
+    Gives the ingredients necessary to define a hierarchical switching recurrent dynamical model,
+    as defined in the NeurIPS submission.
 
-marching_model_JAX = Model(
-    compute_log_initial_continuous_state_emissions_JAX,
-    compute_log_continuous_state_emissions_after_initial_timestep_JAX,
-    compute_log_system_transition_probability_matrices_JAX,
-    compute_log_entity_transition_probability_matrices_JAX,
-    identity_recurrence_entity,
-    cluster_trigger_system_recurrence_transformation
-)
+    Note that we are implicitly defining a distribution over observations (y)
+    elsewhere.  Namely, this is a linear Gaussian model.  But we haven't made this explict yet because
+    Model2a directly observes the x's.
+    """
+
+    compute_log_initial_continuous_state_emissions_JAX: Callable
+    compute_log_continuous_state_emissions_after_initial_timestep_JAX: Callable
+    compute_log_system_transition_probability_matrices_JAX: Callable
+    compute_log_entity_transition_probability_matrices_JAX: Callable
+    transform_of_continuous_state_vector_before_premultiplying_by_entity_recurrence_matrix_JAX: Callable
+    transform_of_flattened_continuous_state_vectors_before_premultiplying_by_system_recurrence_matrix_JAX: Optional[
+        Callable
+    ] = None
+
 
 def save_model_type(model_dir: str, basename_prefix: str = ""):
     filepath = os.path.join(model_dir, f"{basename_prefix}_model_type_string.txt")

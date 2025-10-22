@@ -3,8 +3,8 @@ from typing import Optional
 import jax.numpy as jnp
 import numpy as np
 
-from utilities.model import Model
-from utilities.params import InitializationParameters
+from model import Model 
+from params import InitializationParameters
 from utilities.types import (
     JaxNumpyArray2D,
     JaxNumpyArray3D,

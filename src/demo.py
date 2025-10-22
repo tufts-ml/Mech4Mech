@@ -10,7 +10,7 @@ import time
 import os
 from sklearn.cluster import KMeans
 
-from model import marching_model_JAX
+from model import Model
 from gaussian.initialize import (
     PreInitialization_Strategy_For_CSP,
     smart_initialize_model_2a,
@@ -19,7 +19,7 @@ from metrics import get_aligned_estimate, compute_regime_labeling_accuracy
 from utilities.util import (
     get_current_datetime_as_string, ensure_dir
 )
-from utilities.params import (
+from params import (
     Dims,
     get_dim_of_entity_recurrence_output,
     get_dim_of_system_recurrence_output,
@@ -29,9 +29,17 @@ from model import (
     save_model_type,
 )
 from run_sim import system_regimes_gt, generate_training_data
-from hmm_posterior import save_hmm_posterior_summary
+from compute_posterior import save_hmm_posterior_summary
 from maximization_step import M_step_toggles_from_strings
-from core import SystemTransitionPrior_JAX, run_CAVI_with_JAX
+from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
+from recurrence import identity_recurrence_entity, cluster_trigger_system_recurrence_transformation
+from compute_model_probabilities import (
+    compute_log_continuous_state_emissions_after_initial_timestep_JAX,
+    compute_log_entity_transition_probability_matrices_JAX,
+    compute_log_initial_continuous_state_emissions_JAX,
+    compute_log_system_transition_probability_matrices_JAX,
+)
+
 
 
 """
@@ -50,7 +58,14 @@ L = 6
 ###
 # SPECIFY MODEL
 ###
-model = marching_model_JAX
+model = Model(
+    compute_log_initial_continuous_state_emissions_JAX,
+    compute_log_continuous_state_emissions_after_initial_timestep_JAX,
+    compute_log_system_transition_probability_matrices_JAX,
+    compute_log_entity_transition_probability_matrices_JAX,
+    identity_recurrence_entity,
+    cluster_trigger_system_recurrence_transformation
+)
 model_adjustment = None  # Options: None, "one_system_regime", "remove_recurrence"
 
 GLOBAL_MSG = "LAUGH" * n_train_sequences

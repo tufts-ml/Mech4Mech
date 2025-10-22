@@ -1,5 +1,4 @@
 from typing import Optional
-
 import jax.numpy as jnp
 import numpy as np
 
@@ -9,14 +8,14 @@ from utilities.examples import (
     fix_log_entity_transitions_at_example_boundaries,
     fix_log_system_transitions_at_example_boundaries,
 )
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
     compute_hmm_posterior_summaries_JAX,
     compute_hmm_posterior_summary_JAX,
 )
-from utilities.model import Model
-from utilities.params import (
+from model import Model 
+from params import (
     ContinuousStateParameters_JAX,
     EntityTransitionParameters_MetaSwitch_JAX,
     InitializationParameters_JAX,

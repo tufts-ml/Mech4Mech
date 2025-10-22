@@ -1,20 +1,10 @@
-from utilities.params import AllParameters, dims_from_params
-from utilities.types import NumpyArray2D
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-from scipy.stats import mode
 from typing import List, Union
-
-from typing import Union
 from ssm.util import find_permutation
 
 
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summaries_NUMPY,
     HMM_Posterior_Summary,
@@ -25,6 +15,7 @@ from utilities.types import (
     JaxNumpyArray1D, 
     JaxNumpyArray2D,
 )
+from params import AllParameters, dims_from_params
 
 def _get_an_expected_regime_from_VEZ_summaries(
     VEZ_summaries: Union[HMM_Posterior_Summaries_JAX, List[HMM_Posterior_Summary]],

@@ -528,10 +528,6 @@ def make_list_from_hmm_posterior_summaries(
     return list_of_hmm_posterior_summaries
 
 
-###
-# Produce closed-form M-step
-###
-
 
 # TODO: Is there some way to combine `compute_closed_form_M_step`
 # with `compute_closed_form_M_step_on_posterior_summaries` by just vectorizing across

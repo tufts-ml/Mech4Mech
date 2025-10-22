@@ -7,7 +7,7 @@ import numpy as np
 from jax.scipy.stats import multivariate_normal as mvn_JAX
 from scipy.stats import multivariate_normal as mvn
 
-from utilities.params import (
+from params import (
     ContinuousStateParameters,
     ContinuousStateParameters_JAX,
     EntityTransitionParameters,
@@ -217,33 +217,17 @@ def compute_log_continuous_state_emissions_after_initial_timestep_JAX(
         continuous_states_after_initial_timestep_axes_poorly_ordered,
         [0, 1, 2],
         [2, 0, 1],
-    )  # WANT: (T_1,J,K,D)
+    )  
     log_pdfs_after_initial_timestep = mvn_JAX.logpdf(
         continuous_states_after_initial_timestep,
         means_after_initial_timestep,
         covs_after_initial_timestep,
     )
 
-    # Warning: mvn_JAX.logpdf() can return nans!
-    # Since all we need to do is compare to value of the emissions
-    # across entity regimes, we can just replace these with a very low number
     OVERWRITE_FOR_NANS_IN_LOG_EMISSIONS = -1e12
     log_pdfs_after_initial_timestep = jnp.nan_to_num(
         log_pdfs_after_initial_timestep, nan=OVERWRITE_FOR_NANS_IN_LOG_EMISSIONS
     )
-
-    # Pre-vectorized version for clarity
-    # for t in range(1, T):
-    #     for j in range(J):
-    #         for k in range(K):
-    #             # We have x_t^j ~ N(A[j,k] @ x_{t-1}^j + b[j,k], Q[j,k])
-    #             mu_t = CSP.As[j, k] @ continuous_states[t - 1, j] + CSP.bs[j, k]
-    #             Sigma_t = CSP.Qs[j, k]
-    #             log_emissions.at[t, j, k].set(mvn_JAX.logpdf(continuous_states[t, j], mu_t, Sigma_t))
-
-    # log_emissions = jnp.vstack(
-    #     (log_pdfs_init_time[None, :, :], log_pdfs_remaining_times)
-    # )
 
     return log_pdfs_after_initial_timestep
 
@@ -274,15 +258,7 @@ def compute_log_initial_continuous_state_emissions_JAX(
         D: dimension of continuous states
     """
 
-    ### Initial times <- Not computed
-    # We have x_0^j ~ N(mu_0[j,k], Sigma_0[j,k])
     means_init_time, covs_init_time = IP.mu_0s, IP.Sigma_0s
     log_pdfs_init_time = mvn_JAX.logpdf(initial_continuous_states[:, None, :], means_init_time, covs_init_time)
-    # Pre-vectorized version of initial times...for clarity
-    # for j in range(J):
-    #     for k in range(K):
-    #         # We have x_0^j ~ N(mu_0[j,k], Sigma_0[j,k])
-    #         mu_0, Sigma_0 = IP.mu_0s[j, k], IP.Sigma_0s[j, k]
-    #         log_emissions.at[0, j, k].set(mvn_JAX.logpdf(continuous_states[0, j], mu_0, Sigma_0))
 
     return log_pdfs_init_time

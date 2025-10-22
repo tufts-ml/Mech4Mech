@@ -5,14 +5,12 @@ from typing import Optional
 import numpy as np
 
 from utilities.types import (
-    JaxNumpyArray2D,
-    JaxNumpyArray3D,
     NumpyArray1D,
     NumpyArray2D,
     NumpyArray3D,
 )
 
-from utilities.params import (
+from params import (
     AllParameters_JAX,
     ContinuousStateParameters_JAX,
     EmissionsParameters_JAX,
@@ -20,19 +18,11 @@ from utilities.params import (
     InitializationParameters_JAX,
     SystemTransitionParameters_JAX,
 )
-from utilities.model import Model
-from hmm_posterior import (
+from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
 )
 
-from prior import SystemTransitionPrior_JAX
-
-
-
-###
-# STRUCTS
-###
 
 
 @dataclass
