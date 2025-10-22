@@ -30,14 +30,12 @@ from utilities.params import (
     ContinuousStateParameters_Gaussian_JAX,
     ContinuousStateParameters_Gaussian_WithUnconstrainedCovariances_JAX,
     ContinuousStateParameters_JAX,
-    ContinuousStateParameters_VonMises_JAX,
     ETP_MetaSwitch_with_unconstrained_tpms_from_ordinary_ETP_MetaSwitch,
     EntityTransitionParameters_JAX,
     EntityTransitionParameters_MetaSwitch_JAX,
     EntityTransitionParameters_MetaSwitch_WithUnconstrainedTPMs_JAX,
     InitializationParameters_Gaussian_JAX,
     InitializationParameters_JAX,
-    InitializationParameters_VonMises_JAX,
     STP_with_unconstrained_tpms_from_ordinary_STP,
     SystemTransitionParameters_JAX,
     SystemTransitionParameters_WithUnconstrainedTPMs_JAX,
@@ -45,7 +43,7 @@ from utilities.params import (
     ordinary_ETP_MetaSwitch_from_ETP_MetaSwitch_with_unconstrained_tpms,
     ordinary_STP_from_STP_with_unconstrained_tpms,
 )
-from utilities.sample_weights import (
+from utilities.util import (
     make_sample_weights_which_mask_the_initial_timestep_for_each_event,
 )
 from utilities.util import (
@@ -63,135 +61,6 @@ from utilities.util import (
     normalize_potentials_by_axis_JAX,
 )
 from prior import SystemTransitionPrior_JAX
-
-###
-# ELBO
-###
-
-
-@jdc.pytree_dataclass
-class ELBO_Decomposed:
-    energy: float
-    entropy: float
-    elbo: float
-
-
-def compute_energy_from_init(
-    IP: InitializationParameters_JAX,
-    VES_summary: HMM_Posterior_Summary_JAX,
-    VEZ_summaries: HMM_Posterior_Summaries_JAX,
-    continuous_states: JaxNumpyArray3D,
-    model: Model,
-    example_end_times: NumpyArray1D,
-) -> float:
-    init_times = get_initialization_times(example_end_times)
-
-    expected_system_init_probs = jnp.sum(VES_summary.expected_regimes[init_times], axis=0)  # shape (L,)
-    energy_init_system = jnp.sum(expected_system_init_probs * jnp.log(IP.pi_system))
-
-    J, K = np.shape(IP.pi_entities)
-    energy_init_entities = 0.0
-    for j in range(J):
-        expected_entity_init_probs = jnp.sum(VEZ_summaries.expected_regimes[init_times, j], axis=0)  # shape (K,)
-        energy_init_entities += jnp.sum(expected_entity_init_probs * jnp.log(IP.pi_entities[j]))
-
-    energy_init_continuous_states = 0.0
-    for j in range(J):
-        for k in range(K):
-            for t_init in init_times:
-                log_pdfs_at_some_init_time = model.compute_log_initial_continuous_state_emissions_JAX(
-                    IP, continuous_states[t_init]
-                )
-                energy_init_continuous_states += (
-                    VEZ_summaries.expected_regimes[t_init, j, k] * log_pdfs_at_some_init_time[j, k]
-                )
-
-    return energy_init_system + energy_init_entities + energy_init_continuous_states
-
-
-def compute_energy(
-    STP: SystemTransitionParameters_JAX,
-    ETP: EntityTransitionParameters_MetaSwitch_JAX,
-    CSP: ContinuousStateParameters_JAX,
-    IP: InitializationParameters_JAX,
-    VES_summary: HMM_Posterior_Summary_JAX,
-    VEZ_summaries: HMM_Posterior_Summaries_JAX,
-    system_transition_prior: Optional[SystemTransitionPrior_JAX],
-    continuous_states: JaxNumpyArray3D,
-    model: Model,
-    example_end_times: JaxNumpyArray2D,
-    system_covariates: Optional[JaxNumpyArray2D],
-) -> float:
-    energy_init = compute_energy_from_init(IP, VES_summary, VEZ_summaries, continuous_states, model, example_end_times)
-    energy_post_init_negated_and_divided_by_num_timesteps = 0.0
-    energy_post_init_negated_and_divided_by_num_timesteps += compute_cost_for_system_transition_parameters_JAX(
-        STP,
-        VES_summary,
-        system_transition_prior,
-        model,
-        example_end_times,
-        system_covariates,
-        continuous_states,
-    )
-    energy_post_init_negated_and_divided_by_num_timesteps += compute_cost_for_entity_transition_parameters_JAX(
-        ETP,
-        continuous_states,
-        VES_summary,
-        VEZ_summaries,
-        model,
-        example_end_times,
-    )
-
-    energy_post_init_negated_and_divided_by_num_timesteps += (
-        compute_cost_for_continuous_state_parameters_after_initial_timestep_JAX(
-            CSP,
-            continuous_states,
-            VEZ_summaries,
-            model,
-            example_end_times,
-        )
-    )
-
-    T = np.shape(continuous_states)[0]
-    energy_post_init = -energy_post_init_negated_and_divided_by_num_timesteps * T
-
-    return energy_init + energy_post_init
-
-
-def compute_entropy(
-    VES_summary: HMM_Posterior_Summary_JAX,
-    VEZ_summaries: HMM_Posterior_Summaries_JAX,
-) -> float:
-    return VES_summary.entropy + jnp.sum(VEZ_summaries.entropies)
-
-
-def compute_elbo_decomposed(
-    all_params: AllParameters_JAX,
-    VES_summary: HMM_Posterior_Summary_JAX,
-    VEZ_summaries: HMM_Posterior_Summaries_JAX,
-    system_transition_prior: Optional[SystemTransitionPrior_JAX],
-    continuous_states: JaxNumpyArray3D,
-    model: Model,
-    example_end_times: JaxNumpyArray2D,
-    system_covariates: Optional[JaxNumpyArray2D],
-) -> ELBO_Decomposed:
-    energy = compute_energy(
-        all_params.STP,
-        all_params.ETP,
-        all_params.CSP,
-        all_params.IP,
-        VES_summary,
-        VEZ_summaries,
-        system_transition_prior,
-        continuous_states,
-        model,
-        example_end_times,
-        system_covariates,
-    )
-    entropy = compute_entropy(VES_summary, VEZ_summaries)
-    elbo = energy + entropy
-    return ELBO_Decomposed(energy, entropy, elbo)
-
 
 ###
 # M-step Toggles
@@ -870,14 +739,6 @@ def run_M_step_for_CSP(
             example_end_times,
             use_continuous_states,
         )
-    elif M_step_toggles_CSP == M_Step_Toggle_Value.CLOSED_FORM_VON_MISES:
-        CSP_new = run_M_step_for_CSP_in_closed_form__VonMises_case(
-            VEZ_summaries.expected_regimes,
-            continuous_states,
-            all_params,
-            example_end_times,
-            use_continuous_states,
-        )
     elif M_step_toggles_CSP == M_Step_Toggle_Value.GRADIENT_DESCENT:
         warnings.warn(
             f"Learning the CSP parameters by gradient descent.  Performance seems to be worse than with the closed-form approach. "
@@ -989,14 +850,6 @@ def run_M_step_for_IP(
         return IP
     elif M_step_toggles_IP == M_Step_Toggle_Value.CLOSED_FORM_GAUSSIAN:
         IP_new = run_M_step_for_IP_in_closed_form__Gaussian_case(
-            IP,
-            VEZ_summaries,
-            VES_summary,
-            continuous_states,
-            example_end_times,
-        )
-    elif M_step_toggles_IP == M_Step_Toggle_Value.CLOSED_FORM_VON_MISES:
-        IP_new = run_M_step_for_IP_in_closed_form__VonMises_case(
             IP,
             VEZ_summaries,
             VES_summary,

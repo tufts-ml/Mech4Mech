@@ -9,7 +9,7 @@ import sklearn
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
-from utilities.metrics import compute_regime_labeling_accuracy
+from metrics import compute_regime_labeling_accuracy
 from utilities.model import Model
 from utilities.params import (
     AllParameters_JAX,
@@ -31,7 +31,7 @@ from utilities.types import (
 )
 from utilities.util import make_fixed_sticky_tpm_JAX
 from utilities.examples import example_end_times_are_proper
-from utilities.sample_weights import (
+from utilities.util import (
     make_sample_weights_which_mask_the_initial_timestep_for_each_event,
 )
 
@@ -48,8 +48,10 @@ from hmm_posterior import (
     compute_closed_form_M_step_on_posterior_summaries,
 )
 from utilities.kmeans import plot_kmeans_on_2d_data
-from utilities.steps_in_state import plot_steps_assigned_to_state
-from M_step_and_ELBO import (
+
+#from utilities.steps_in_state import plot_steps_assigned_to_state
+
+from maximization_step import (
     M_Step_Toggle_Value,
     run_M_step_for_CSP_in_closed_form__Gaussian_case,
     run_M_step_for_ETP_via_gradient_descent,
@@ -57,7 +59,7 @@ from M_step_and_ELBO import (
     run_M_step_for_STP_in_closed_form,
     run_M_step_for_STP_via_gradient_descent,
 )
-from E_step import run_VES_step_JAX, run_VEZ_step_JAX
+from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
 
 
 ###
@@ -268,8 +270,8 @@ def make_kmeans_preinitialization_of_CSP_JAX(
 
             outcomes_jk = continuous_states[outcome_indices_jk, j, :]
             predictors_jk = continuous_states[predictor_indices_jk, j, :]
-            if plotbose:
-                plot_steps_assigned_to_state(outcomes_jk, predictors_jk, j, k, save_dir, basename_prefix="init_kmeans")
+            # if plotbose:
+            #     plot_steps_assigned_to_state(outcomes_jk, predictors_jk, j, k, save_dir, basename_prefix="init_kmeans")
 
             ### run vector autoregression
             lr = LinearRegression(fit_intercept=True)

@@ -15,7 +15,7 @@ from gaussian.initialize import (
     PreInitialization_Strategy_For_CSP,
     smart_initialize_model_2a,
 )
-from utilities.metrics import get_aligned_estimate, compute_regime_labeling_accuracy
+from metrics import get_aligned_estimate, compute_regime_labeling_accuracy
 from utilities.util import (
     get_current_datetime_as_string, ensure_dir
 )
@@ -29,9 +29,8 @@ from model import (
     save_model_type,
 )
 from run_sim import system_regimes_gt, generate_training_data
-from initialize import compute_elbo_from_initialization_results
 from hmm_posterior import save_hmm_posterior_summary
-from M_step_and_ELBO import M_step_toggles_from_strings
+from maximization_step import M_step_toggles_from_strings
 from core import SystemTransitionPrior_JAX, run_CAVI_with_JAX
 
 
@@ -159,17 +158,6 @@ results_init = smart_initialize_model_2a(
 )
 params_init = results_init.params
 VES_init, VEZ_init = results_init.ES_summary, results_init.EZ_summaries
-
-
-elbo_init = compute_elbo_from_initialization_results(
-    results_init,
-    system_transition_prior,
-    DATA,
-    model,
-    example_end_times,
-    system_covariates,
-)
-print(f"ELBO after init: {elbo_init:.02f}")
 
 
 ####

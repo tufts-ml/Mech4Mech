@@ -17,9 +17,8 @@ from utilities.types import (
     NumpyArray2D,
 )
 import utilities.elbo_utils as elbo_utils
-from E_step import run_VES_step_JAX, run_VEZ_step_JAX
-from M_step_and_ELBO import (
-    ELBO_Decomposed,
+from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
+from maximization_step import (
     M_Step_Toggle_Value,
     M_Step_Toggles,
     run_M_step_for_CSP,
@@ -46,7 +45,7 @@ def run_CAVI_with_JAX(
     true_system_regimes: Optional[NumpyArray1D] = None,
     true_entity_regimes: Optional[NumpyArray2D] = None,
     verbose: bool = True,
-) -> Tuple[HMM_Posterior_Summary_JAX, HMM_Posterior_Summaries_JAX, AllParameters_JAX, ELBO_Decomposed]:
+) -> Tuple[HMM_Posterior_Summary_JAX, HMM_Posterior_Summaries_JAX, AllParameters_JAX]:
     """
     Arguments:
         continuous_states: jnp.array with shape (T,J) or (T, J, D)
@@ -177,21 +176,6 @@ def run_CAVI_with_JAX(
     ed_list.append(elbo_dict)
     if verbose:
         pretty_print_elbo(**elbo_dict)
-        '''
-        elbo_decomposed = compute_elbo_decomposed(
-            all_params,
-            VES_summary,
-            VEZ_summaries,
-            system_transition_prior,
-            continuous_states,
-            model,
-            example_end_times,
-            system_covariates,
-        )
-        print(
-            f"After (possibly smart) initialization, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-        )
-        '''
 
     ###
     # CAVI
@@ -240,34 +224,7 @@ def run_CAVI_with_JAX(
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
-        '''
-        if verbose:
-            print(
-                f"\nVEZ step's log normalizer by entities for continuous state emissions when we use VES inits for q(S): {VEZ_summaries.log_normalizers}"
-            )
-            if true_entity_regimes is not None:
-                pct_corrects_entities = np.empty(DIMS.J)
-                for j in range(DIMS.J):
-                    most_likely_system_regimes = np.argmax(VEZ_summaries.expected_regimes[:, j, :], axis=1)
-                    pct_corrects_entities[j] = compute_regime_labeling_accuracy(
-                        most_likely_system_regimes, true_entity_regimes[:, j]
-                    )
-                print(f"Percent correct classifications for entity-level segmentations {pct_corrects_entities}")
-
-            elbo_decomposed = compute_elbo_decomposed(
-                all_params,
-                VES_summary,
-                VEZ_summaries,
-                system_transition_prior,
-                continuous_states,
-                model,
-                example_end_times,
-                system_covariates,
-            )
-            print(
-                f"After E-step on iteration {i+1}, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-            )
-        '''
+     
 
         # TODO: I probably don't really need separate functions of the form run_M_step_for_<xxxx>.  Make this a single wrapper that in
         # turn calls the appropriate functions for closed-form or gradient descent inference.
@@ -294,22 +251,6 @@ def run_CAVI_with_JAX(
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
-        '''
-        elbo_decomposed = compute_elbo_decomposed(
-            all_params,
-            VES_summary,
-            VEZ_summaries,
-            system_transition_prior,
-            continuous_states,
-            model,
-            example_end_times,
-            system_covariates,
-        )
-        if verbose:
-            print(
-                f"After ETP-M step on iteration {i+1}, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-            )
-        '''
 
 
         ###
@@ -335,22 +276,7 @@ def run_CAVI_with_JAX(
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
-        '''
-        elbo_decomposed = compute_elbo_decomposed(
-            all_params,
-            VES_summary,
-            VEZ_summaries,
-            system_transition_prior,
-            continuous_states,
-            model,
-            example_end_times,
-            system_covariates,
-        )
-        if verbose:
-            print(
-                f"After STP-M step on iteration {i+1}, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-            )
-        '''
+
     
 
 
@@ -374,22 +300,6 @@ def run_CAVI_with_JAX(
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
-        '''
-        elbo_decomposed = compute_elbo_decomposed(
-        all_params,
-        VES_summary,
-        VEZ_summaries,
-        system_transition_prior,
-        continuous_states,
-        model,
-        example_end_times,
-        system_covariates,
-        )
-        if verbose:
-            print(
-            f"After CSP-M step on iteration {i+1}, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-            )
-        '''
 
         ###
         # M-step (IP)
@@ -414,21 +324,4 @@ def run_CAVI_with_JAX(
         # I think the current more compact one is better; otherwise we have to construct
         # a full all parameters instance (with lots of extraneous info) when all we want to do is an operation
         # on the initial params.
-        '''
-        elbo_decomposed = compute_elbo_decomposed(
-            all_params,
-            VES_summary,
-            VEZ_summaries,
-            system_transition_prior,
-            continuous_states,
-            model,
-            example_end_times,
-            system_covariates,
-        )
-
-        if verbose:
-            print(
-                f"After IP-M step on iteration {i+1}, we have Elbo: {elbo_decomposed.elbo:.02f}. Energy: {elbo_decomposed.energy:.02f}. Entropy: { elbo_decomposed.entropy:.02f}. "
-            )
-        '''
     return VES_summary, VEZ_summaries, all_params, ed_list, classification_list 

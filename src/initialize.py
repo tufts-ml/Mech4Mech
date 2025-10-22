@@ -27,7 +27,6 @@ from hmm_posterior import (
 )
 
 from prior import SystemTransitionPrior_JAX
-from M_step_and_ELBO import ELBO_Decomposed, compute_elbo_decomposed
 
 
 
@@ -166,26 +165,3 @@ def inspect_system_level_segmentations_over_EM_iterations(
         )
 
 
-def compute_elbo_from_initialization_results(
-    initialization_results: InitializationResults,
-    system_transition_prior: SystemTransitionPrior_JAX,
-    continuous_states: JaxNumpyArray3D,
-    model: Model,
-    example_end_times: Optional[NumpyArray1D],
-    system_covariates: Optional[JaxNumpyArray2D],
-) -> ELBO_Decomposed:
-    if example_end_times is None:
-        T = len(continuous_states)
-        example_end_times = np.array([-1, T])
-
-    elbo_decomposed = compute_elbo_decomposed(
-        initialization_results.params,
-        initialization_results.ES_summary,
-        initialization_results.EZ_summaries,
-        system_transition_prior,
-        continuous_states,
-        model,
-        example_end_times,
-        system_covariates,
-    )
-    return elbo_decomposed.elbo

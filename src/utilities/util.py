@@ -2,6 +2,8 @@ import datetime
 import warnings
 from typing import List, Tuple
 import os
+import copy
+from typing import Optional
 import jax.numpy as jnp
 import jax.random as jr
 import numpy as np
@@ -9,8 +11,7 @@ import tensorflow_probability.substrates.jax.bijectors as tfb
 from jax.scipy.special import logsumexp as logsumexp_JAX
 from scipy.special import logsumexp
 
-
-from utilities.types import NumpyArray1D, NumpyArray2D
+from utilities.types import NumpyArray1D, NumpyArray2D, JaxNumpyArray2D, JaxNumpyArray3D
 
 
 ###
@@ -370,3 +371,43 @@ def ensure_dir(directory):
     # alternative: os.makedirs(directory, exist_ok=True)
     if not os.path.isdir(directory):
         os.makedirs(directory)
+
+def make_sample_weights_which_mask_the_initial_timestep_for_each_event(
+    continuous_states: JaxNumpyArray3D,
+    example_end_times: NumpyArray1D,
+    use_continuous_states: Optional[JaxNumpyArray2D] = None,
+) -> JaxNumpyArray2D:
+    """
+    Kaitlin's understanding: This function literally just takes in our observations, the end times of the event, and a matrix of booleans for each (t,j) pair 
+    to inform the model which ones we want masked. If all True, the function just ensures that the returned boolean matrix for each (t,j) pair has a false 
+    for each sequence starting point. 
+
+    Arguments:
+        use_continuous_states: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that
+            the (t,j)-th element  is 1 if continuous_states[t,j] should be utilized
+            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
+        example_end_times: optional, has shape (E+1,)
+            An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across i.i.d "examples".
+            An example might induce a largetime gap between timesteps, and a discontinuity in the continuous states x.
+
+            If there are E examples, then along with the observations, we store
+                end_times=[-1, t_1, …, t_E], where t_e is the timestep at which the e-th example ended.
+            So to get the timesteps for the e-th example, you can index from 1,…,T_grand by doing
+                    [end_times[e-1]+1 : end_times[e]].
+    """
+    T, J, D = np.shape(continuous_states)
+
+    if use_continuous_states is None:
+        use_continuous_states = np.full((T, J), True)
+
+    if example_end_times is None:
+        T = len(continuous_states)
+        example_end_times = np.array([-1, T])
+
+    sample_weights = copy.deepcopy(use_continuous_states)
+    for event_end_idx in example_end_times[:-1]:
+        event_start_idx = event_end_idx + 1
+        sample_weights[event_start_idx, :] = False
+    return sample_weights
