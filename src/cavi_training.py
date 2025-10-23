@@ -1,14 +1,12 @@
 import warnings
 from typing import Optional, Tuple, Union
-
 import numpy as np
-from utilities.examples import example_end_times_are_proper
+
+from utilities.util import example_end_times_are_proper
 from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
 )
-from model import Model 
-from params import AllParameters_JAX, dims_from_params
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,
@@ -16,7 +14,11 @@ from utilities.types import (
     NumpyArray1D,
     NumpyArray2D,
 )
-import utilities.elbo_utils as elbo_utils
+from model import Model 
+from prior import SystemTransitionPrior_JAX
+from params import AllParameters_JAX, dims_from_params
+import compute_ELBO as elbo_utils
+
 from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
 from maximization_step import (
     M_Step_Toggle_Value,
@@ -26,8 +28,10 @@ from maximization_step import (
     run_M_step_for_IP,
     run_M_step_for_STP,
 )
-from prior import SystemTransitionPrior_JAX
 
+"""
+Uses a Coordinate Ascent Variational Inference (CAVI) method to train the HSRDM. 
+"""
 
 def run_CAVI_with_JAX(
     all_params: AllParameters_JAX,

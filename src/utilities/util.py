@@ -11,17 +11,17 @@ import tensorflow_probability.substrates.jax.bijectors as tfb
 from jax.scipy.special import logsumexp as logsumexp_JAX
 from scipy.special import logsumexp
 
-from utilities.types import NumpyArray1D, NumpyArray2D, JaxNumpyArray2D, JaxNumpyArray3D
+from utilities.types import NumpyArray1D, NumpyArray2D, JaxNumpyArray1D, JaxNumpyArray2D, JaxNumpyArray3D, JaxNumpyArray4D
+from model import Model 
+
+"""
+Utility functions used throughout the repository. 
+"""
 
 
 ###
-# Normalization (to simplex) and Log Normalization
+# Functions to normalize arrays for arrays/matrices (e.g. to simplex, log normalization, matrix normalization by mean and std)
 ###
-
-# We import `logsumexp` from jax instead of doing
-# so that we can use the functions here when doing
-# numerical optimization procedures on parameters.
-
 
 def normalize_log_potentials(log_potentials: NumpyArray2D) -> NumpyArray2D:
     """
@@ -57,11 +57,6 @@ def normalize_potentials_by_axis_JAX(potentials: jnp.array, axis: int) -> jnp.ar
     return jnp.exp(log_probs)
 
 
-###
-# Normalization of array via mean,std
-###
-
-
 def normalize_matrix_by_mean_and_std_of_columns(arr: NumpyArray2D) -> NumpyArray2D:
     if arr.ndim != 2:
         raise ValueError
@@ -69,7 +64,7 @@ def normalize_matrix_by_mean_and_std_of_columns(arr: NumpyArray2D) -> NumpyArray
 
 
 ###
-# Generate random objects
+# Functions to generate random objects
 ###
 
 
@@ -111,7 +106,7 @@ def random_rotation(n, theta=None):
 
 
 ###
-# TPMs : Sticky
+# Functions for manipulating transition probability matrices (TPMs)
 ###
 
 
@@ -183,9 +178,6 @@ def evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant(
     return lp
 
 
-###
-# TPMs : Softening
-###
 def soften_tpm(tpm_orig: NumpyArray2D) -> NumpyArray2D:
     """
     By "softening" a tpm, we mean to bound its entries away from exact 1's or 0's
@@ -207,11 +199,6 @@ def soften_tpm(tpm_orig: NumpyArray2D) -> NumpyArray2D:
     tpm_uniform = np.ones((K, K)) / K
 
     return P_UNIFORM * tpm_uniform + (1 - P_UNIFORM) * tpm_orig
-
-
-###
-# Represent transition probability matrices (tpm) in unconstrained manner
-###
 
 
 def unconstrained_tpm_from_tpm(tpm_or_tpms: jnp.array) -> jnp.array:
@@ -267,7 +254,7 @@ def tpm_from_unconstrained_tpm(
 
 
 ###
-# Conversions
+# Functions for setting up the individual sequence example regimes from the set of overall data sequences. 
 ###
 
 
@@ -279,98 +266,6 @@ def convert_list_of_regime_id_and_num_timesteps_to_regime_sequence(
         segment = [k] * T_slice
         regime_sequence.extend(segment)
     return regime_sequence
-
-
-###
-# Cartesian product
-###
-
-
-def compute_cartesian_product_of_two_1d_arrays(x_vals: NumpyArray1D, y_vals: NumpyArray1D):
-    # `x_for_grid` has shape (len(x), len(x)), but all rows are identical.
-    # `y_for_grid` has shape (len(y), len(y)), but all columns are identical.
-    x_for_grid, y_for_grid = np.meshgrid(x_vals, y_vals)
-    return np.column_stack((x_for_grid.ravel(), y_for_grid.ravel()))  # has shape (len(x)*len(y), D=2)
-
-
-###
-# List manipulations
-###
-def construct_a_new_list_after_removing_multiple_items(orig_list: List, indices_to_remove: List[int]) -> List:
-    """
-    Thanks Chat GPT!
-
-    Usage:
-        orig_list = [10, 20, 30, 40, 50, 60]
-        indices_to_remove = [1, 3, 5]
-
-        new_list=construct_a_new_list_after_removing_multiple_items(my_list, indices_to_remove)
-        print(new_list)  # Output: [10, 30, 50]
-        print(orig_list) # Output: [10, 20, 30, 40, 50, 60]
-
-    """
-    return [item for index, item in enumerate(orig_list) if index not in indices_to_remove]
-
-
-def are_lists_identical(list_of_lists):
-    # Check if the list_of_lists is empty
-    if not list_of_lists:
-        return True  # Empty lists are considered identical
-
-    # Compare each list to the first list
-    first_list = list_of_lists[0]
-    for other_list in list_of_lists[1:]:
-        if first_list != other_list:
-            return False
-
-    return True
-
-
-def flatten_list_of_lists(list_of_lists):
-    return [item for sublist in list_of_lists for item in sublist]
-
-
-###
-# Datetime
-###
-
-
-def get_current_datetime_as_string():
-    return datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
-
-def segment_list(data, indexes):
-    # written by chatGPT! Ensure indexes are sorted
-    indexes = sorted(indexes)
-    
-    # Add the end of the list as the final segment endpoint
-    indexes = indexes + [len(data)]
-    
-    segments = []
-    start = 0
-    
-    for idx in indexes:
-        segments.append(data[start:idx])
-        start = idx
-    
-    return segments
-
-def find_indices(lst, target):
-    # written by chatGPT!
-    """Return the indices where the target integer appears in the list."""
-    return [i for i, x in enumerate(lst) if x == target]
-
-def ensure_dir(directory):
-    """
-    Description:
-    Makes sure directory exists before saving to it.
-
-    Parameters:
-            directory: An string naming the directory on the local machine where we will save stuff.
-
-    """
-    # alternative: os.makedirs(directory, exist_ok=True)
-    if not os.path.isdir(directory):
-        os.makedirs(directory)
 
 def make_sample_weights_which_mask_the_initial_timestep_for_each_event(
     continuous_states: JaxNumpyArray3D,
@@ -411,3 +306,307 @@ def make_sample_weights_which_mask_the_initial_timestep_for_each_event(
         event_start_idx = event_end_idx + 1
         sample_weights[event_start_idx, :] = False
     return sample_weights
+
+def example_end_times_are_proper(example_end_times: NumpyArray1D, T: int) -> Optional[bool]:
+    """example_end_times should look like [-1, <bunch of times giving ends of all segments besides the last one>, T]"""
+    return example_end_times[0] == -1 and example_end_times[-1] == T
+
+
+def only_one_example(example_end_times: Optional[NumpyArray1D], T: int) -> Optional[bool]:
+    return (example_end_times is None) or (len(example_end_times) == 2 and (example_end_times == [-1, T]))
+
+
+def get_initialization_times(example_end_times: NumpyArray1D) -> NumpyArray1D:
+    """
+    These are times just after example boundaries.
+    """
+    return np.array(example_end_times[:-1]) + 1
+
+
+def get_non_initialization_times(example_end_times: NumpyArray1D) -> NumpyArray1D:
+    """
+    These are times NOT just after example boundaries.
+    """
+    T = example_end_times[-1]
+    initialization_times = get_initialization_times(example_end_times)
+    return np.array([i for i in range(T) if i not in initialization_times])
+
+
+###
+# Functions for knowing and fixing the modeling probability distributions at sequence example boundaries. 
+###
+
+
+def eligible_transitions_to_next(example_end_times: NumpyArray1D) -> NumpyArray1D:
+    """
+    The t-th timestep is not an eligible transition source if there is en example boundary between the t-th and the
+    (t+1)-st timestep.
+
+    Returns:
+        A numpy array of booleans telling whether each timestep in (0,...,T-1) should be selected when performing
+        an inference operation on transitions.
+
+    Example:
+        If example_end_times=[-1,4,10], this function returns
+            array([ True,  True,  True,  True, False,  True,  True,  True,  True]).
+        The value at index 4 is False because the transition from 4 to 5 is not eligible for doing inference.
+        (It crosses an example boundary.)
+    """
+    T = example_end_times[-1]
+    return np.isin(np.arange(T - 1), example_end_times[1:-1], invert=True)
+
+
+def fix_log_system_transitions_at_example_boundaries(
+    log_system_transitions: JaxNumpyArray4D,
+    IP,
+    example_end_times: NumpyArray1D,
+) -> JaxNumpyArray4D:
+    """
+    Arguments:
+        log_system_transitions: has shape (T-1, L, L)
+    """
+    L = np.shape(log_system_transitions)[2]
+
+    log_system_transitions_fixed = np.array(log_system_transitions)
+
+    # TODO: Vectorize this!
+    # pi_system: has shape (L,).
+    # We reshape this so that there the transitions to entity K are uniform across the rows
+    log_transitions_to_destinations_per_init_dist = np.tile(np.log(IP.pi_system), (L, 1))
+    for end_time in example_end_times[1:-1]:
+        log_system_transitions_fixed[end_time] = log_transitions_to_destinations_per_init_dist
+    return jnp.array(log_system_transitions_fixed)
+
+
+def fix_log_entity_transitions_at_example_boundaries(
+    log_entity_transitions: JaxNumpyArray4D,
+    IP,
+    example_end_times: NumpyArray1D,
+) -> JaxNumpyArray4D:
+    """
+    Arguments:
+        log_entity_transitions: has shape (T-1, J, K, K)
+    """
+    _, J, K, _ = np.shape(log_entity_transitions)
+
+    log_entity_transitions_fixed = np.array(log_entity_transitions)
+
+    # TODO: Vectorize all this
+    for j in range(J):
+        # pi_entities : has shape (J, K).
+        # We reshape this so that there the transitions to entity K are uniform across the rows
+        log_transitions_to_destinations_per_init_dist = np.tile(np.log(IP.pi_entities[j]), (K, 1))
+        for end_time in example_end_times[1:-1]:
+            log_entity_transitions_fixed[end_time, j] = log_transitions_to_destinations_per_init_dist
+    return jnp.array(log_entity_transitions_fixed)
+
+
+def fix__log_emissions_from_system__at_example_boundaries(
+    log_emissions_from_system: JaxNumpyArray2D,
+    VEZ_expected_regimes: JaxNumpyArray3D,
+    IP,
+    example_end_times: NumpyArray1D,
+) -> JaxNumpyArray3D:
+    """
+    Arguments:
+        log_emissions_from_system: has shape (T, L)
+        VEZ_expected_regimes: has shape (T,J,K)
+        continuous_states: has shape (T,J,D)
+    """
+    L = np.shape(log_emissions_from_system)[1]
+
+    log_emissions_from_system_fixed = np.array(log_emissions_from_system)
+
+    ###
+    # Reconstruct the initial log emissions from system
+    ###
+
+    # `iinitial_log_emissions_from_system` has shape (L,) and is obtained by summing over (J,K) objects
+    initial_log_emission_for_each_system_regime = jnp.sum(VEZ_expected_regimes * np.log(IP.pi_entities))
+    initial_log_emissions_from_system = jnp.repeat(initial_log_emission_for_each_system_regime, L)
+
+    # TODO: Maybe vectorize this
+    for end_time in example_end_times[1:-1]:
+        log_emissions_from_system_fixed[end_time + 1] = initial_log_emissions_from_system
+
+    return jnp.array(log_emissions_from_system_fixed)
+
+
+def fix__log_emissions_from_entities__at_example_boundaries(
+    log_emissions_from_entities: JaxNumpyArray3D,
+    continuous_states: JaxNumpyArray3D,
+    IP,
+    model: Model,
+    example_end_times: NumpyArray1D,
+) -> JaxNumpyArray3D:
+    """
+    Arguments:
+        log_emissions_from_entities: has shape (T, J, K).  These are the log emissions associated to an entity
+            transition function.  They are the continuous states, x.
+        continuous_states: has shape (T,J,D)
+    """
+    log_emissions_from_entities_fixed = np.array(log_emissions_from_entities)
+
+    # TODO: Vectorize all this
+    for end_time in example_end_times[1:-1]:
+        log_emissions_from_entities_fixed[end_time + 1] = model.compute_log_initial_continuous_state_emissions_JAX(
+            IP, continuous_states[end_time + 1]
+        )
+
+    return jnp.array(log_emissions_from_entities_fixed)
+
+
+###
+# Functions for covariance computations
+###
+
+
+def cholesky_nzvals_from_covariance_JAX(Sigma: JaxNumpyArray2D) -> JaxNumpyArray1D:
+    """
+    Returns the non-zero values of the Cholesky factor (which is lower triangular)
+    of a covariance matrix.
+
+    I.e. if Sigma = LL^T, we return the nzvals of L.
+
+    Arguments:
+        Sigma: A covariance matrix.
+
+    Returns:
+        A 1d array giving the non-zero values of the Cholesky factor (which is lower triangular)
+        of a covariance matrix.
+
+    """
+    L = jnp.linalg.cholesky(Sigma)
+    return L[jnp.tril_indices_from(L)]
+
+
+def covariance_from_cholesky_nzvals_JAX(
+    cholesky_nzvals: JaxNumpyArray1D,
+) -> JaxNumpyArray2D:
+    """
+    Arguments:
+        cholesky_nzvals: A 1d array giving the non-zero values of L, the Cholesky factor (which is lower triangular)
+        of a covariance matrix.
+
+    Returns:
+        A covariance matrix, LL^T
+    """
+
+    D = _compute_dim_of_lower_triangular_matrix_from_number_of_nzvals(len(cholesky_nzvals))
+    idxs = np.tril_indices(D)
+    L_reconstructed = jnp.zeros((D, D), dtype=cholesky_nzvals.dtype).at[idxs].set(cholesky_nzvals)
+    return L_reconstructed @ L_reconstructed.T
+
+
+def _compute_dim_of_lower_triangular_matrix_from_number_of_nzvals(n: int) -> int:
+    """
+    Overview
+        Compute the dimension of a square lower triangular matrix
+        if there are `n` nonzero values.
+
+    Details:
+        For a lower triangular (square) matrix with D rows and columns,
+        the number of nonzero values is N=D(D+1)/2.
+
+        Thus, given N, we can solve for D via the quadratic formula:
+            D^2 + D - 2N = 0
+        gives, taking the positive square root
+            D = -1 + sqrt(1+8N)
+                ---------------
+                    2
+    """
+    return int((-1 + np.sqrt(1 + 8 * n)) / 2)
+
+
+###
+# Functions for general array/matrix computations
+###
+
+def compute_cartesian_product_of_two_1d_arrays(x_vals: NumpyArray1D, y_vals: NumpyArray1D):
+    # `x_for_grid` has shape (len(x), len(x)), but all rows are identical.
+    # `y_for_grid` has shape (len(y), len(y)), but all columns are identical.
+    x_for_grid, y_for_grid = np.meshgrid(x_vals, y_vals)
+    return np.column_stack((x_for_grid.ravel(), y_for_grid.ravel()))  # has shape (len(x)*len(y), D=2)
+
+
+###
+# Functions for manipulating lists
+###
+def construct_a_new_list_after_removing_multiple_items(orig_list: List, indices_to_remove: List[int]) -> List:
+    """
+    Thanks Chat GPT!
+
+    Usage:
+        orig_list = [10, 20, 30, 40, 50, 60]
+        indices_to_remove = [1, 3, 5]
+
+        new_list=construct_a_new_list_after_removing_multiple_items(my_list, indices_to_remove)
+        print(new_list)  # Output: [10, 30, 50]
+        print(orig_list) # Output: [10, 20, 30, 40, 50, 60]
+
+    """
+    return [item for index, item in enumerate(orig_list) if index not in indices_to_remove]
+
+
+def are_lists_identical(list_of_lists):
+    # Check if the list_of_lists is empty
+    if not list_of_lists:
+        return True  # Empty lists are considered identical
+
+    # Compare each list to the first list
+    first_list = list_of_lists[0]
+    for other_list in list_of_lists[1:]:
+        if first_list != other_list:
+            return False
+
+    return True
+
+
+def flatten_list_of_lists(list_of_lists):
+    return [item for sublist in list_of_lists for item in sublist]
+
+def segment_list(data, indexes):
+    # written by chatGPT! Ensure indexes are sorted
+    indexes = sorted(indexes)
+    
+    # Add the end of the list as the final segment endpoint
+    indexes = indexes + [len(data)]
+    
+    segments = []
+    start = 0
+    
+    for idx in indexes:
+        segments.append(data[start:idx])
+        start = idx
+    
+    return segments
+
+def find_indices(lst, target):
+    # written by chatGPT!
+    """Return the indices where the target integer appears in the list."""
+    return [i for i, x in enumerate(lst) if x == target]
+
+
+###
+# Functions to express and save model runs 
+###
+
+
+def get_current_datetime_as_string():
+    return datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
+
+
+def ensure_dir(directory):
+    """
+    Description:
+    Makes sure directory exists before saving to it.
+
+    Parameters:
+            directory: An string naming the directory on the local machine where we will save stuff.
+
+    """
+    # alternative: os.makedirs(directory, exist_ok=True)
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+
+

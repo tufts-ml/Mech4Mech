@@ -10,14 +10,16 @@ import time
 import os
 from sklearn.cluster import KMeans
 
-from model import Model
-from gaussian.initialize import (
-    PreInitialization_Strategy_For_CSP,
-    smart_initialize_model_2a,
-)
-from metrics import get_aligned_estimate, compute_regime_labeling_accuracy
 from utilities.util import (
     get_current_datetime_as_string, ensure_dir
+)
+
+from run_sim import system_regimes_gt, generate_training_data
+from model import Model, save_model_type
+from recurrence import identity_recurrence_entity, cluster_trigger_system_recurrence_transformation
+from initialize import (
+    PreInitialization_Strategy_For_CSP,
+    smart_initialize_model_2a,
 )
 from params import (
     Dims,
@@ -25,25 +27,21 @@ from params import (
     get_dim_of_system_recurrence_output,
     save_params,
 )
-from model import (
-    save_model_type,
-)
-from run_sim import system_regimes_gt, generate_training_data
-from compute_posterior import save_hmm_posterior_summary
-from maximization_step import M_step_toggles_from_strings
-from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
-from recurrence import identity_recurrence_entity, cluster_trigger_system_recurrence_transformation
-from compute_model_probabilities import (
-    compute_log_continuous_state_emissions_after_initial_timestep_JAX,
+from compute_transitions import (
     compute_log_entity_transition_probability_matrices_JAX,
-    compute_log_initial_continuous_state_emissions_JAX,
     compute_log_system_transition_probability_matrices_JAX,
 )
+from compute_emissions import(compute_log_continuous_state_emissions_after_initial_timestep_JAX, compute_log_initial_continuous_state_emissions_JAX,
+)
+from maximization_step import M_step_toggles_from_strings
+from compute_posterior import save_hmm_posterior_summary
+from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
+from metrics import get_aligned_estimate, compute_regime_labeling_accuracy
 
 
 
 """
-Model 2a refers to the fact that here we'll take the x's to be observed.
+Main script to train of the HSRDM. 
 """
 
 ###

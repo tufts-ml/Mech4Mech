@@ -10,19 +10,25 @@ from dynamax.utils.optimize import run_gradient_descent
 from statsmodels.regression.linear_model import WLS
 from statsmodels.tools.tools import add_constant
 
-from utilities.examples import (
+
+from utilities.util import (
+    make_sample_weights_which_mask_the_initial_timestep_for_each_event,evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, soften_tpm,normalize_log_potentials_by_axis_JAX,
+    normalize_potentials_by_axis_JAX,
     eligible_transitions_to_next,
     get_initialization_times,
     get_non_initialization_times,
 )
-from compute_posterior import (
-    HMM_Posterior_Summaries_JAX,
-    HMM_Posterior_Summary_JAX,
-    make_list_from_hmm_posterior_summaries,
-    HMM_Posterior_Summary_NUMPY,
-    HMM_Posterior_Summaries_NUMPY
+from utilities.types import (
+    JaxNumpyArray2D,
+    JaxNumpyArray3D,
+    JaxNumpyArray5D,
+    NumpyArray1D,
+    NumpyArray3D,
+    NumpyArray2D,
 )
+
 from model import Model 
+from prior import SystemTransitionPrior_JAX
 from params import (
     AllParameters_JAX,
     CSP_Gaussian_with_unconstrained_covariances_from_ordinary_CSP_Gaussian,
@@ -42,33 +48,23 @@ from params import (
     ordinary_ETP_MetaSwitch_from_ETP_MetaSwitch_with_unconstrained_tpms,
     ordinary_STP_from_STP_with_unconstrained_tpms,
 )
-from utilities.util import (
-    make_sample_weights_which_mask_the_initial_timestep_for_each_event,evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, soften_tpm
+
+from compute_posterior import (
+    HMM_Posterior_Summaries_JAX,
+    HMM_Posterior_Summary_JAX,
+    make_list_from_hmm_posterior_summaries,
+    HMM_Posterior_Summary_NUMPY,
+    HMM_Posterior_Summaries_NUMPY
 )
 
-from utilities.types import (
-    JaxNumpyArray2D,
-    JaxNumpyArray3D,
-    JaxNumpyArray5D,
-    NumpyArray1D,
-    NumpyArray3D,
-    NumpyArray2D,
-)
-from utilities.util import (
-    normalize_log_potentials_by_axis_JAX,
-    normalize_potentials_by_axis_JAX,
-)
-from prior import SystemTransitionPrior_JAX
+"""
+Computes the maximization step in the CAVI training. 
+"""
 
-###
-# M-step Toggles
-###
 
 
 class M_Step_Toggle_Value(Enum):
-    # TODO: The variations on closed form (GAUSSIAN, VON_MISES, etc.)
-    # Should probably just be offloaded to an Inference class (similar to Model class)
-    # but where we provide specific functions for closed-form inference, if available.
+
     OFF = 1
     GRADIENT_DESCENT = 2
     CLOSED_FORM_TPM = 3
@@ -106,16 +102,6 @@ def M_step_toggles_from_strings(
         CSP=M_Step_Toggle_Value[CSP_toggle.upper()],
         IP=M_Step_Toggle_Value[IP_toggle.upper()],
     )
-
-
-###
-# Compute costs
-###
-
-# These costs are used for two things:
-#   1) For parameter optimization
-#   2) For computing the ELBO (the negative cost gives that model subcomponent's
-#       contribution to the expected log likelihood)
 
 
 def compute_variational_posterior_on_regime_triplets_JAX(
@@ -228,6 +214,10 @@ def compute_expected_log_system_transitions_JAX(
     return jnp.sum(
         variational_probs * log_transition_matrices * eligible_transitions_to_next(example_end_times)[:, None, None]
     )
+
+###
+# Compute costs for optimization 
+###
 
 
 def compute_cost_for_entity_transition_parameters_JAX(
@@ -469,14 +459,7 @@ def compute_closed_form_M_step(
                 axis=0,
             )
 
-    # Add in a small bit of a uniform distribution to bound away from exact ones and zeros.
-    # A better approach is to use a Dirichlet prior and take the posterior.
     return soften_tpm(tpm_empirical)
-
-
-# TODO: Is there some way to combine `compute_closed_form_M_step`
-# with `compute_closed_form_M_step_on_posterior_summaries` by just vectorizing across
-# any leading dimensions when they exist?
 
 
 def compute_closed_form_M_step_on_posterior_summaries(
@@ -627,9 +610,6 @@ def run_M_step_for_ETP_via_gradient_descent(
         use_continuous_states=use_continuous_states,
     )
     
-    # We reset the optimizer state to None before each run of the optimizer (which is ADAM)
-    # because we want to reset the EWMA now that we have new contextual information from the other substeps of
-    # variational EM (as provided via the frozen arguments in the partial function representation of cost_function_ETP).
     optimizer_state_for_entity_transitions = None
     (
         ETP_WUC_new,
@@ -695,12 +675,7 @@ def run_M_step_for_STP_in_closed_form(
     VES_summary: HMM_Posterior_Summary_JAX,
     example_end_times: NumpyArray1D,
 ) -> SystemTransitionParameters_JAX:
-    # Previously, we had
-    #     STP_gives_a_TPM = not STP.Gammas.any() and not STP.Upsilon.any() and STP.Pi.any()
-    # But in the special case where the number of system regimes L=1,
-    # then the tpm is [[1]], and the log of that is [[0]], so the check fails.
-    # Thus, we change the condition to simply
-    #     STP_gives_a_TPM = not STP.Gammas.any() and not STP.Upsilon.any()
+
     warnings.warn("Running closed-form M-step for STP.  Note that this ignores the prior specification.")
     STP_gives_a_TPM = not STP.Gammas.any() and not STP.Upsilon.any()
     if not STP_gives_a_TPM:
@@ -735,9 +710,6 @@ def run_M_step_for_STP_via_gradient_descent(
     )
 
     
-
-    # We reset the optimizer state to None before each run of the optimizer (which is ADAM)
-    # because we want to reset the EWMA now that we have new contextual information (here, VES_summary).
     optimizer_state_for_system_transitions = None
     (
         STP_WUC_new,

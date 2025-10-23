@@ -2,9 +2,9 @@ import jax.numpy as jnp
 import numpy as np
 
 
-###
-# Type Aliases
-###
+"""
+Array types. 
+"""
 NumpyArray1D = np.ndarray
 # a np.ndarray such that ndim==1
 NumpyArray2D = np.ndarray

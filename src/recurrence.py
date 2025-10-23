@@ -4,6 +4,10 @@ import jax
 
 from utilities.types import JaxNumpyArray1D
 
+"""
+Defines the recurrence or feedback functions f(x) and g(x) for entity and system states from the observations, respectively. 
+"""
+
 
 def cluster_trigger_system_recurrence_transformation(
     x_prevs_reshaped: JaxNumpyArray1D,

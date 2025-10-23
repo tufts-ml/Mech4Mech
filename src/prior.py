@@ -3,7 +3,9 @@ import jax.numpy as jnp
 import jax.random as jr
 import numpy as np
 
-
+"""
+Defines the sticky Dirichlet prior that is used on the assumed cateogrical distributions over entity and system states. 
+"""
 
 @jdc.pytree_dataclass
 class SystemTransitionPrior_JAX:

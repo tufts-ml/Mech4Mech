@@ -7,7 +7,7 @@ import jax_dataclasses as jdc
 import numpy as np
 from ssm.messages import hmm_expected_states
 
-from utilities.examples import eligible_transitions_to_next
+from utilities.util import eligible_transitions_to_next, soften_tpm
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,
@@ -18,9 +18,7 @@ from utilities.types import (
     NumpyArray3D,
     NumpyArray4D,
 )
-from utilities.util import soften_tpm
 from run_sim import system_regimes_gt
-from utilities.hmm_entropy_utils import calc_entropy_hmm_posterior
 
 
 
@@ -306,37 +304,7 @@ def compute_hmm_posterior_summary_JAX(
         jnp.asarray(log_normalizer),
         entropy
     )
-    '''
-    # ### RK: I tried running the corrresponding dynamax function,  so we don't have to convert to jax and back,
-    # ### but their dynamax funtion seems to be dropping a time-step for expected_joints in the setting where
-    # ### there are time-dependent parameters.
-    # ### See https://github.com/probml/dynamax/issues/310.
-    # ### TODO: The problem is that trans_probs is one timestep too short! check how dynamax does this!
-    # from dynamax.hidden_markov_model import hmm_smoother
-    # result=hmm_smoother(init_dist_over_system_regimes, transitions, log_emissions)
-    # expected_regimes, expected_joints, log_normalizer  =  result.smoothed_probs, result.trans_probs, float(result.marginal_loglik)
 
-    hmm_posterior_summary_without_entropy = HMM_Posterior_Summary_JAX(
-        jnp.asarray(expected_regimes),
-        jnp.asarray(expected_joints),
-        jnp.asarray(log_normalizer),
-        entropy=None,
-    )
-
-    log_init = jnp.log(init_dist_over_regimes)
-    entropy = compute_entropy_of_HMM_posterior(
-        log_transitions,
-        log_emissions,
-        log_init,
-        hmm_posterior_summary_without_entropy,
-    )
-    return HMM_Posterior_Summary_JAX(
-        jnp.asarray(expected_regimes),
-        jnp.asarray(expected_joints),
-        jnp.asarray(log_normalizer),
-        entropy,
-    )
-    '''
 
 def compute_hmm_posterior_summary_JAX_initialize(
     log_transitions: JaxNumpyArray3D,
@@ -368,16 +336,6 @@ def compute_hmm_posterior_summary_JAX_initialize(
     )
 
     expected_regimes = system_regimes_gt(10,  [1227, 2840, 6128, 7392, 9553, 9680])
-
-
-    # ### RK: I tried running the corrresponding dynamax function,  so we don't have to convert to jax and back,
-    # ### but their dynamax funtion seems to be dropping a time-step for expected_joints in the setting where
-    # ### there are time-dependent parameters.
-    # ### See https://github.com/probml/dynamax/issues/310.
-    # ### TODO: The problem is that trans_probs is one timestep too short! check how dynamax does this!
-    # from dynamax.hidden_markov_model import hmm_smoother
-    # result=hmm_smoother(init_dist_over_system_regimes, transitions, log_emissions)
-    # expected_regimes, expected_joints, log_normalizer  =  result.smoothed_probs, result.trans_probs, float(result.marginal_loglik)
 
     hmm_posterior_summary_without_entropy = HMM_Posterior_Summary_JAX(
         jnp.asarray(expected_regimes),
@@ -529,9 +487,6 @@ def make_list_from_hmm_posterior_summaries(
 
 
 
-# TODO: Is there some way to combine `compute_closed_form_M_step`
-# with `compute_closed_form_M_step_on_posterior_summaries` by just vectorizing across
-# any leading dimensions when they exist?
 def compute_closed_form_M_step(
     posterior_summary: HMM_Posterior_Summary_NUMPY,
     use_continuous_states: Optional[NumpyArray2D] = None,
@@ -616,12 +571,6 @@ def compute_closed_form_M_step_on_posterior_summaries(
 
     return np.array(tpms)
 
-
-####
-# Save hmm posterior summary
-###
-
-
 def save_hmm_posterior_summary(
     hmm_posterior_summary: HMM_Posterior_Summary_JAX,
     role_in_model: str,
@@ -639,3 +588,43 @@ def save_hmm_posterior_summary(
 
     np.save(filepath_regimes, np.array(hmm_posterior_summary.expected_regimes))
     np.save(filepath_joints, np.array(hmm_posterior_summary.expected_joints))
+
+def calc_entropy_hmm_posterior(
+        r_TL, s_ULL, do_assert_input_valid=False, eps=1e-13):
+    ''' Calculate entropy of HMM hidden state sequence distribution
+
+    Args
+    ----
+    r_TL : 2D array, shape (T, L)
+        r_TL[t,l] := p( z[t] = l )
+        Per-timestep marginal distribution over states
+    s_ULL : 3D array, shape (T-1, L, L), where U = T-1
+        s_ULL[t,k,l] := p( z[t] = k, z[t+1] = l)
+        Joint distribution over states for adjacent tsteps t, t+1
+        Strictly required that r is a marginal of s
+        * r_TL[:-1] = sum(s_ULL, axis=2)
+        * r_TL[-1]  = sum(s_ULL[-1], axis=0)
+
+    Returns
+    -------
+    entropy : float
+        Entropy of the provided distribution
+    ''' 
+    if do_assert_input_valid:
+        assert jnp.allclose(r_TL[:-1], np.sum(s_ULL, axis=2)).item()
+        assert jnp.allclose(r_TL[-1], np.sum(s_ULL[-1], axis=0)).item()
+    # Entropy at time 0
+    r0_L = r_TL[0]
+    h0 = -jnp.sum(r0_L * jnp.log(r0_L + eps))
+
+    # Entropy at times 1, 2, ... T-1
+    # Defined as sum of conditional entropy
+    # = H[ z_1 | z_0] + H[ z_2 | z_1] + ...
+
+    # step 1, compute array c_ULL
+    # where c_ULL[t, j, k] := p(z_t+1 = k | z_t = j)
+    denom_UL1 = r_TL[:-1][:,:,np.newaxis]
+    c_ULL = s_ULL / (eps + denom_UL1)
+    # step 2, compute conditional entropy using its traditional formula
+    h1toT_U = -jnp.sum(s_ULL * jnp.log(c_ULL + eps), axis=(1,2))
+    return h0 + jnp.sum(h1toT_U)

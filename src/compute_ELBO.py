@@ -8,16 +8,9 @@ import numpy as np
 import jax.numpy as jnp
 import jax_dataclasses as jdc
 
-from model import Model 
-from params import (
-    AllParameters_JAX,
-    SystemTransitionParameters_JAX,
-    EntityTransitionParameters_MetaSwitch_JAX,
-    ContinuousStateParameters_JAX,
-    InitializationParameters_JAX,
-)
-from prior import SystemTransitionPrior_JAX
-
+from utilities.util import (evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, normalize_log_potentials_by_axis_JAX,eligible_transitions_to_next,
+    get_initialization_times,
+    get_non_initialization_times)
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,
@@ -26,16 +19,24 @@ from utilities.types import (
     NumpyArray1D,
     NumpyArray2D,
 )
+
+from model import Model 
+from prior import SystemTransitionPrior_JAX
+from params import (
+    AllParameters_JAX,
+    SystemTransitionParameters_JAX,
+    EntityTransitionParameters_MetaSwitch_JAX,
+    ContinuousStateParameters_JAX,
+    InitializationParameters_JAX,
+)
 from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
 )
-from utilities.examples import (
-    eligible_transitions_to_next,
-    get_initialization_times,
-    get_non_initialization_times,
-)
-from utilities.util import evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, normalize_log_potentials_by_axis_JAX
+
+"""
+Computes the Evidence Lower Bound (ELBO). Not used directly for training, but for monitoring training. 
+"""
 
 def calc_elbo(
     params: AllParameters_JAX,
@@ -230,11 +231,6 @@ def calc_energy__data_likelihood(
     # Ignore parts of any entity sequence with no data
     mask_VJ1 = mask_TJ[non_init_times_V, :, None]
     return jnp.sum(Ez_VJK * (mask_VJ1 * logpdf_VJK))
-
-
-#######
-## Utils
-#######
 
 
 def calc_prob_of_regime_triplets_at_adjacent_times_JAX(

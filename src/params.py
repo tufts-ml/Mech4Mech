@@ -3,17 +3,18 @@ import pickle
 import warnings
 from dataclasses import dataclass
 from typing import Union
-
 import jax.numpy as jnp
 import jax_dataclasses as jdc
 import numpy as np
 from jax import vmap
 
-from utilities.covariances import (
+from utilities.util import (
+    normalize_log_potentials_by_axis_JAX,
+    tpm_from_unconstrained_tpm,
+    unconstrained_tpm_from_tpm,
     cholesky_nzvals_from_covariance_JAX,
     covariance_from_cholesky_nzvals_JAX,
 )
-from model import Model
 from utilities.types import (
     JaxNumpyArray1D,
     JaxNumpyArray2D,
@@ -24,16 +25,13 @@ from utilities.types import (
     NumpyArray3D,
     NumpyArray4D,
 )
-from utilities.util import (
-    normalize_log_potentials_by_axis_JAX,
-    tpm_from_unconstrained_tpm,
-    unconstrained_tpm_from_tpm,
-)
+
+from model import Model
 
 
-###
-# Parameters
-###
+"""
+Defines all of the model parameters that are used during training. 
+"""
 
 
 @dataclass
