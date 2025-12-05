@@ -1,0 +1,392 @@
+Student,Text,No evidence,Target phenomena,Set-up conditions,Entities,Activities,Properties,Organization,Chaining
+T,Ok. Cool. Let's get started. Um ok everyone on the doc?,1,0,0,0,0,0,0,0
+A,Yes.,1,0,0,0,0,0,0,0
+T,Ok. Um. So.,1,0,0,0,0,0,0,0
+A,"They're two separate the questions, right? They're not tied together. ",1,0,0,0,0,0,0,0
+T,Yeah no they're two separate questions. Um. Ok so I have some thoughts on the first one. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,I guess we can all like - I don't know - go around if we want.,1,0,0,0,0,0,0,0
+X,Sure.,1,0,0,0,0,0,0,0
+T,"Um. So I was just thinking we know that um - we have the equation that like c m delta T equals uh like total energy, right? ",1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Right going from - oh no well so it equals U internal energy.,1,0,0,0,0,0,0,0
+X,Um.,1,0,0,0,0,0,0,0
+T,"Right from when we - when we integrate that - or actually equals - I guess in using a gas equals Q - Q minus W. Um. Ok yeah we can pull up the exact equation, but just along those lines, we know that we can get Q from a resistor by finding the power, which will give us watts, and then to get it to Joules, multiply it - or I guess divide it by time.",1,0,0,0,0,0,0,0
+X,So.,1,0,0,0,0,0,0,0
+T,A watt is a - no a watt is a joule per second.,1,0,0,0,0,0,0,0
+X,A watt is a joule per second. ,1,0,0,0,0,0,0,0
+T,So then times time.,1,0,0,0,0,0,0,0
+X,"So from an instrumentation standpoint, what we need going into the resistor is we need a voltage across the resistor, and we need to know - we need to take a current rating going through that, and that will give us how much power is actually there. ",0,0,1,0,0,0,0,0
+T,Yeah well power equals I squared R. ,1,0,0,0,0,0,0,0
+X,Right.,1,0,0,0,0,0,0,0
+T,Right?,1,0,0,0,0,0,0,0
+A,Yes.,1,0,0,0,0,0,0,0
+X,Yeah. But - ,1,0,0,0,0,0,0,0
+T,So.,1,0,0,0,0,0,0,0
+X,"But the thing there is that you would have to make sure that you actually know the resistance, and resistance will change with temperature, so a much better way to do it would be to look at the voltage drop across the resistor.",0,0,1,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,"And the current going in, and then we don't have to worry about what the resistance was.",1,0,0,0,0,0,0,0
+T,"Ok. That would be a very nice way of doing it. What's the...I squared...it's V equals I over R, right?",1,0,0,0,0,0,0,0
+X,Uh. ,1,0,0,0,0,0,0,0
+T,And so.,1,0,0,0,0,0,0,0
+X,So for - ,1,0,0,0,0,0,0,0
+A,V equals I R.,1,0,0,0,0,0,0,0
+X,Yeah V equals I R. ,1,0,0,0,0,0,0,0
+T,V equals I R. So it would be I Q times V? Or wait wait.,1,0,0,0,0,0,0,0
+X,"So it would be - well so what it would be is it would be um since V equals I R, then it - V times uh current, so V times I, equals power. So.",1,0,0,0,0,0,0,0
+T,Yes.,1,0,0,0,0,0,0,0
+A,P equals I R.,1,0,0,0,0,0,0,0
+T,Yeah. Ok wait so - wait writing power in terms of I and R is gonna be...,1,0,0,0,0,0,0,0
+A,Cause resistance and temperature affects it. ,1,0,0,0,0,0,0,0
+T,Yes ok. ,1,0,0,0,0,0,0,0
+X,"So power - so if you wanted you could replace one of the I squared and the R as just the V, so then it's just V times I.",1,0,0,0,0,0,0,0
+T,Yes. Thank you.,1,0,0,0,0,0,0,0
+X,Yeah. ,1,0,0,0,0,0,0,0
+T,Um. Ok. So we're going to get Q equals V I times time.,1,0,0,0,0,0,0,0
+X,Yup.,1,0,0,0,0,0,0,0
+T,Equals c m delta T.,1,0,0,0,0,0,0,0
+X,"And actually what's really great with this is um because we're assuming that we're going to be taking readings at time steps, we would actually integrate. We would just - we would just integrate whatever we got for uh V I over time, and we would just get the area under the curve and that would tell us how much power had gone in. ",1,0,0,0,0,0,0,0
+A,Oh true. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,So. So um - ,1,0,0,0,0,0,0,0
+T,That is quite nice ok. So we could - yeah so we could do it at -,1,0,0,0,0,0,0,0
+X,So it would be - ,1,0,0,0,0,0,0,0
+T,"Take it at certain intervals of time, and then just find the area of that graph. ",1,0,0,0,0,0,0,0
+X,Right. ,1,0,0,0,0,0,0,0
+T,Basically.,1,0,0,0,0,0,0,0
+X,"Or yeah so I guess that would be uh - I guess it wouldn't be an integral it would be a summation? Because we're doing discrete time steps, but we would - we could just call it an integral and then - ",1,0,0,0,0,0,0,0
+P,Like a Riemann sum. ,1,0,0,0,0,0,0,0
+A,Same thing. ,1,0,0,0,0,0,0,0
+T,Yeah. Well Riemann sum and integral - aren't they just.,1,0,0,0,0,0,0,0
+X,Well a Riemann sum would be if your time step was infinitesimally small.,1,0,0,0,0,0,0,0
+T,Yeah. Ok. ,1,0,0,0,0,0,0,0
+X,"But we're assuming that we're taking readings, so there is some time step in there that isn't infinitesimally small.",1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,But for this - ,1,0,0,0,0,0,0,0
+T,You could just - ,1,0,0,0,0,0,0,0
+X,"- it's probably so fast, that we would just.",1,0,0,0,0,0,0,0
+T,Line.,1,0,0,0,0,0,0,0
+X,Yeah. I mean.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,It might just be semantics at that point. ,1,0,0,0,0,0,0,0
+T,Intervals of time. Kind of like - wait would this be something - this would be something that we'd have a graph for. We would take - we would graph like - ,1,0,0,0,0,0,0,0
+X,So we would just look at the area of that graph.,1,0,0,0,0,0,0,0
+T,Yeah. Wait what would our um - what would our axes be for that graph? Would it be - ,1,0,0,0,0,0,0,0
+X,Um. So.,1,0,0,0,0,0,0,0
+T,Graphing voltage versus current?,1,0,0,0,0,0,0,0
+X,So V I yeah.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,On the y axis. And then time. ,1,0,0,0,0,0,0,0
+T,Ok yeah. V I on y axis and t on x axis.,1,0,0,0,0,0,0,0
+X,"So that tells us how much - how much energy we put in, um. ",1,0,0,0,0,0,0,0
+A,Time on x axis.,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,Let's see.,1,0,0,0,0,0,0,0
+T,And then I believe we can just - this - is there any work being done?,1,0,0,0,0,0,0,0
+X,Well.,1,0,0,0,0,0,0,0
+T,Well ok. That's all just - I don't think that's - the power times - V I t um is that Q? Or is that just energy?,1,0,0,0,0,0,0,0
+X,Well that - uh Q is...,1,0,0,0,0,0,0,0
+P,Is there any work being done? If not the energy is - ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,So do we need there to be work being done or can the container be sealed? ,0,0,1,0,0,0,0,0
+A,I think it's assumed sealed. ,0,0,1,0,0,0,0,0
+T,I don't think - no I don't think we need it. I just want to make sure we're writing the right equation. ,1,0,0,0,0,0,0,0
+P,Ok maybe you should write that saying that like we're -,1,0,0,0,0,0,0,0
+A,The assumptions.,1,0,0,0,0,0,0,0
+P,- assuming that there's -,1,0,0,0,0,0,0,0
+T,Ok yeah. ,1,0,0,0,0,0,0,0
+P,it's set up such that no work is done. Yeah. We - ,1,0,0,0,0,0,0,0
+X,Solid container. Very rigid.,0,0,1,0,0,0,0,0
+T,Yeah. We'll write this out like nicer once we get thoughts down.,1,0,0,0,0,0,0,0
+X,So - so would it be a rigid container that is very well insulated? ,0,0,1,0,0,0,0,0
+A,Yes.,1,0,0,0,0,0,0,0
+X,Ok. Or do we just measure - try to somehow measure how much heat comes out of it?,0,0,1,0,0,0,0,0
+P,We could say that's a source of error. Like your original assumption is that it is entirely insulated.,0,0,1,0,0,0,0,0
+X,Or wasn't there an exp - sorry. ,1,0,0,0,0,0,0,0
+A,I was gonna say I actually like her idea. ,1,0,0,0,0,0,0,0
+X,Oh.,1,0,0,0,0,0,0,0
+A,Source of error just so we can minimize the amount of work we do. ,1,0,0,0,0,0,0,0
+X,"Well I was gonna say or um wasn't there somewhere there was like this experiment where they put like - they had stuff in a - fluid in a glass container that was underwater and they were able to - you could measure the temperature of the water as well, and that could tell you how much had escaped. ",0,0,1,0,0,0,0,0
+T,That's kinda like calorimeter kind of stuff?,1,0,0,0,0,0,0,0
+X,Maybe?,1,0,0,0,0,0,0,0
+T,Of like - ok. ,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,Or we could just say it's super insulated. ,0,0,1,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Although we just have to design the experiment. It's not like we have to actually do it. ,1,0,0,0,0,0,0,0
+T,No. ,1,0,0,0,0,0,0,0
+A,Just design and justify this will work. ,1,0,0,0,0,0,0,0
+X,How can you minimize the experimental error. That's one of the points there. ,1,0,0,0,0,0,0,0
+T,Yeah. Yeah and we would minimize it by either making it incredibly insulated or also being able to understand how it's not - like.,0,0,1,0,0,0,0,0
+X,"Ok so so from the insulation standpoint, it could be like um you know how uh like if you have like liquid nitrogen in a container they use it's got like a vacuum between the walls so you have like the -",0,0,1,0,0,0,0,0
+T,Oh yes yeah. ,1,0,0,0,0,0,0,0
+X,- inner one and then they have a vacuum and then the outer wall. ,0,0,1,0,0,0,0,0
+T,Mhm. ,1,0,0,0,0,0,0,0
+X,That works incredibly well I mean like those -,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+X,- and then that's still we could take that container and put it in water and even then measure the rise and then we know.,0,0,1,0,0,0,0,0
+T,Right. Ok. ,1,0,0,0,0,0,0,0
+X,At that point we go like all right I mean our - we gotta be down on the noise at some point. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Uh. ,1,0,0,0,0,0,0,0
+T,Yeah Ok. Yeah so we would assume it's pretty well insulated. ,0,0,1,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Um and rigid with no heat loss.,0,0,1,0,0,0,0,0
+X,Those are called - I don't know if they're called doers or - some term for that.,1,0,0,0,0,0,0,0
+T,"Um. So - so basically, the experiment is we have a gas in a rigid",0,0,1,0,0,0,0,0
+X,This is so weird. I've actually never used Google docs with other people like writing stuff. This is very very,1,0,0,0,0,0,0,0
+T,It's a fun experience. Um. Uh like in the container is a resistor with some kind of voltmeter.,0,0,1,0,0,0,0,0
+X,Yeah we measure um let's see so we would measure before it goes into the container right we'd measure voltage across the resistor.,0,0,1,0,0,0,0,0
+T,Ok yeah. ,1,0,0,0,0,0,0,0
+X,And then uh also we'd be measuring current. Um. ,1,0,0,0,0,0,0,0
+T,Well we would probably need to - we would probably need to know it for all like - well ok is it gonna change over - ,1,0,0,0,0,0,0,0
+X,Yeah probably. ,1,0,0,0,0,0,0,0
+T,Yeah. So we probably hook it up to a sensor that we could access from the outside.,0,0,1,0,0,0,0,0
+X,So we would be - yeah we'd just be accessing it the whole time. ,0,0,1,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Right so um. Um. ,1,0,0,0,0,0,0,0
+T,Access the voltage drop across.,0,0,1,0,0,0,0,0
+X,"In fact what we would probably do, is we would probably measure current someplace much earlier on, and then the voltage is directly across it right at where it goes into the container. ",0,0,1,0,0,0,0,0
+T,Ok and that's simply just,1,0,0,0,0,0,0,0
+X,That's yeah that's like a - that's a really - ,1,0,0,0,0,0,0,0
+T,Just cause it's easier and we don't have to worry about it kind of thing. ,1,0,0,0,0,0,0,0
+X,Well oh like why would we measure it right there?,0,0,1,0,0,0,0,0
+T,Yeah yeah why do it before?,0,0,1,0,0,0,0,0
+X,"So so there is some voltage drop on the wires that go to it, so what you want to do is you want to measure it really close to wherever it is that you care. ",0,0,1,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,But the current through the whole loop is always constant.,1,0,0,0,0,0,0,0
+T,Right.,1,0,0,0,0,0,0,0
+X,So we can measure that you know at whatever our power source is. ,0,0,1,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Um yeah. ,1,0,0,0,0,0,0,0
+T,Ok. So.,1,0,0,0,0,0,0,0
+X,And then all of that would go into a um like a data acquisition like a um thing so um yeah. And if we were trying to do it underwater and we were - oh nah we would just have wires. Wires are fine. ,0,0,1,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Source of error though. Cause heat can travel along wires. ,1,0,0,0,0,0,0,0
+T,That is true. ,1,0,0,0,0,0,0,0
+X,"But you know really small, but it's there.",1,0,0,0,0,0,0,0
+T,Yeah heat loss through wires. Um. Ok so we... we turn on the resistor. ,0,0,1,0,0,0,0,0
+X,Do we need to be able to read the temperature inside the container? Is that something that's important? Since we're trying to determine. ,0,0,1,0,0,0,0,0
+T,Yes. It is. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Yes. Ok. Sorry. I'll write that - like we'll write this out nicer. Um.,1,0,0,0,0,0,0,0
+X,It's good. ,1,0,0,0,0,0,0,0
+T,Um also we can measure the temperature inside the container for - ok. I mean yeah we really - we really just need like initial and final.,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Um.,1,0,0,0,0,0,0,0
+X,Do we need to know anything about the pressure or does that matter?,1,0,0,0,0,0,0,0
+T,I don't think it does.,1,0,0,0,0,0,0,0
+X,Cause Q was P times t right?,1,0,0,0,0,0,0,0
+T,Power. ,1,0,0,0,0,0,0,0
+X,Oh power times - ok so. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,c m. What is c m?,1,0,0,0,0,0,0,0
+T,Specific heat times mass. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Yeah sorry. Like. ,1,0,0,0,0,0,0,0
+X,Ok so so our container when it's filled we have to be really um.,1,0,0,0,0,0,0,0
+T,But yeah. ,1,0,0,0,0,0,0,0
+X,So we do need to know the pressure because how are we gonna know?,1,0,0,0,0,0,0,0
+T,Because we need to know mass.,1,0,0,0,0,0,0,0
+X,Right yeah. How are we gonna know that we got it filled right? I mean.,1,0,0,0,0,0,0,0
+T,"Yeah we don't - but we don't need to know that throughout the experiment, but we do need to know.",1,0,0,0,0,0,0,0
+X,On the fill.,1,0,0,0,0,0,0,0
+T,Yeah we need to know the volume of the container. Would we just get mass just through p V equals m R T?,1,0,0,0,0,0,0,0
+X,Yeah I think - or we could uh we could of course weigh the container so if we pulled a really high vacuum on the container and then you weigh it and then you fill it and then you weight it again.,0,0,1,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Right. That should um unless is buoyancy a problem?,1,0,0,0,0,0,0,0
+T,And honestly that's - I think that's gonna be probably more accurate than p V equals m R T because I'm not sure we can assume ideal gas. ,1,0,0,0,0,0,0,0
+X,Ok. Yeah that might be.,1,0,0,0,0,0,0,0
+T,Well deviations for ideal gas at like normal pressure and volume is pretty low. But.,1,0,0,0,0,0,0,0
+X,Well it depends on the gas. ,0,0,1,0,0,0,0,0
+T,Yeah that's true. ,1,0,0,0,0,0,0,0
+X,Right. ,1,0,0,0,0,0,0,0
+T,Yeah and we don't know exactly which gas we're doing. Um. ,0,0,1,0,0,0,0,0
+X,"Um. Yeah so we would - we would - so let's see. Maybe what we would do is if the thing is underwater, the entire apparatus is on something that um is measuring the weight, and so one assumption is that gravity is constant um which if we're getting super anal, it's not always true. It's actually not true.",0,0,1,0,0,0,0,0
+T,"It's not true, but in terms of the deviations that it's gonna affect.",1,0,0,0,0,0,0,0
+X,Yeah. Yeah it's.,1,0,0,0,0,0,0,0
+T,It's like. ,1,0,0,0,0,0,0,0
+X,Yeah and I forgot I forgot.,1,0,0,0,0,0,0,0
+T,Well also.,1,0,0,0,0,0,0,0
+X,"I saw somewhere where they actually had to measure the gravity difference in a room, and I forgot what that was for. ",1,0,0,0,0,0,0,0
+T,"Well ok like if we're staying stationary, it's not really gonna matter. It's only if you're moving. ",1,0,0,0,0,0,0,0
+X,Well um.,1,0,0,0,0,0,0,0
+T,Like gravity here versus at the equator is different. ,1,0,0,0,0,0,0,0
+X,"Well actually - so actually like um when they're doing like weights and measures, like um and they're trying - I forgot what it was for, but they'll actually measure the specific gravity - or not the specific gravity - they'll measure the force of gravity at various points in the room because like then it actually matters. ",1,0,0,0,0,0,0,0
+T,Yeah if you need to be incredibly precise. ,1,0,0,0,0,0,0,0
+X,Right but I don't know.,1,0,0,0,0,0,0,0
+T,I don't think it's gonna affect um us.,1,0,0,0,0,0,0,0
+X,"Well yeah so if we were doing something like this, what we would do it right is we would figure out what the orders of magnitude were of all these different effects.",1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,And then ones that were where it was like you know we're working at you know say ten to the minus six and that's ten to the minus ten.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Then we would just rule it out.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,But we don't - we probably don't have to for this I'm sure. Um. ,1,0,0,0,0,0,0,0
+T,The weight of the container,1,0,0,0,0,0,0,0
+X,Yeah it would be the entire container like.,0,0,1,0,0,0,0,0
+T,Before and after gas is added.,0,0,1,0,0,0,0,0
+X,"Yeah so we would pull - we'd pull a high vacuum, and then we'd check the weight, and then we would add our gas.",0,0,1,0,0,0,0,0
+T,Ok yeah.,1,0,0,0,0,0,0,0
+X,And that would um. ,1,0,0,0,0,0,0,0
+T,"In order to find mass we will create a vacuum in the container and weigh it - and weigh it before and after - before and after gas is added. Um. Um ok. So then - that's everything we need to know beforehand, right? Or well I guess we can also um measure the temperature, right?",0,0,1,0,0,0,0,0
+X,Yeah. So we want to know the temperature uh inside the container and then also the temperature of the water on the outside. ,0,0,1,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Cause that'll help us with the mass.,1,0,0,0,0,0,0,0
+T,"We - ok so for the insulation, is the best way to do it underwater or can't we just do it like in a vacuum?",0,0,1,0,0,0,0,0
+X,"Well so what I was thinking is we have a high vacuum between the walls right, so that's gonna minimize - that's gonna act as our insulation, but if we wanted to see how much heat we actually lost even with a high vacuum, then if it's underwater, we can look at the temperature difference of the water, right, which is gonna be some small amount, and then that will also kind of give us an idea of ok how much heat did we actually lose from our container, so we can kind of correct.",0,0,1,0,0,0,0,0
+P,Um I put that in sources of error. ,1,0,0,0,0,0,0,0
+T,Do you think - yeah I was gonna say do you think that we can assume for this experiment that it just like a vacuum and then in ways to improve it,0,0,1,0,0,0,0,0
+X,We would say ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+T,That would be it in ways to like reduce error it would be to find the actual amount of heat loss. ,1,0,0,0,0,0,0,0
+X,"Sure sure. Yeah well and it would be something that if someone was really gonna do this experiment, they would again calculate what sort of the expected um uh you know contributions would really be.",1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"And then if it's like no we really do need something more accurate, then they could do that, but yeah it does make it a lot harder if you - like pulling a vacuum um you know having a container that's like a nice thermos, those exist. ",0,0,1,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Um. Putting it under water that starts to be a problem.,0,0,1,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Running wires underwater. ,0,0,1,0,0,0,0,0
+T,Um. Ok and we have the current that we measured before because it's constant. Um. As well as a temperature probe. Um. Ok. That's good. Ok and then we're gonna turn on the resistor.,0,0,1,0,0,0,0,0
+X,Yup. The power.,1,0,0,0,0,0,0,0
+T,For a period of time. ,1,0,0,0,0,0,0,0
+X,Yup. ,1,0,0,0,0,0,0,0
+T,What do you think like is a reasonable period of time for this kind of experiment? Like -,1,0,0,0,0,0,0,0
+X,I mean.,1,0,0,0,0,0,0,0
+T,- five minutes or like?,1,0,0,0,0,0,0,0
+X,"It probably depends how much power you're actually putting in, right?",1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Um. And how big the container was. Um. ,0,0,1,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,I would - I would imagine you know a few minutes is probably fine. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"You know, but - I mean but actually it doesn't really matter right because we're integrating anyway. ",1,0,0,0,0,0,0,0
+T,That's true. It should be fine. Yeah. ,1,0,0,0,0,0,0,0
+X,Um. You know. ,1,0,0,0,0,0,0,0
+T,Um.,1,0,0,0,0,0,0,0
+P,We can still specify a random period of time. ,1,0,0,0,0,0,0,0
+T,Period of time such as ten minutes. ,1,0,0,0,0,0,0,0
+X,Yeah. ,1,0,0,0,0,0,0,0
+T,Um. Ok. And collect data for the um for the voltage drop um and the final temperature. ,1,0,0,0,0,0,0,0
+X,Well uh for the volt - so we would collect voltage and current.,1,0,0,0,0,0,0,0
+T,Ok ok.,1,0,0,0,0,0,0,0
+X,We don't probably have to specify that it's voltage drop.,1,0,0,0,0,0,0,0
+P,Um. Oh it says to like describe the instrumentation so also we should like - ,1,0,0,0,0,0,0,0
+X,Wait what? I'm sorry say that again? It says to describe what?,1,0,0,0,0,0,0,0
+P,The instrumentation. Like what we're gonna be using to collect data. ,1,0,0,0,0,0,0,0
+X,"So well we've described that we're gonna have a voltage sensor, current sensor, um a temperature sensor. ",0,0,1,0,0,0,0,0
+A,[inaudible] sensors. ,1,0,0,0,0,0,0,0
+X,And where those are gonna be right those are um uh did we have anything else that we were looking for? ,1,0,0,0,0,0,0,0
+P,Like time I guess.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Oh yeah we probably need to have a - that's actually a good point - we probably need to have some kind of clock. ,0,0,1,0,0,0,0,0
+T,Um. For a period of time using a clock.,0,0,1,0,0,0,0,0
+X,Well I mean actually so it sounds - it sounds -,1,0,0,0,0,0,0,0
+A,[inaudible],1,0,0,0,0,0,0,0
+T,Yes ok using what using an atomic clock. We'll be very accurate. ,0,0,1,0,0,0,0,0
+X,"Oh my god. Well so so um one way to get sort of the atomic clock accuracy without having to have a full room, is uh just uh you get the time off GPS. So um.",0,0,1,0,0,0,0,0
+T,That's true. Ok. ,1,0,0,0,0,0,0,0
+X,Using a GPS synchronized - I think a clock is probably fine. ,0,0,1,0,0,0,0,0
+T,I think clock's good. ,0,0,1,0,0,0,0,0
+X,"Right. Um. But this is actually a thing that we've run into with problems in the past is like - like a lot of times people think oh I'll use an Arduino, and you use it for something, and you realize actually the clock on a Arduino is not that good. ",1,0,0,0,0,0,0,0
+T,Interesting. ,1,0,0,0,0,0,0,0
+X,So then you have to supplement with something that's better or maybe it doesn't matter um you know.,1,0,0,0,0,0,0,0
+T,Interesting. ,1,0,0,0,0,0,0,0
+X,And so it's just - it becomes a source of error. ,1,0,0,0,0,0,0,0
+T,I'll - accurate clock. I mean yeah. ,0,0,1,0,0,0,0,0
+T,Accurate clock. ,0,0,1,0,0,0,0,0
+X,Accurate clock yeah. Yeah I mean it also comes down to well how good was our voltmeter. How good was our - ,0,0,1,0,0,0,0,0
+T,Right. Also how long are we doing it for. It's for like - ,1,0,0,0,0,0,0,0
+X,Yeah. Do it for ten hours. Do we need another you know microsecond.,1,0,0,0,0,0,0,0
+T,"Yeah. Um ok. So then graph um V I versus time and take the area under the curve. Um. Ok. That area under the curve is just gonna be equal to Q, right?",1,0,0,0,0,0,0,0
+X,I think so. Uh Q was just the total work?,1,0,0,0,0,0,0,0
+T,Um. Yeah so I think - ,1,0,0,0,0,0,0,0
+X,Let's see...,1,0,0,0,0,0,0,0
+T,I'm not sure if - ,1,0,0,0,0,0,0,0
+X,"So it's not a rate, right?",1,0,0,0,0,0,0,0
+T,- Q is really - you know it's not a rate. ,1,0,0,0,0,0,0,0
+X,Ok.,1,0,0,0,0,0,0,0
+T,But I'm not sure if Q is the right thing to be using there.,1,0,0,0,0,0,0,0
+X,So let's see it's - ,1,0,0,0,0,0,0,0
+T,I think it should be U. Well ok.,1,0,0,0,0,0,0,0
+A,I think it would be [inaudible].,1,0,0,0,0,0,0,0
+T,It is U except that,1,0,0,0,0,0,0,0
+P,We're assuming there's no work though.,1,0,0,0,0,0,0,0
+T,Except we're assuming that it's no work. ,1,0,0,0,0,0,0,0
+X,"So it's just energy in, right? Q yeah it's Q.",1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Yeah. It's Q.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Yeah.,1,0,0,0,0,0,0,0
+T,"Will be equal to Q heat. Um. So then divide that number - ok the Q heat in Joules cause so whatever units you use for that stuff, it just has to be in Joules. Um divide that number ",1,0,0,0,0,0,0,0
+X,Well yeah so we get it - we got the energy probably in watt-hours is probably what you would - right? Is it watt - ,1,0,0,0,0,0,0,0
+T,Well watt-seconds.,1,0,0,0,0,0,0,0
+X,Or is it just watts?,1,0,0,0,0,0,0,0
+T,The power is gonna be in watts times - yeah times time so the Q's just gonna be in Joules so long as time is seconds. ,1,0,0,0,0,0,0,0
+X,Ok. Ok yeah. Yeah yeah yeah.,1,0,0,0,0,0,0,0
+T,Um.,1,0,0,0,0,0,0,0
+X,Yeah.,1,0,0,0,0,0,0,0
+T,So in the beginning...,1,0,0,0,0,0,0,0
+X,So that area - yeah that area is just Joules.,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Cool.,1,0,0,0,0,0,0,0
+T,Um. And you have the specific heat. Nice.,1,0,0,0,0,0,0,0
+X,Ta da.,1,0,0,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,So do we know um with this uh are we all supposed to then write up our own individual thing or do we all turn it in as a group?,1,0,0,0,0,0,0,0
+P,No it's just this. ,1,0,0,0,0,0,0,0
+T,No he said only one person.,1,0,0,0,0,0,0,0
+X,Ok ok.,1,0,0,0,0,0,0,0
+T,It's only - I can do that yeah. ,1,0,0,0,0,0,0,0
+X,Also what happened to your finger? ,1,0,0,0,0,0,0,0
+T,[omitted],1,0,0,0,0,0,0,0
+X,Oh no. ,1,0,0,0,0,0,0,0
+T,Don't know what's going on.,1,0,0,0,0,0,0,0
+X,I'm sorry.,1,0,0,0,0,0,0,0
+T,It's ok. It doesn't hurt if it's in the splint. I just need to keep off it. Um. Ok. Wait for measurements. Ok. Measurements - we can just say more explicitly uh measure current um like -,1,0,0,0,0,0,0,0
+P,Isn't this all describing about the experiment?,1,0,0,0,0,0,0,0
+T,Yeah. I wrote this just as like a note to myself. ,1,0,0,0,0,0,0,0
+P,Ok.,1,0,0,0,0,0,0,0
+T,"I don't know if we really need - yeah ok. Um. Ok. I mean honestly, that kind of looks fine. ",1,0,0,0,0,0,0,0
+X,Ok. And then do we need to talk about sources or error? ,1,0,0,0,0,0,0,0
+T,Um there's some down here.,1,0,0,0,0,0,0,0
+X,"Ok. So one thought I had too was that actually um whatever material the container is made out of when it heats up, it's going to expand -",0,0,1,0,0,0,0,0
+T,Mhm.,1,0,0,0,0,0,0,0
+X,- and that will change whatever the internal volume is. And I don't know if it makes it bigger or smaller actually. It um might make it bigger but if there were -,0,0,1,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,- things inside the container it might actually make it smaller cause they would um ,0,0,1,0,0,0,0,0
+T,Yeah. Yeah true. ,1,0,0,0,0,0,0,0
+X,But uh but it would just be something that would uh could be taken into account and then - ,1,0,0,0,0,0,0,0
+T,Yeah. Container material during experiment. Um. That will also probably depend on like how great the change in temperature is. ,0,0,1,0,0,0,0,0
+X,Yeah. Yeah. I mean it will change - ,1,0,0,0,0,0,0,0
+T,And the material of. ,1,0,0,0,0,0,0,0
+X,- but how much will error - ,1,0,0,0,0,0,0,0
+T,"Also some materials - that's dependent on like a constant of material, right?",0,0,1,0,0,0,0,0
+P,So like that can be a source of error mitigation that we choose a material that will not significantly expand. ,0,0,1,0,0,0,0,0
+T,Yeah. Yeah. ,1,0,0,0,0,0,0,0
+X,"Like a good example of this is um uh there was a power plant they were starting up and uh you don't think of it, but over like a huge structure that's made out of um like steel um as the plant heated up, um the contractors didn't cut uh one of the beams, and so the plant actually expanded and uh the beams started touching and uh and so they had to shut the plant down because they didn't realize that the whole building actually expands by about a foot and a half or something. Right and so you don't think about it being a big thing, but you know on - ",0,0,1,0,0,0,0,0
+A,Big scales,1,0,0,0,0,0,0,0
+X,- on big scales it can matter. And that was actually a really expensive thing for the contractor because it's um I think it's like several million dollars a day if you don't have a plant - ,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Like a plant is supposed to be online and it's not. ,1,0,0,0,0,0,0,0
+T,And it's not yeah.,1,0,0,0,0,0,0,0
+X,And it takes like twelve or eighteen hours to start a plant up. So um.,1,0,0,0,0,0,0,0
+T,That's ,1,0,0,0,0,0,0,0
+X,You know just get somebody to go up there and cut the beam and stuff.,1,0,0,0,0,0,0,0
+T,Yeah. Um. Equals...um ok any other - I mean obviously just the regular like instrumentational error. And like - ,1,0,0,0,0,0,0,0
+X,"Yeah I mean it's - so the um - so probably we have a data acquisition system, and all of the readings that we're taking probably go through something called a analog or digital converter so a ADC.",0,0,1,0,0,0,0,0
+T,Mhm. ,1,0,0,0,0,0,0,0
+X,And so depending on how many bits that ADC is like if it's eight bits it means it can have two hundred and fifty-six values. And if you think about it that's like that's like that's not that much. ,0,0,1,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Right whereas if it was fifteen uh fourteen bits or sixteen bits or twenty-four bits and you get more and more um so that's a place that you know if - if you know better sensors I guess.,0,0,1,0,0,0,0,0
+T,Yeah. Um. High-quality sensors. I guess. And calibrate them correctly.,0,0,1,0,0,0,0,0
+X,Yeah actually calibration's a big one right?,1,0,0,0,0,0,0,0
+T,Yeah. Um. Ok. Any other major things to add? I feel like this is a pretty good -,1,0,0,0,0,0,0,0
+X,Pretty good place.,1,0,0,0,0,0,0,0
+T,- thing. Yeah?,1,0,0,0,0,0,0,0
+X,Ok.,1,0,0,0,0,0,0,0
+T,Ok. I'm good with that. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0

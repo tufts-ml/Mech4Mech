@@ -18,43 +18,36 @@ from utilities.types import (
     NumpyArray3D,
     NumpyArray4D,
 )
-from run_sim import system_regimes_gt
 
-
-
-
-###
-# Structs
-###
+"""
+Takes the expectations of the MODEL log probabilities with respect to the other computed approximate posterior 
+q(s_{0:T}) or q(z^{1:J}_{0:T}) computed in -> (expectation_step.py), and uses these as inputs to the forwards-backwards algorithm.
+computed in this script.  
+The output of the forwards-backwards are the exact marginals, pairwise marginals, and emissions that act as the posterior summary
+for the non-fixed posterior component. This posterior summary, rather than the full posterior, is all we need to compute our costs 
+for the maximization step -> (maximization_step.py). 
+"""
 
 
 @dataclass
 class HMM_Posterior_Summary_NUMPY:
     """
-    Gives posterior summary for a "HMM", by which we mean a model
-    where some discrete latent chain, x_{1:T}, generates some
-    emissions chain, y_{1:T}, in a way such that
-        p(y_t | past) :=  p(y_t | x_{1:t}, y_{1:t-1}) = p(y_t|x_t)
-
-    The posterior summary tells us what we need to know about
-        p(x_{1:T} | y_{1:T})
+    Purpose: Defines the posterior summary for a "HMM".
+        The posterior summary tells us what we need to know about p(z_{1:T} | x_{1:T}), 
+        which is only the mariginal and the pairwise marginals over the latents in our Markov case. 
 
     Attributes:
         expected_regimes: np.array with shape (T,K)
-            Gives E[x_t | y_{1:T}]
+            Gives the marginal probabilities of z_t | x_{1:T}.
         expected_joints: np.array with shape (T-1, K, K)
-            Gives E[x_{t+1}, x_t | y_{1:T}]; that is, the (t,k,k')-th element gives
-            the probability distribution over all pairwise options
-            (x_{t+1}=k', x_{t}=k | y_{1:T}).
+            Gives the pairwise marginal probabilities of z_t, z_(t-1); that is, the (t,k,k')-th element gives
+            the probability distribution over all pairwise options given the entire observeration sequence. 
+            (z_{t}=k', z_{t-1}=k | x_{1:T}).
         log_normalizer : float
-            The log probability density over the emissions chain (y_{1:T}),
-            which can be obtained by marginalziing the last filtered joint p(x_T, y_{1:T})
-            over the probabilities for each final latent variable x_T.
+            The log probability density over the emissions chain (x_{1:T}),
+            which can be obtained by marginalziing the last filtered joint p(z_T, x_{1:T})
+            over the probabilities for each final latent variable z_T.
         entropy: optional float
-
-    Notation:
-        T: number of timesteps
-        K: number of regimes
     """
 
     expected_regimes: NumpyArray2D
@@ -66,30 +59,22 @@ class HMM_Posterior_Summary_NUMPY:
 @jdc.pytree_dataclass
 class HMM_Posterior_Summary_JAX:
     """
-    Gives posterior summary for a "HMM", by which we mean a model
-    where some discrete latent chain, x_{1:T}, generates some
-    emissions chain, y_{1:T}, in a way such that
-        p(y_t | past) :=  p(y_t | x_{1:t}, y_{1:t-1}) = p(y_t|x_t)
-
-    The posterior summary tells us what we need to know about
-        p(x_{1:T} | y_{1:T})
+    Purpose: Defines the posterior summary for a "HMM".
+        The posterior summary tells us what we need to know about p(z_{1:T} | x_{1:T}), 
+        which is only the mariginal and the pairwise marginals over the latents in our Markov case. 
 
     Attributes:
         expected_regimes: np.array with shape (T,K)
-            Gives E[x_t | y_{1:T}]
+            Gives the marginal probabilities of z_t | x_{1:T}.
         expected_joints: np.array with shape (T-1, K, K)
-            Gives E[x_{t+1}, x_t | y_{1:T}]; that is, the (t,k,k')-th element gives
-            the probability distribution over all pairwise options
-            (x_{t+1}=k', x_{t}=k | y_{1:T}).
+            Gives the pairwise marginal probabilities of z_t, z_(t-1); that is, the (t,k,k')-th element gives
+            the probability distribution over all pairwise options given the entire observeration sequence. 
+            (z_{t}=k', z_{t-1}=k | x_{1:T}).
         log_normalizer : float
-            The log probability density over the emissions chain (y_{1:T}),
-            which can be obtained by marginalziing the last filtered joint p(x_T, y_{1:T})
-            over the probabilities for each final latent variable x_T.
+            The log probability density over the emissions chain (x_{1:T}),
+            which can be obtained by marginalziing the last filtered joint p(z_T, x_{1:T})
+            over the probabilities for each final latent variable z_T.
         entropy: optional float
-
-    Notation:
-        T: number of timesteps
-        K: number of regimes
     """
 
     expected_regimes: JaxNumpyArray2D
@@ -104,39 +89,25 @@ HMM_Posterior_Summary = Union[HMM_Posterior_Summary_JAX, HMM_Posterior_Summary_N
 @dataclass
 class HMM_Posterior_Summaries_NUMPY:
     """
-    WARNING:
-        This class is, as of now, not currently instantiated when running CAVI with numpy.
-        That uses a List[HMM_Posterior_Summary].  This class is for post-inference conversions
-        from HMM_Posterior_Summaries_JAX, so that we can do things like write diagnostic code
-        with for loops instead of the horrible vectorized code.
-
-    Overview:
-        Gives posterior summaries for J "HMM"s, by which we mean a model
-        where some discrete latent chain, x_{1:T}^(j), generates some
-        emissions chain, y_{1:T}^(j), in a way such that
-            p(y_t^j | past^j) :=  p(y_t | x_{1:t}^j, y_{1:t-1}^j) = p(y_t^j|x_t^j)
-
+    Purpose:
+        Defines the posterior summaries for J "HMM"s.
         The posterior summary tells us what we need to know about
-            p(x_{1:T}^j | y_{1:T}^j)
+            p(z_{1:T}^j | x_{1:T}^j)
         for each j=1,..,J
 
     Attributes:
         expected_regimes: np.array with shape (T,J,K)
-            Gives E[x_t^j | y_{1:T}^j]
+            Gives the marginal probabilities of z_t^j | x_{1:T}^j for each j 
         expected_joints: np.array with shape (T-1, J, K, K)
-            Gives E[x_{t+1}^j, x_t^j | y_{1:T}^j]; that is, the (t,j,k,k')-th element gives
+            Gives the pairwise marginals of z_t^j, z_(t-1)^j for each j; that is, the (t,j,k,k')-th element gives
             the probability distribution over all pairwise options
-            (x_{t+1}^j=k', x_{t}^j=k | y_{1:T}^j).
+            (z_{t+1}^j=k', z_{t}^j=k | x_{1:T}^j).
         log_normalizers : np.array with shape (J,)
-            The log probability density over the emissions chain (y_{1:T}^j),
-            which can be obtained by marginalziing the last filtered joint p(x_T^j, y_{1:T}^j)
-            over the probabilities for each final latent variable x_T^j.
+            The log probability density over the emissions chain (x_{1:T}^j),
+            which can be obtained by marginalziing the last filtered joint p(z_T^j, x_{1:T}^j)
+            over the probabilities for each final latent variable z_T^j.
         entropies: optional np.array with shape(J,)
 
-    Notation:
-        T: number of timesteps
-        K: number of regimes
-        J: number of entities
     """
 
     expected_regimes: NumpyArray3D
@@ -148,32 +119,24 @@ class HMM_Posterior_Summaries_NUMPY:
 @jdc.pytree_dataclass
 class HMM_Posterior_Summaries_JAX:
     """
-    Gives posterior summaries for J "HMM"s, by which we mean a model
-    where some discrete latent chain, x_{1:T}^(j), generates some
-    emissions chain, y_{1:T}^(j), in a way such that
-        p(y_t^j | past^j) :=  p(y_t | x_{1:t}^j, y_{1:t-1}^j) = p(y_t^j|x_t^j)
-
-    The posterior summary tells us what we need to know about
-        p(x_{1:T}^j | y_{1:T}^j)
-    for each j=1,..,J
+    Purpose:
+        Defines the posterior summaries for J "HMM"s.
+        The posterior summary tells us what we need to know about
+            p(z_{1:T}^j | x_{1:T}^j)
+        for each j=1,..,J
 
     Attributes:
         expected_regimes: np.array with shape (T,J,K)
-            Gives E[x_t^j | y_{1:T}^j]
+            Gives the marginal probabilities of z_t^j | x_{1:T}^j for each j 
         expected_joints: np.array with shape (T-1, J, K, K)
-            Gives E[x_{t+1}^j, x_t^j | y_{1:T}^j]; that is, the (t,j,k,k')-th element gives
+            Gives the pairwise marginals of z_t^j, z_(t-1)^j for each j; that is, the (t,j,k,k')-th element gives
             the probability distribution over all pairwise options
-            (x_{t+1}^j=k', x_{t}^j=k | y_{1:T}^j).
+            (z_{t+1}^j=k', z_{t}^j=k | x_{1:T}^j).
         log_normalizers : np.array with shape (J,)
-            The log probability density over the emissions chain (y_{1:T}^j),
-            which can be obtained by marginalziing the last filtered joint p(x_T^j, y_{1:T}^j)
-            over the probabilities for each final latent variable x_T^j.
+            The log probability density over the emissions chain (x_{1:T}^j),
+            which can be obtained by marginalziing the last filtered joint p(z_T^j, x_{1:T}^j)
+            over the probabilities for each final latent variable z_T^j.
         entropies: optional np.array with shape(J,)
-
-    Notation:
-        T: number of timesteps
-        K: number of regimes
-        J: number of entities
     """
 
     expected_regimes: JaxNumpyArray3D
@@ -194,35 +157,30 @@ def compute_entropy_of_HMM_posterior(
     posterior_summary_without_entropy: HMM_Posterior_Summary_JAX,
 ):
     """
-    Compute the entropy of an HMM posterior.
-
-    The HMM is a joint probability distribution over (x,y) := (x_{1:T}, y_{1:T}),
-    where each x_t \in {1,...,K} are the discrete latent states and y_t are the observations
-
-    The entropy of the posterior is given by
-    H(p(x|y)) = - \sum_{k=1}^K p(x_1=k |y) log p(x_1=k)
-                - \sum_{t=2}^T \sum_{k=1}^K \sum_{k'=1}^K p(x_t=k', x_{t-1}=k | y) log p(x_t=k'| x_{t-1}=k)
-                - \sum_{t=1}^T \sum_{k=1}^K p(x_t | y) log p(y_t | x_t=k)
-                - log p(y)
+    Purpose: Compute the entropy of an HMM posterior with the MODEL probabilities provided in the arguments.
+        These model probabilities are computed in -> (compute_transitions.py) and (compute_emissions.py).
 
     Arguments:
         log_init: An array of shape (K,)
             whose k-th entry gives the MODEL's log init state probability
-            p(x_1 =k)
+            p(z_1 =k)
         log_transitions: An array of shape (T-1,K,K),
             whose (t,k,k')-th entry gives the MODEL's log probability
-            of p(x_t = k' | x_{t-1}=k)
+            of p(z_t = k' | z_{t-1}=k)
         log_emissions : An array of shape (T,K),
             whose (t,k)-th entry gives the MODEL's log emissions density
-            of p(y_t | x_t=k)
+            of p(x_t | z_t=k)
         posterior_summary:  Has attributes
             - log_normalizer : float
             - expected_regimes: array of shape (T,K)
             - expected_joints: array of shape (T-1,K,K)
+    
+    Returns: 
+        Computed entropy of the HMM posterior with the model probabilities. 
     """
     PS = posterior_summary_without_entropy
     entropy = 0.0
-    entropy += -PS.log_normalizer  # float
+    entropy += -PS.log_normalizer  
     entropy += -jnp.sum(PS.expected_regimes * log_emissions)
     entropy += -jnp.sum(PS.expected_joints * log_transitions)
     entropy += -jnp.sum(PS.expected_regimes[0] * log_init)
@@ -239,7 +197,31 @@ def compute_hmm_posterior_summary_NUMPY(
     log_emissions: JaxNumpyArray2D,
     init_dist_over_regimes: JaxNumpyArray1D,
 ) -> HMM_Posterior_Summary_NUMPY:
+    
+    """
+    Purpose: Use the current MODEL probability distributions to compute the posterior distribution summary,
+        containing the expected latent marginals given the entire observered sequence z_t | x_{1:T},
+        the pairwise marginals given the entire observed sequence  z_t, z_(t-1) | x_{1:T}, and the log
+        probability density over x_{1:T}. The posterior distribution is computed via a forwards-backwards algorithm.
+    
+    Arguments:
+        log_init: An array of shape (K,)
+            whose k-th entry gives the MODEL's log init state probability
+            p(z_1 =k)
+        log_transitions: An array of shape (T-1,K,K),
+            whose (t,k,k')-th entry gives the MODEL's log probability
+            of p(z_t = k' | z_{t-1}=k)
+        log_emissions : An array of shape (T,K),
+            whose (t,k)-th entry gives the MODEL's log emissions density
+            of p(x_t | z_t=k)
+
+    Returns: 
+        The HMM posterior summary: expected marginals (regimes), expected pairwise marginals (joints), log density over emissions. 
+    """
+
     transitions = np.exp(log_transitions)
+
+    #Computes forwards-backwards algorithm
     expected_regimes, expected_joints, log_normalizer = hmm_expected_states(
         init_dist_over_regimes,
         transitions,
@@ -269,23 +251,28 @@ def compute_hmm_posterior_summary_JAX(
     init_dist_over_regimes: JaxNumpyArray1D,
 ) -> HMM_Posterior_Summary_JAX:
     """
+    Purpose: Use the current MODEL probability distributions to compute the posterior distribution summary,
+        containing the expected latent marginals given the entire observered sequence z_t | x_{1:T},
+        the pairwise marginals given the entire observed sequence  z_t, z_(t-1) | x_{1:T}, and the log
+        probability density over x_{1:T}. The posterior distribution is computed via a forwards-backwards algorithm.
+    
     Arguments:
+        log_init: An array of shape (K,)
+            whose k-th entry gives the MODEL's log init state probability
+            p(z_1 =k)
         log_transitions: An array of shape (T-1,K,K),
             whose (t,k,k')-th entry gives the MODEL's log probability
-            of p(x_t = k' | x_{t-1}=k)
+            of p(z_t = k' | z_{t-1}=k)
         log_emissions : An array of shape (T,K),
             whose (t,k)-th entry gives the MODEL's log emissions density
-            of p(y_t | x_t=k)
-        init_dist_over_regimes: An array of shape (K,)
-            whose k-th entry gives the MODEL's init state probability
-            p(x_1 =k)
+            of p(x_t | z_t=k)
+    Returns: 
+        The HMM posterior summary: expected marginals (regimes), expected pairwise marginals (joints), log density over emissions.
+    
     """
     transitions = jnp.exp(log_transitions)
 
-    # TODO: Here is where we lose jax-ness...Questions
-    # 1) Does the conversion to numpy slow things down?
-    # 2) Should we convert the return values to jax arrays?
-    # 3) Is there a function in dynamax which does hmm_expected_states but with jax i/o?
+    #Computes the forwards-backwards algorithm 
     expected_regimes, expected_joints, log_normalizer = hmm_expected_states(
         np.asarray(init_dist_over_regimes, dtype=np.float64),
         np.asarray(transitions, dtype=np.float64),
@@ -296,66 +283,13 @@ def compute_hmm_posterior_summary_JAX(
     entropy = calc_entropy_hmm_posterior(r_TL, s_ULL).item()
     if not np.isfinite(entropy):
         raise ValueError("Entropy not a finite float value")
-    if entropy < -1e-5:
-        raise ValueError("Entropy of discrete rv seq should not be below zero")
+    #if entropy < -1e-5:
+        #raise ValueError("Entropy of discrete rv seq should not be below zero")
     return HMM_Posterior_Summary_JAX(
         r_TL,
         s_ULL,
         jnp.asarray(log_normalizer),
         entropy
-    )
-
-
-def compute_hmm_posterior_summary_JAX_initialize(
-    log_transitions: JaxNumpyArray3D,
-    log_emissions: JaxNumpyArray2D,
-    init_dist_over_regimes: JaxNumpyArray1D,
-) -> HMM_Posterior_Summary_JAX:
-    """
-    Arguments:
-        log_transitions: An array of shape (T-1,K,K),
-            whose (t,k,k')-th entry gives the MODEL's log probability
-            of p(x_t = k' | x_{t-1}=k)
-        log_emissions : An array of shape (T,K),
-            whose (t,k)-th entry gives the MODEL's log emissions density
-            of p(y_t | x_t=k)
-        init_dist_over_regimes: An array of shape (K,)
-            whose k-th entry gives the MODEL's init state probability
-            p(x_1 =k)
-    """
-    transitions = jnp.exp(log_transitions)
-
-    # TODO: Here is where we lose jax-ness...Questions
-    # 1) Does the conversion to numpy slow things down?
-    # 2) Should we convert the return values to jax arrays?
-    # 3) Is there a function in dynamax which does hmm_expected_states but with jax i/o?
-    expected_regimes, expected_joints, log_normalizer = hmm_expected_states(
-        np.asarray(init_dist_over_regimes, dtype=np.float64),
-        np.asarray(transitions, dtype=np.float64),
-        np.asarray(log_emissions, dtype=np.float64),
-    )
-
-    expected_regimes = system_regimes_gt(10,  [1227, 2840, 6128, 7392, 9553, 9680])
-
-    hmm_posterior_summary_without_entropy = HMM_Posterior_Summary_JAX(
-        jnp.asarray(expected_regimes),
-        jnp.asarray(expected_joints),
-        jnp.asarray(log_normalizer),
-        entropy=None,
-    )
-
-    log_init = jnp.log(init_dist_over_regimes)
-    entropy = compute_entropy_of_HMM_posterior(
-        log_transitions,
-        log_emissions,
-        log_init,
-        hmm_posterior_summary_without_entropy,
-    )
-    return HMM_Posterior_Summary_JAX(
-        jnp.asarray(expected_regimes),
-        jnp.asarray(expected_joints),
-        jnp.asarray(log_normalizer),
-        entropy,
     )
 
 
@@ -365,6 +299,11 @@ def compute_hmm_posterior_summaries_JAX(
     init_dists_over_regimes: JaxNumpyArray2D,
 ) -> HMM_Posterior_Summaries_JAX:
     """
+    Purpose: Use the current MODEL probability distributions to compute the posterior distribution summary,
+        containing the expected latent marginals given the entire observered sequence z_t^j | x_{1:T}^j for each j,
+        the pairwise marginals given the entire observed sequence  z_t^j, z_(t-1)^j | x_{1:T}^j for each j, and the log
+        probability density over x_{1:T}^j. The posterior distribution is computed via a forwards-backwards algorithm.
+      
     Arguments:
         log_transitions: An array of shape (T-1,J,K,K),
             whose (t,j,k,k')-th entry gives the MODEL's log probability
@@ -374,9 +313,11 @@ def compute_hmm_posterior_summaries_JAX(
             of p(y_t^j | x_t^j=k)
         init_dists_over_regimes: np.array of size (J,K)
             The j-th row must live on the simplex for all j=1,...,J.
+
+    Returns: 
+        The HMM posterior summary for all j: expected marginals (regimes), expected pairwise marginals (joints), log density over emissions.
     """
-    # first create LISTS, where the j-th element of each list
-    # gives an attribute from the hmm posterior summaries (including entropy)
+
     J = jnp.shape(log_transitions)[1]
 
     list_of_hmm_summaries_by_entity = [None] * J
@@ -392,7 +333,14 @@ def compute_hmm_posterior_summaries_NUMPY(
     log_emissions: NumpyArray3D,
     init_dists_over_regimes: NumpyArray2D,
 ) -> List[HMM_Posterior_Summary_NUMPY]:
+
     """
+    Purpose: Use the current MODEL probability distributions to compute the posterior distribution summary,
+        containing the expected latent marginals given the entire observered sequence z_t^j | x_{1:T}^j for each j,
+        the pairwise marginals given the entire observed sequence  z_t^j, z_(t-1)^j | x_{1:T}^j for each j, and the log
+        probability density over x_{1:T}^j. The posterior distribution is computed via a forwards-backwards algorithm.
+    
+    
     Arguments:
         log_transitions: An array of shape (T-1,J,K,K),
             whose (t,j,k,k')-th entry gives the MODEL's log probability
@@ -402,6 +350,9 @@ def compute_hmm_posterior_summaries_NUMPY(
             of p(y_t^j | x_t^j=k)
         init_dists_over_regimes: np.array of size (J,K)
             The j-th row must live on the simplex for all j=1,...,J.
+
+    Returns: 
+        The HMM posterior summary for all j: expected marginals (regimes), expected pairwise marginals (joints), log density over emissions.
     """
     J = np.shape(log_transitions)[1]
     hmm_posterior_summaries = [None] * J
@@ -420,6 +371,25 @@ def compute_hmm_posterior_summaries_NUMPY(
 def convert_hmm_posterior_summaries_from_jax_to_numpy(
     hmm_posterior_summaries: HMM_Posterior_Summaries_JAX,
 ) -> HMM_Posterior_Summaries_NUMPY:
+    """
+    Purpose: Convert the posterior summary jax arrays to numpy arrays. 
+
+    hmm_posterior_summaries:
+
+        expected_regimes: np.array with shape (T,J,K)
+            Gives the marginal probabilities of z_t^j | x_{1:T}^j for each j 
+        expected_joints: np.array with shape (T-1, J, K, K)
+            Gives the pairwise marginals of z_t^j, z_(t-1)^j for each j; that is, the (t,j,k,k')-th element gives
+            the probability distribution over all pairwise options
+            (z_{t+1}^j=k', z_{t}^j=k | x_{1:T}^j).
+        log_normalizers : np.array with shape (J,)
+            The log probability density over the emissions chain (x_{1:T}^j),
+            which can be obtained by marginalziing the last filtered joint p(z_T^j, x_{1:T}^j)
+            over the probabilities for each final latent variable z_T^j.
+        
+    Returns: 
+        The HMM posterior summary as numpy arrays.
+    """
     entropies = None if hmm_posterior_summaries.entropies is None else np.asarray(hmm_posterior_summaries.entropies)
     return HMM_Posterior_Summaries_NUMPY(
         np.asarray(hmm_posterior_summaries.expected_regimes),
@@ -432,6 +402,26 @@ def convert_hmm_posterior_summaries_from_jax_to_numpy(
 def make_hmm_posterior_summaries_from_list(
     list_of_hmm_posterior_summaries: List[HMM_Posterior_Summary],
 ) -> HMM_Posterior_Summaries_JAX:
+    """
+    Purpose: Convert the posterior summary jax arrays to numpy arrays. 
+
+    list_of_hmm_posterior_summaries: a list of individual posterior_summaries for all j 
+    
+        expected_regimes: np.array with shape (T,J,K)
+            Gives the marginal probabilities of z_t^j | x_{1:T}^j for each j 
+        expected_joints: np.array with shape (T-1, J, K, K)
+            Gives the pairwise marginals of z_t^j, z_(t-1)^j for each j; that is, the (t,j,k,k')-th element gives
+            the probability distribution over all pairwise options
+            (z_{t+1}^j=k', z_{t}^j=k | x_{1:T}^j).
+        log_normalizers : np.array with shape (J,)
+            The log probability density over the emissions chain (x_{1:T}^j),
+            which can be obtained by marginalziing the last filtered joint p(z_T^j, x_{1:T}^j)
+            over the probabilities for each final latent variable z_T^j.
+        
+    Returns: 
+        The jax HMM posterior summaries for all j
+    """
+
     J = len(list_of_hmm_posterior_summaries)
 
     (
@@ -467,6 +457,26 @@ def make_hmm_posterior_summaries_from_list(
 def make_list_from_hmm_posterior_summaries(
     hmm_posterior_summaries: HMM_Posterior_Summaries_JAX,
 ) -> List[HMM_Posterior_Summary_JAX]:
+
+    """
+    Purpose: Convert the posterior summary for all j in jax arrays to a list of individual summaries. 
+
+    hmm_posterior_summaries: a jax array for the posterior_summaries for all j 
+    
+        expected_regimes: np.array with shape (T,J,K)
+            Gives the marginal probabilities of z_t^j | x_{1:T}^j for each j 
+        expected_joints: np.array with shape (T-1, J, K, K)
+            Gives the pairwise marginals of z_t^j, z_(t-1)^j for each j; that is, the (t,j,k,k')-th element gives
+            the probability distribution over all pairwise options
+            (z_{t+1}^j=k', z_{t}^j=k | x_{1:T}^j).
+        log_normalizers : np.array with shape (J,)
+            The log probability density over the emissions chain (x_{1:T}^j),
+            which can be obtained by marginalziing the last filtered joint p(z_T^j, x_{1:T}^j)
+            over the probabilities for each final latent variable z_T^j.
+        
+    Returns: 
+        The list of individual HMM posterior summaries for all j
+    """
     J = np.shape(hmm_posterior_summaries.expected_regimes)[1]
 
     list_of_hmm_posterior_summaries = [None] * J
@@ -486,91 +496,6 @@ def make_list_from_hmm_posterior_summaries(
     return list_of_hmm_posterior_summaries
 
 
-
-def compute_closed_form_M_step(
-    posterior_summary: HMM_Posterior_Summary_NUMPY,
-    use_continuous_states: Optional[NumpyArray2D] = None,
-    example_end_times: Optional[NumpyArray1D] = None,
-) -> NumpyArray2D:
-    """
-    Returns:
-        Array of shape (K,K) which is a tpm.
-
-    Remarks:
-        If we have four observations (x1,x2,x3,x4), and the `use_continuous_states` mask is [True,True,False,False],
-        then we only use the pair (x1,x2) when estimating the tpm.  Basically, BOTH points have to have a true usage
-        in order for their contribution to the tpm to count.
-    """
-
-    T, K = np.shape(posterior_summary.expected_regimes)[:2]
-
-    if use_continuous_states is None:
-        use_continuous_states = np.full((T), True)
-
-    if example_end_times is None:
-        example_end_times = np.array([-1, T])
-
-    # Compute tpm
-    tpm_empirical = np.zeros((K, K))
-    for k in range(K):
-        for k_prime in range(K):
-            tpm_empirical[k, k_prime] = np.sum(
-                posterior_summary.expected_joints[:, k, k_prime]
-                * use_continuous_states[1:]
-                * eligible_transitions_to_next(example_end_times),
-                axis=0,
-            ) / np.sum(
-                posterior_summary.expected_regimes[:-1, k]
-                * use_continuous_states[1:]
-                * eligible_transitions_to_next(example_end_times),
-                axis=0,
-            )
-
-    # Add in a small bit of a uniform distribution to bound away from exact ones and zeros.
-    # A better approach is to use a Dirichlet prior and take the posterior.
-    return soften_tpm(tpm_empirical)
-
-
-# TODO: Is there some way to combine `compute_closed_form_M_step`
-# with `compute_closed_form_M_step_on_posterior_summaries` by just vectorizing across
-# any leading dimensions when they exist?
-
-
-def compute_closed_form_M_step_on_posterior_summaries(
-    posterior_summaries: HMM_Posterior_Summaries_NUMPY,
-    use_continuous_states: Optional[NumpyArray2D] = None,
-    example_end_times: Optional[NumpyArray1D] = None,
-) -> NumpyArray3D:
-    """
-    Arguments:
-        use_continuous_states: If None, we assume all states should be utilized in inference.
-            Otherwise, this is a (T,J) boolean vector such that
-            the (t,j)-th element  is 1 if continuous_states[t,j] should be utilized
-            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
-            that info to do the M-step.
-
-    Returns:
-        Array of shape (J,K,K), whose j-th entry is a tpm
-    """
-
-    T, J, K = np.shape(posterior_summaries.expected_regimes)
-
-    if use_continuous_states is None:
-        use_continuous_states = np.full((T, J), True)
-
-    if example_end_times is None:
-        example_end_times = np.array([-1, T])
-
-    posterior_summaries_list = make_list_from_hmm_posterior_summaries(posterior_summaries)
-
-    tpms = [None] * J
-    for j in range(J):
-        tpms[j] = compute_closed_form_M_step(
-            posterior_summaries_list[j], use_continuous_states[:, j], example_end_times
-        )
-
-    return np.array(tpms)
-
 def save_hmm_posterior_summary(
     hmm_posterior_summary: HMM_Posterior_Summary_JAX,
     role_in_model: str,
@@ -578,10 +503,12 @@ def save_hmm_posterior_summary(
     basename_prefix: str = "",
 ):
     """
-    Saves the expected regimes and expected joints from an HMM posterior as numpy files.
+    Purpose: Saves the expected regimes and expected joints from an HMM posterior as numpy files.
 
     Arguments:
         role_in_model: says whether it's system states S or entity states Z.
+        save_dir: str for the path to save the file
+        basename_prefix: str for the file name 
     """
     filepath_regimes = os.path.join(save_dir, f"{basename_prefix}_expected_regimes_{role_in_model}.npy")
     filepath_joints = os.path.join(save_dir, f"{basename_prefix}_expected_joints_{role_in_model}.npy")
@@ -589,26 +516,25 @@ def save_hmm_posterior_summary(
     np.save(filepath_regimes, np.array(hmm_posterior_summary.expected_regimes))
     np.save(filepath_joints, np.array(hmm_posterior_summary.expected_joints))
 
-def calc_entropy_hmm_posterior(
-        r_TL, s_ULL, do_assert_input_valid=False, eps=1e-13):
-    ''' Calculate entropy of HMM hidden state sequence distribution
+def calc_entropy_hmm_posterior(r_TL, s_ULL, do_assert_input_valid=False, eps=1e-13):
+   
+    ''' 
+    Purpose: Calculate entropy of HMM hidden state sequence distribution
 
-    Args
-    ----
-    r_TL : 2D array, shape (T, L)
-        r_TL[t,l] := p( z[t] = l )
-        Per-timestep marginal distribution over states
-    s_ULL : 3D array, shape (T-1, L, L), where U = T-1
-        s_ULL[t,k,l] := p( z[t] = k, z[t+1] = l)
-        Joint distribution over states for adjacent tsteps t, t+1
-        Strictly required that r is a marginal of s
-        * r_TL[:-1] = sum(s_ULL, axis=2)
-        * r_TL[-1]  = sum(s_ULL[-1], axis=0)
+    Arguments: 
+        r_TL : 2D array, shape (T, L)
+            r_TL[t,l] := p( z[t] = l )
+            Per-timestep marginal distribution over states
+        s_ULL : 3D array, shape (T-1, L, L), where U = T-1
+            s_ULL[t,k,l] := p( z[t] = k, z[t+1] = l)
+            Joint distribution over states for adjacent tsteps t, t+1
+            Strictly required that r is a marginal of s
+            * r_TL[:-1] = sum(s_ULL, axis=2)
+            * r_TL[-1]  = sum(s_ULL[-1], axis=0)
 
-    Returns
-    -------
-    entropy : float
-        Entropy of the provided distribution
+    Returns: 
+        entropy : float
+            Entropy of the provided distribution
     ''' 
     if do_assert_input_valid:
         assert jnp.allclose(r_TL[:-1], np.sum(s_ULL, axis=2)).item()

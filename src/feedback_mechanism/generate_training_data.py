@@ -3,7 +3,11 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-#GENERATES THE EMBEDDINGS FOR THE TRAINING DATA FOR THE FEEDBACK MECHANISM AND SAVES THEM WIHT CORRESPONDING LABELS. 
+
+"""
+Purpose: Generates the embeddings for the training data for the feedback mechanism and saves them with the corresponding labels. 
+Saves the embeddings and labels in (data) -> (feedback_mechanism) -> (trainind_data.npz)
+"""
 
 repo_root = Path(__file__).resolve().parents[2]
 data_dir = repo_root / "data" / "feedback_mechanism"

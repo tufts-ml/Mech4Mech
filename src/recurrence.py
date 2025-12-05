@@ -1,78 +1,108 @@
 import jax.numpy as jnp
 import numpy as np 
 import jax
+import torch
+import types
+from pathlib import Path
+from typing import Union
+from feedback_mechanism.utils import flatten_params, inv_softplus, use_posterior, add_variational_layers
 
-from utilities.types import JaxNumpyArray1D
+from utilities.types import JaxNumpyArray1D, NumpyArray3D, NumpyArray2D
 
 """
 Defines the recurrence or feedback functions f(x) and g(x) for entity and system states from the observations, respectively. 
 """
 
-
-def cluster_trigger_system_recurrence_transformation(
-    x_prevs_reshaped: JaxNumpyArray1D,
-    system_covariates: JaxNumpyArray1D,
-) -> JaxNumpyArray1D:
-    """
-    Returns the scalar value associated with the probability that the cluster state should be triggered based on how many players are currently out of bounds.
-
-    Arguments:
-        x_prevs_reshaped: Has shape (JD,) where we scroll through j's first, and then d's. Cite[ChatGPT]
-    """
-    
-    condition1 = x_prevs_reshaped[0:64] > 1 
-    condition2 = x_prevs_reshaped[0:64] < 0 
-
-    count = jnp.sum(condition1) + jnp.sum(condition2)
-    
-    prob = jax.lax.cond(
-        count >= 11,             
-        lambda _: 1.0,           
-        lambda _: count / 11.0,  
-        operand=None             
-    )
-
-    return jnp.array([prob])
-
-
-def direction_entity_recurrence_transformation(
-    x_prevs_reshaped: JaxNumpyArray1D,
-) -> JaxNumpyArray1D:
-    """
-    Returns a flattened vector of how far/close the jth entity is to a certain gridpoint. There are 4 gridpoints at x= 0.2,0.4,0.6,0.8
-
-    Arguments:
-        x_prevs_reshaped: Has shape (JD,) where we scroll through j's first, and then d's.
-    """
-
-    grid1 = abs(x_prevs_reshaped[0] - 0.2) 
-    grid2 = abs(x_prevs_reshaped[0] - 0.4) 
-    grid3 = abs(x_prevs_reshaped[0] - 0.6) 
-    grid4 = abs(x_prevs_reshaped[0] - 0.8) 
-
-    return jnp.stack((grid1, grid2, grid3, grid4))
-
 def identity_recurrence_entity(
-    x_prevs_reshaped: JaxNumpyArray1D,
+    observations: JaxNumpyArray1D,
 ) -> JaxNumpyArray1D:
     """
-    Returns the identity of the values. 
+
+    Purpose: Inside recurrence function (JAX world). Uses the observations as the feedback component to interact with parameters (Psis) to compute the probability distribution for 
+    that particular entity latent state at the next time step. 
 
     Arguments:
         x_prevs_reshaped: Has shape (JD,) where we scroll through j's first, and then d's.
+
+    Returns: the identity of the values - i.e. just returns observations. 
     """
 
-    return x_prevs_reshaped
+    return observations
 
 
 def identity_recurrence_system(
-    x_prevs_reshaped: JaxNumpyArray1D,
-    system_covariates: JaxNumpyArray1D,
+    observations: JaxNumpyArray1D,
 ) -> JaxNumpyArray1D:
     """
-    Returns the identity of the values. 
+    Purpose: Inside recurrence function (JAX world). Uses the observations as the feedback component to interact with parameters (Upsilon) to compute the probability distribution for 
+    that particular system latent state at the next time step. 
 
     Arguments:
-        x_prevs_reshaped: Has shape (JD,) where we scroll through j's first, and then d's.
+        observations: Has shape (JD,) where we scroll through j's first, and then d's.
+
+    Returns: the identity of the values - i.e. just returns observations. 
     """
-    return x_prevs_reshaped
+    return observations
+
+def mechanisticfeedback_recurrence_transformation(
+    observations: NumpyArray3D,
+    latent_variable: str 
+) -> Union[NumpyArray2D, NumpyArray3D]:
+
+    """
+    Purpose: Outside recurrence function from the JAX world. Uses the scalar class values predicted from a PyTorch model as the feedback 
+        component to interact with the system and entity recurrence parameters. 
+
+        All training scripts for the PyTorch model can be found in -> (feedback_mechanism). The trained model is saved in ->
+        (feedback_mechanism -> best_model.pt) 
+
+    Arguments:
+        observations: has shape (T, J, D). 
+        latent_variable: string that specifies the "system"or the "entity" recurrence.
+
+    Returns: the scalar class value of each embedding in TxJxD (observations), predicted by a previously trained NN torch model (in feedback mechanism). 
+        Input is a 3D numpy array of TxJxD. If the latent_variable = "system": the output is a (T-1)xJ 2D numpy array. If the latent_variable 
+        = "entity": the output is a (T-1)xJx1 3D numpy array. 
+    """
+
+    device = torch.device("cpu")
+
+    model = torch.nn.Sequential(
+    torch.nn.Linear(in_features=128, out_features=128),
+    torch.nn.ReLU(inplace=False),
+    torch.nn.Linear(in_features=128, out_features=8),
+    ).to(device)
+
+
+    model.raw_sigma = torch.nn.Parameter(inv_softplus(torch.tensor(1e-4, device=device))) 
+    add_variational_layers(model, model.raw_sigma) # Make all regular layers variational - have parameters that can be obtained from the approximate posterior.
+
+    model.use_posterior = types.MethodType(use_posterior, model) 
+
+    repo_root = Path(__file__).resolve().parent
+    model_dir = repo_root / "feedback_mechanism" / "best_model.pt"   
+
+    state_dict = torch.load(model_dir, map_location="cpu")
+    model.load_state_dict(state_dict)
+
+    model.eval()   
+
+    observations = observations[:-1, ...] 
+
+    T, J, D = observations.shape
+    x_torch = torch.from_numpy(observations).float()
+    x_flat = x_torch.reshape(T * J, D)
+    with torch.no_grad():
+        y_pred = model(x_flat)
+    pred_class = y_pred.argmax(dim=-1)
+
+    y_TJ = pred_class.reshape(T, J)
+
+    if latent_variable == "entity": 
+        y_TJ_vector = y_TJ.unsqueeze(-1)
+        y_TJ_np = y_TJ_vector.cpu().numpy()
+
+    elif latent_variable == "system": 
+        y_TJ_np = y_TJ.cpu().numpy()
+        
+    return y_TJ_np

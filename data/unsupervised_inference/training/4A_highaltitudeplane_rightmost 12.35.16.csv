@@ -1,0 +1,609 @@
+Student,Text,No evidence,Target phenomena,Set-up conditions,Entities,Activities,Properties,Organization,Chaining
+T,Ok. Nice. Moving on in record time. ,1,0,0,0,0,0,0,0
+X,Dun duh duh. ,1,0,0,0,0,0,0,0
+T,Ok. I to be honest I'm not quite sure what they're looking for in this problem when it says design a protocol for getting the oxygen up to appropriate temperature and pressure. ,1,0,0,0,0,0,0,0
+X,"So probably - so this is actually an area that um while I don't know a ton about gas turbines, I know a lot about flight because this is what I do for - um and stuff. ",1,0,0,0,0,0,0,0
+T,Oh. Very nice. ,1,0,0,0,0,0,0,0
+X,And I've actually designed stuff that works at a hundred thousand feet. So.,1,0,0,0,0,0,0,0
+A,Oh.,1,0,0,0,0,0,0,0
+T,Awesome. ,1,0,0,0,0,0,0,0
+X,Not gas turbines but airplanes.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,So um so I think what they're looking for is I think they're looking for like you know you're saying ok the air is gonna come in does it go through like um you know like a diffuser or and then does it go you know.,0,0,0,0,1,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,And then how do we basically -,1,0,0,0,0,0,0,0
+T,Compressor,0,0,0,1,0,0,0,0
+A,[inaudible] compressor. ,1,0,0,0,0,0,0,0
+X,Yeah a compressor and then do we have like a -,1,0,0,0,0,0,0,0
+T,Like a kind of multi-stage compressor.,0,0,0,1,0,0,0,0
+X,Right. So we're looking for the stages. ,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,So I think that's what they mean by a protocol. Right so.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,So I had a couple of thoughts on this. ,1,0,0,0,0,0,0,0
+T,Awesome. Ok.,1,0,0,0,0,0,0,0
+X,And I don't know um you know I'm open to stuff.,1,0,0,0,0,0,0,0
+T,Please yeah.,1,0,0,0,0,0,0,0
+X,But um so one of the things - and we haven't really covered this - but one of the things about flying at a hundred thousand feet is lift is a function of something uh sorry was that me that just did that? So lift is a function of a formula which is one half rho v squared.,0,1,0,0,0,0,0,0
+T,Mhm.,1,0,0,0,0,0,0,0
+X,"Um times cl times area of your wing, but we don't need to worry about that so much. Really the important relationship there is that as density goes down, you have to do something to increase the amount of lift that you get. And so typically what you do as you fly higher is you fly it faster.",0,0,1,0,0,0,0,0
+T,Right. How does thrust work in - is thrust in that equation somewhere?,1,0,0,0,0,0,0,0
+X,Um. So so um.,1,0,0,0,0,0,0,0
+T,I remember reading something about,1,0,0,0,0,0,0,0
+X,"Yeah so there's something on a airplane called its um lift to drag ratio, so um you know it's it's uh in practical sense it's how far forward and airplane can glide for every foot that it loses, but also what it means is that if your airplane weighs say a hundred thousand pounds and let's say you have a lift to drag ratio or ten to one, then that means that you need ten thousand pounds of thrust to keep -",0,0,1,0,0,0,0,0
+T,Right.,1,0,0,0,0,0,0,0
+X,- it in level flight. Right because that's one tenth.,1,0,0,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,So it's ten to one. So um but where I was going with it - ,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,- so I don't think that that's gonna be all that important here.,1,0,0,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,"But what I was thinking is important is that it turns out at a hundred thousand feet, the density - the air density - is about one one hundredth of what it is um on the surface of Earth, and so what that means is that your flight speed, because it's one half rho v squared, to offset that with velocity you have to go about ten times faster. So if your airplane was designed to do say two hundred miles an hour, right, um then at a hundred thousand feet, you need to do two thousand miles an hour right. So what that means is that the air coming in, even though it's a lower density air, um, may actually be coming in with a pretty high speed and we may actually have to slow it down.",0,0,0,0,1,0,0,0
+A,With a compressor.,0,0,0,1,0,0,0,0
+T,Interesting.,1,0,0,0,0,0,0,0
+X,So and we might not actually have to even use a compressor.,0,0,0,1,0,0,0,0
+A,[inaudible],1,0,0,0,0,0,0,0
+T,Diffuser?,0,0,0,1,0,0,0,0
+X,"So do you guys remember - yeah a diffuser right. So we were - the diffusers we were we had you know high pressure air coming in and then it would diffuse, but it was also heating up, which was kind of a good thing for us, right? ",0,0,0,0,0,1,0,0
+T,Mhm.,1,0,0,0,0,0,0,0
+X,"Um and we haven't gotten into any Mach effects, so I don't think we have to take that into account here. Um.",1,0,0,0,0,0,0,0
+T,Hopefully not. ,1,0,0,0,0,0,0,0
+X,"No I'm - like if you were actually doing this for something that was going that fast, there would be - what you would do is you - there's a shock wave and then the kind of that kind of acts like your diffuser um because the air has to pass through the shock wave and it has to slow down to subsonic speeds. ",0,0,0,0,1,0,0,0
+T,Right ok.,1,0,0,0,0,0,0,0
+X,"And so uh in the process it heats up um uh so um so anyway so I guess where I was going with that was that I imagine that we have to have some kind of diffuser, um and what governs that I think might be what temperature we want this stuff to go to. ",0,0,0,0,0,1,0,0
+T,Mhm. Ok.,1,0,0,0,0,0,0,0
+X,Right if we're worried about temperature. But I don't know maybe we're not worried about temperature. ,1,0,0,0,0,0,0,0
+T,I mean the problem says that we would need it both up to pressure and temperature. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Uh so we probably should pay attention to that a bit. ,1,0,0,0,0,0,0,0
+A,Increase temperature? The combustion chamber?,0,0,0,1,0,0,0,0
+X,"So yeah so combustion chamber would so that's the other thing too right is uh accelerating a gas to supersonic speeds is not something you can really do, but what you can do is you can increase the temperature of that gas so that the supersonic speed in there is - you're not exceeding the supersonic speed in there so - and that's what jet engines do. That's why you can go supersonic with a jet engine. The gas coming out the back of a jet engine is not going supersonic.",0,0,0,0,0,1,0,0
+T,Right.,1,0,0,0,0,0,0,0
+X,It's hot enough that the speed of sound within that gas is much higher. Um but I don't think we have to worry about any of that. But so we have to - so maybe in this maybe we do still use a compressor. Maybe we'd use like a diffuser and then we have a compressor to bring it back - to bring it up to the pressure that we want. ,0,0,0,0,0,1,0,0
+T,Ok so diffuser will be - we need the diffuser because we're going fast enough -,0,0,0,1,0,0,0,0
+X,Probably.,1,0,0,0,0,0,0,0
+T,- that the air. Thank you. Um so the diffuser is used to like to bring the velocity -,0,0,0,0,1,0,0,0
+X,To slow. To bring the velocity down. ,0,0,0,0,1,0,0,0
+T,- of the air down.,0,0,0,1,0,0,0,0
+X,And it will bring the temperature up. ,0,0,0,0,0,1,0,0
+T,And the temperature up. ,0,0,0,0,0,1,0,0
+X,I think. I think if I remember that right. ,1,0,0,0,0,0,0,0
+T,Ok. We'll check on that. ,1,0,0,0,0,0,0,0
+X,Yeah.,1,0,0,0,0,0,0,0
+A,We can always use the combustion chamber to bring the temperature up. ,0,0,0,0,0,1,0,0
+X,Well.,1,0,0,0,0,0,0,0
+T,Well but I think yeah. Does it need to be at a temperature before?,0,0,0,0,0,1,0,0
+X,See I don't know. I don't know if that's really true. ,1,0,0,0,0,0,0,0
+T,I don't know too much about.,1,0,0,0,0,0,0,0
+X,"It's like minus sixty up at altitude, so you know which is - I mean it's cold but I'm not sure that - I'm not sure that it is as far as burning something, it might actually be better. ",0,0,1,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,"Compressor to get it up to the pressure that we need. Then we have a combustor, right. That's gonna - that's gonna provide the energy that we're putting in.",0,0,0,0,0,1,0,0
+A,To increase the temperature.,0,0,0,0,0,1,0,0
+X,Yeah and it's gonna increase the temperature a lot. And it's also - ,0,0,0,0,0,1,0,0
+T,To give us - the combustor gives us energy for thrust is that?,0,0,0,0,0,1,0,0
+X,It gives us yeah the energy - ,0,0,0,0,0,1,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,- to - so usually -,1,0,0,0,0,0,0,0
+T,Just to get us going.,1,0,0,0,0,0,0,0
+X,- usually you get yeah you would have the combustor and then uh you would extract some energy from that in from a turbine to spin the compressor right. So that's - ,0,0,0,0,0,0,0,1
+T,Ok ok. ,1,0,0,0,0,0,0,0
+X,- right. ,1,0,0,0,0,0,0,0
+T,Some of which goes to spin right the compressor. ,0,0,0,0,1,0,0,0
+X,Yeah. Um and then the rest of which just goes out the back.,0,0,0,0,1,0,0,0
+A,Exhaust.,0,0,0,1,0,0,0,0
+X,The exhaust. Or you could have an afterburner which is very common on high-altitude stuff because you're basically putting more energy in because you just need so much to overcome the weight of drag of going that fast. ,0,0,0,1,0,0,0,0
+T,Ok so it says sometimes it'll have an afterburner.,0,0,0,1,0,0,0,0
+A,Should we have an afterburner?,0,0,0,1,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,Um. Every high-altitude - ,0,0,1,0,0,0,0,0
+T,What's the advantage?,1,0,0,0,0,0,0,0
+X,Of having an afterburner?,0,0,0,1,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"You're just dumping more fuel in after - so after you've taken out energy to spin the compressor, you're just dumping more fuel in so that you have more thrust. ",0,0,0,0,1,0,0,0
+T,Oh ok. It just - using it - using it up.,0,0,0,0,1,0,0,0
+X,"Yeah it's like it's like hey you didn't need that amount of power to run the compressor, but you needed that amount of power to move the plane forward. ",1,0,0,0,0,0,0,0
+A,Oh ok.,1,0,0,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,"Yeah. And so like a high-altitude aircraft like a SR-71, A-12, those use afterburners. Uh the Concorde actually uh had afterburners um that was a passenger plane.",0,0,0,1,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"Um but like a U-2 which is also a high-altitude plane, although it doesn't go to a hundred thousand feet it only goes to like eighty-five thousand feet, that does not have an afterburner. Um but that's essentially a glider with a jet engine on it so.",0,0,0,1,0,0,0,0
+T,Right.,1,0,0,0,0,0,0,0
+X,It's kinda.,1,0,0,0,0,0,0,0
+T,So it sounds like it wouldn't be a disadvantage to have an afterburner on this. ,0,0,0,1,0,0,0,0
+X,Probably not. ,1,0,0,0,0,0,0,0
+T,I mean - ,1,0,0,0,0,0,0,0
+P,Except like it says -,1,0,0,0,0,0,0,0
+T,We do need to worry about weight.,1,0,0,0,0,0,0,0
+P,Yeah. ,1,0,0,0,0,0,0,0
+X,Actually that probably helps us with weight.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,The thing it doesn't help us with is afterburners are typically not very efficient. ,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Uh and stuff but it probably helps us with weight because we don't have to build a turbine that can handle the full pressure of all that.,0,0,0,1,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,We just you know we just have to make the nozzle at the end be able to handle it.,0,0,0,1,0,0,0,0
+T,Turbine doesn't need to be as - I don't know. ,0,0,0,1,0,0,0,0
+X,Uh it doesn't need to handle the heat um and the pressure I guess would be the...,1,0,0,0,0,0,0,0
+T,Pressure so we can save on weight. Um.,1,0,0,0,0,0,0,0
+X,So if you're wondering this is what it looks like.,1,0,0,0,0,0,0,0
+T,Oh yeah. ,1,0,0,0,0,0,0,0
+X,Yeah so it's.,1,0,0,0,0,0,0,0
+T,"I did so much with this in high school, but I feel like I've forgotten all of it. ",1,0,0,0,0,0,0,0
+T,Um. Ok.,1,0,0,0,0,0,0,0
+X,Oh here we go ok. Back. ,1,0,0,0,0,0,0,0
+T,Um. This is really good.,1,0,0,0,0,0,0,0
+X,So. Does this help?,1,0,0,0,0,0,0,0
+T,Absolutely. Yeah. Um ok. So oh where - ,1,0,0,0,0,0,0,0
+X,So do we actually have to -,1,0,0,0,0,0,0,0
+T,Wait where does it sorry - where does it go into the turbine? Is that - that's after the compressor?,0,0,0,1,0,0,0,0
+X,So so yeah so we would have a diffuser I think.,0,0,0,1,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"Then so that slows the air down, and then that allows the compressor to compress it to a high pressure. Then right after the compressor is our combustor, and that's going to provide - that's gonna add energy to the system. Then right after that is the turbine where we're actually gonna extract some of that energy to spin the compressor.",0,0,0,0,0,0,0,1
+T,Mhm.,1,0,0,0,0,0,0,0
+X,"Um. And then after that, we have um a place that we can put more fuel if we want, and that would be the afterburner. Um and actually in thinking about this, I wonder if - so probably also for that afterburner if that's what we're gonna use, we would want to have a way to bleed air around the combustor, around the turbine, and straight into the afterburner so there's more oxygen to burn the fuel.",0,0,0,0,0,0,1,0
+T,Um ok.,1,0,0,0,0,0,0,0
+X,"So that might be a thing, and I don't know if that's gonna need doors or anything",1,0,0,0,0,0,0,0
+T,Ok so you're saying in using an afterburner we'd want to bring some from the start all the way.,0,0,0,0,0,0,1,0
+X,"So some that's been compressed, but it bypasses the combustor, so it bypasses the place that there's the - where we're gonna increase the temperature.",0,0,0,0,0,0,1,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"And it bypasses the turbine, but then it gets dumped into the stream um after, so that there's air to burn the fuel right. So there's - you know cause we've already blown a bunch of fuel into the air and probably burned most of the oxygen. I don't know how much oxygen would still be there. ",0,0,0,0,0,0,1,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,Um. Uh. But that is probably gonna have to have some doors on it because it's gonna depend on whether you're actually using the afterburner or not like for whatever stage of flight. ,0,0,0,1,0,0,0,0
+T,Ok. Yeah. ,1,0,0,0,0,0,0,0
+X,"So you know you wouldn't - if you're not creating a lot of power off the engine, you wouldn't want tons of air bypassing everything internal to the engine. Um. ",0,0,0,0,0,0,1,0
+T,Right. Ok. So we'll need some kind of valve system for that. ,0,0,0,1,0,0,0,0
+X,Yeah some kind of valve. That's a good way to put it. ,0,0,0,1,0,0,0,0
+T,Ok. Um wait wait I just wanna make sure I have it into words correctly. We want the compressed air in the afterburner to just give us more energy? Or. ,0,0,0,0,0,1,0,0
+X,"Uh so we can put more fuel in, right. So we can burn more fuel.",0,0,0,0,1,0,0,0
+T,Ok ok. ,1,0,0,0,0,0,0,0
+X,Cause we need the oxygen is what we need. ,0,0,0,1,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+T,Is that good? Um.,1,0,0,0,0,0,0,0
+X,"And actually so something that well that could be uh noted here is that at some speed, you wouldn't even need the compressor because you'd be going so fast that air - you'd be able to just - it would just compress as it comes in.",0,0,0,0,0,1,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,But um I don't know what speed that would be. ,0,0,0,0,0,1,0,0
+T,Afterburner...,0,0,0,1,0,0,0,0
+X,Oh not afterburner.,0,0,0,1,0,0,0,0
+T,Ok sorry sorry.,1,0,0,0,0,0,0,0
+X,You probably still want that afterburner.,0,0,0,1,0,0,0,0
+T,A compressor um ok because it would already be - ,0,0,0,1,0,0,0,0
+X,Because there'd be enough energy in the air coming in that -,0,0,0,0,0,1,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"- it would just compress. But I don't know what that speed would be. And I don't think it actually asks us to solve this problem, right? It just says - ",0,0,0,0,0,1,0,0
+A,Design,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+T,Yeah see that's - I wasn't sure if we - yeah if we wanted any kind of like quantitative numbers on this. Do we at least maybe want to guess -,1,0,0,0,0,0,0,0
+X,Some numbers?,1,0,0,0,0,0,0,0
+T,- on some temperatures and pressures?,1,0,0,0,0,0,0,0
+X,Sure. We could so,1,0,0,0,0,0,0,0
+T,I want like.,1,0,0,0,0,0,0,0
+X,"Ok so so from a pressure and temperature standpoint, those we can get from a table, right.",1,0,0,0,0,0,0,0
+T,Ok yeah. ,1,0,0,0,0,0,0,0
+X,So we could say um hang on let me uh I think it's like engineering edge. Density... let's see here. Um. Yeah there we go. So air density um at a hundred thousand feet is point three three uh let's see here you guys aren't gonna like that number. It's in slugs. ,1,0,0,0,0,0,0,0
+T,Oh.,1,0,0,0,0,0,0,0
+X,Slugs per foot cubed. Um ok so let's see here. ,1,0,0,0,0,0,0,0
+T,Disgusting. ,1,0,0,0,0,0,0,0
+X,Oh although they did say that this was a hundred thousand feet -,1,0,0,0,0,0,0,0
+A,Yeah.,1,0,0,0,0,0,0,0
+X,Not in meters. Not thirty thousand meters. ,1,0,0,0,0,0,0,0
+T,They did. ,1,0,0,0,0,0,0,0
+X,So this is the appropriate one to use.,1,0,0,0,0,0,0,0
+T,Ok. That's fine. ,1,0,0,0,0,0,0,0
+X,So yeah so it's point three three - so actually so I would say three point three um times ten to the minus five slugs per foot cubed. ,1,0,0,0,0,0,0,0
+T,Ok well we can make that prettier later. ,1,0,0,0,0,0,0,0
+X,Um. So what that means is um so actually we probably want a velocity right we want to know what the velocity coming in is. So if we assume - so this is back to our assumptions thing - if we assume that this airplane would fly at um let's see here what's two hundred miles an hour in feet per second right? So that's probably... need my calculator. ,1,0,0,0,0,0,0,0
+T,Guys my calculator broke yesterday and I'm really really mad about it. ,1,0,0,0,0,0,0,0
+X,Oh no did I not bring my calculator with me?,1,0,0,0,0,0,0,0
+T,I have a broken calculator. ,1,0,0,0,0,0,0,0
+P,Um should - we can just use Wolfram Alpha. ,1,0,0,0,0,0,0,0
+X,Oh yeah hey there you go. Yeah. ,1,0,0,0,0,0,0,0
+T,Wow getting real good. ,1,0,0,0,0,0,0,0
+X,Ah no it's - ,1,0,0,0,0,0,0,0
+P,What happened?,1,0,0,0,0,0,0,0
+T,"We can use whatever isn't obscured. But, it's just sad.",1,0,0,0,0,0,0,0
+X,Here. Do you already have Wolfram up?,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+X,Uh two hundred miles per hour in feet per second. ,1,0,0,0,0,0,0,0
+P,Two hundred ninety-three point three feet per second. ,1,0,0,0,0,0,0,0
+X,So let's just say two hundred - let's just say - we'll call it - ,1,0,0,0,0,0,0,0
+A,Three hundred. ,1,0,0,0,0,0,0,0
+X,- three hundred. Three hundred. Three hundred feet per second. ,1,0,0,0,0,0,0,0
+T,"Three hundred. This is - and this is velocity of air in, right?",1,0,0,0,0,0,0,0
+X,"So well no. Three hundred feet per second is the velocity that the airplane would fly if it was at sea level. Um so the other thing that you need to know is you need to know what the density at sea level is, which is uh two point three seven seven times ten to the minus three slugs per feet cubed. ",1,0,0,0,0,0,0,0
+T,You may need to say that one more time. ,1,0,0,0,0,0,0,0
+X,Actually I'll.,1,0,0,0,0,0,0,0
+T,At sea level,1,0,0,0,0,0,0,0
+X,"So zero feet. It's that one that says twenty-three, but I just changed it to - ",1,0,0,0,0,0,0,0
+T,Yeah ok. Twenty-three point seven seven.,1,0,0,0,0,0,0,0
+P,Do you want to link that too so we can cite it?,1,0,0,0,0,0,0,0
+X,Yeah. Yeah yeah yeah. ,1,0,0,0,0,0,0,0
+T,Oh yeah two point three.,1,0,0,0,0,0,0,0
+X,Just uh.,1,0,0,0,0,0,0,0
+T,Seven.,1,0,0,0,0,0,0,0
+X,Um. Let's see here. Let me turn this. So.,1,0,0,0,0,0,0,0
+T,Wow that was an interesting spelling of density on my part. ,1,0,0,0,0,0,0,0
+X,Do you want like a links section? ,1,0,0,0,0,0,0,0
+T,Yeah maybe just at the bottom. ,1,0,0,0,0,0,0,0
+X,And what I'll do is I'll take a screen shot of that chart - ,1,0,0,0,0,0,0,0
+T,That's good. ,1,0,0,0,0,0,0,0
+X,- so that we can uh - oh crap do you guys know how to - I'm - ,1,0,0,0,0,0,0,0
+A,Command shift 4.,1,0,0,0,0,0,0,0
+X,Is it command shift 4?,1,0,0,0,0,0,0,0
+A,Mhm.,1,0,0,0,0,0,0,0
+X,Ok. And then I just click.,1,0,0,0,0,0,0,0
+T,Yo MacBook. ,1,0,0,0,0,0,0,0
+X,I know. I'm - I've gone to the dark side. ,1,0,0,0,0,0,0,0
+T,Cannot relate. ,1,0,0,0,0,0,0,0
+X,Ok k k k. They got me with their sleek sexy line. ,1,0,0,0,0,0,0,0
+T,Mk.,1,0,0,0,0,0,0,0
+P,I have to run to a meeting. ,1,0,0,0,0,0,0,0
+T,Ok yeah. All good. ,1,0,0,0,0,0,0,0
+X,Cool. Well thank you.,1,0,0,0,0,0,0,0
+T,We're probably winding down anyway.,1,0,0,0,0,0,0,0
+P,I'll be back in half an hour if you happen to still be going then but.,1,0,0,0,0,0,0,0
+T,Ok. Well just take a look at our doc maybe before we turn it in. ,1,0,0,0,0,0,0,0
+X,Is it just like a nope that's not it ok. Where does it save the picture?,1,0,0,0,0,0,0,0
+A,Your downloads?,1,0,0,0,0,0,0,0
+X,Is it in downloads? Ok so. ,1,0,0,0,0,0,0,0
+A,For your desktop. ,1,0,0,0,0,0,0,0
+X,So I should just be able to hit insert.,1,0,0,0,0,0,0,0
+A,Yeah. Check your recent.,1,0,0,0,0,0,0,0
+X,Load from this computer. Documents,1,0,0,0,0,0,0,0
+A,It should be under recents.,1,0,0,0,0,0,0,0
+X,Under recents?,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Ok screenshot there it is. Ok choose. There it is. There. Can you guys see that? Does that work? ,1,0,0,0,0,0,0,0
+A,Oh there we go. ,1,0,0,0,0,0,0,0
+T,There we go.,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Nice.,1,0,0,0,0,0,0,0
+X,Oh nice look at that you even got like compressor in brackets. How fun. Ok so um so what this means so from a thing so if we have our one uh cL A times - so ok let me just write that down - so um is this where are we putting this is this under assumptions?,1,0,0,0,0,0,0,0
+T,Yeah. Either assumptions or like right above it is like what we know for sure. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+A,The actual.,1,0,0,0,0,0,0,0
+X,Um so if flight at sea level is three hundred feet per second. Then... and... one half... uh did you guys have like that cool little rho somewhere?,1,0,0,0,0,0,0,0
+T,Uh Aditi got it from equations. I don't know.,1,0,0,0,0,0,0,0
+X,Rho. Here I'll type it this way and somebody can like.,1,0,0,0,0,0,0,0
+T,Yeah I got you.,1,0,0,0,0,0,0,0
+X,Plus one-half rho v. Actually I should probably say it's equal to rho v squared,1,0,0,0,0,0,0,0
+A,That was [inaudible].,1,0,0,0,0,0,0,0
+X,Times c lift. Let's make that guy subscript. Let's see how do we do this. Uh.,1,0,0,0,0,0,0,0
+T,Beats me.,1,0,0,0,0,0,0,0
+X,Text subscript. Ok now I have to get out of subscript.,1,0,0,0,0,0,0,0
+T,Oh. ,1,0,0,0,0,0,0,0
+X,Um.,1,0,0,0,0,0,0,0
+T,I never know how to do that. ,1,0,0,0,0,0,0,0
+X,Let's see here uh lift times wing area. That's probably... then if uh so basically we have to make um yeah let's see here so how does this work so we need um. ,1,0,0,0,0,0,0,0
+A,[inaudible],1,0,0,0,0,0,0,0
+X,"To get the same lift, if rho goes down, we have to get v to go up. How do we write that equation?",1,0,0,0,0,0,0,0
+T,So if rho decreases,1,0,0,0,0,0,0,0
+A,v must increase.,1,0,0,0,0,0,0,0
+T,By like one over one hundred.,1,0,0,0,0,0,0,0
+X,Yeah. ,1,0,0,0,0,0,0,0
+T,Or I guess the decrease is by one hundred.,1,0,0,0,0,0,0,0
+X,Then v squared must increase by 100.,1,0,0,0,0,0,0,0
+T,"Then, yeah. ",1,0,0,0,0,0,0,0
+A,Wait.,1,0,0,0,0,0,0,0
+X,So I guess the way that we would write this would be that one half rho v squared cL A v or cL A has to equal one half rho v squared cL A cause our lift requirement didn't change. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,So thus v,1,0,0,0,0,0,0,0
+T,Um just v equals.,1,0,0,0,0,0,0,0
+X,v or v2 or whatever has to equal - I guess it's now our v one hundred thousand feet. Uh it's not squared it's not squared. ,1,0,0,0,0,0,0,0
+T,Oh oh. Sorry. Subscript. ,1,0,0,0,0,0,0,0
+X,Subscript yeah. v oh it was under format yeah.,1,0,0,0,0,0,0,0
+T,Oh. ,1,0,0,0,0,0,0,0
+X,Uh decrease - uh increases by a factor of ten. So three hundred times ten is three thousand feet per second. ,1,0,0,0,0,0,0,0
+T,Um.,1,0,0,0,0,0,0,0
+A,[inaudible],1,0,0,0,0,0,0,0
+T,Um increases by a hundred.,1,0,0,0,0,0,0,0
+A,By ten. ,1,0,0,0,0,0,0,0
+X,By ten. ,1,0,0,0,0,0,0,0
+T,Oh sorry by ten since it's squared. ,1,0,0,0,0,0,0,0
+X,Yeah. ,1,0,0,0,0,0,0,0
+T,Um increases by.,1,0,0,0,0,0,0,0
+X,"And I suppose we could if we were um wanting to be really good with it, it was actually um uh is it 3.3 divided by 237 cause we actually got those numbers, right.",1,0,0,0,0,0,0,0
+T,Wait what is this for?,1,0,0,0,0,0,0,0
+X,Um up here.,1,0,0,0,0,0,0,0
+A,You're ten to the four.,1,0,0,0,0,0,0,0
+T,Oh yeah yeah yeah yeah. ,1,0,0,0,0,0,0,0
+X,Yeah this one's to the three.,1,0,0,0,0,0,0,0
+T,Density ratio.,1,0,0,0,0,0,0,0
+X,Yeah yeah. ,1,0,0,0,0,0,0,0
+T,Equals.,1,0,0,0,0,0,0,0
+X,And it's not 2.3 its 237.,1,0,0,0,0,0,0,0
+T,Oh. Yeah. Ok. ,1,0,0,0,0,0,0,0
+X,So um so I wonder if we shouldn't - cause the first one kind of is like a nice explanation and the second one is like the actual numbers.,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,So um so we just have to figure out what the square root of -,1,0,0,0,0,0,0,0
+T,Of the actual numbers -,1,0,0,0,0,0,0,0
+X,- 237 divided by 3.3,1,0,0,0,0,0,0,0
+T,- are ok yeah yeah. Um actual...,1,0,0,0,0,0,0,0
+X,Ok so I guess - I guess it wasn't quite ten it's like eight point four seven times faster. So it's like basically eight point five. ,1,0,0,0,0,0,0,0
+T,Velocity must be eight times faster. ,1,0,0,0,0,0,0,0
+X,Um that would mean so three hundred woah nope times three hundred so our velocity becomes uh twenty-five hundred forty feet per second. ,1,0,0,0,0,0,0,0
+T,Um. Feet per second. ,1,0,0,0,0,0,0,0
+X,"Ok. So ok what other numbers do we need? Oh you wanted to know the temperature at altitude, right?",1,0,0,0,0,0,0,0
+T,"Yeah I mean I just well I feel like we should have - it can be a rough estimate, but because - ",1,0,0,0,0,0,0,0
+X,Oh we actually have - that table has temperature in it.,1,0,0,0,0,0,0,0
+T,"Oh nice. Ok. But yeah cause it's saying - it's asking for a protocol to get oxygen up to the appropriate temperature and pressure, I feel like.",1,0,0,0,0,0,0,0
+X,But then doesn't tell us what that is.,1,0,0,0,0,0,0,0
+T,Yeah. Would it - would we be able to just come up with a very rough estimate of like I don't - even just like magnitude like orders of magnitude of what that might be?,1,0,0,0,0,0,0,0
+X,Yeah. I mean we could just say that um uh so so we could just use like a typical gasoline engine right -,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"- as a thing. So typically a gas engine is somewhere around ten to one compression ratio, so um and, you know, they run at seventy degrees Fahrenheit, so um so we would just say uh if um let's see here so we would just use p v equals n R T, right? So.",1,0,0,0,0,0,0,0
+T,Yeah wait I'm sorry what was the first number that you said that a gas engine runs at?,1,0,0,0,0,0,0,0
+X,Oh well so let's say that a typical engine runs at um - if you wanted Kelvin -,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,- um two hundred and seventy-three - you know that would be like zero degrees - would that be zero degrees? ,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"Yeah it would be zero degrees Celsius right or thirty-two degrees Fahrenheit um so um if we're just using that and we said ok well we know that engines run at this temperature - they can. I mean right when it's freezing out, your car still runs right. ",1,0,0,0,0,0,0,0
+T,Ok ok. Yeah. ,1,0,0,0,0,0,0,0
+X,"Um so if we use that and we said ok they typically have like a ten to one compression ratio, then um then uh you know if the temperature coming in was two hundred and seventy-three degrees Kelvin, then when it's compressed, it goes up, right? Wow actually twenty-seven hundred degrees Kelvin is that right? If you compressed a gas ten times, does the temperature jump ten times?",1,0,0,0,0,0,0,0
+T,Yeah?,1,0,0,0,0,0,0,0
+A,Temperature. This is why I don't -,1,0,0,0,0,0,0,0
+X,"p v equals n R T? Right if your pressure went up ten times, then and your volume decreased ten times, does your temperature go - your temperature goes up though when you increase the pressure. Why is this - why is this not computing in my head? What's going on here?",1,0,0,0,0,0,0,0
+T,Alright I'm also seeing if I can just find any stuff online about like typical -,1,0,0,0,0,0,0,0
+X,Typical jet engine.,1,0,0,0,0,0,0,0
+T,jet engine like conditions.,1,0,0,0,0,0,0,0
+X,Yeah so what you want to know is you want to know um what is the pressure and temperature leaving the compressor.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Um. Ah here we go. Good old Glen. Alright. Let's see here. The engine pressure ratio... the total pressure across the whole system... ,1,0,0,0,0,0,0,0
+T,The compression - compressor pressure ratio. I mean we do also have our like energy conservation things for like a compressor.,1,0,0,0,0,0,0,0
+X,Yeah we could just use that.,1,0,0,0,0,0,0,0
+T,Of like you know delta E equals.,1,0,0,0,0,0,0,0
+X,Ok. Let's do that. That's probably - ,1,0,0,0,0,0,0,0
+T,Does that give use everything we need then?,1,0,0,0,0,0,0,0
+X,I think it might. Um.,1,0,0,0,0,0,0,0
+T,"I don't - they don't give us enthalpy, which if we have specific heat we can work backwards to get temperature. I don't - I just - I'm not quite sure how much um -",1,0,0,0,0,0,0,0
+X,How far they want us to actually take this?,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Yeah. ,1,0,0,0,0,0,0,0
+T,I - like there's stuff we could take it somewhat far. Like.,1,0,0,0,0,0,0,0
+X,I found a page in French that gives all the information we want. ,1,0,0,0,0,0,0,0
+T,Love that.,1,0,0,0,0,0,0,0
+X,Um.,1,0,0,0,0,0,0,0
+A,In French.,1,0,0,0,0,0,0,0
+X,Yeah. Um.,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,I just don't know what any of these are.,1,0,0,0,0,0,0,0
+T,Air compressor. That's negative... equals... just...,1,0,0,0,0,0,0,0
+X,Oh hey got temperature versus entropy diagram for a jet engine. ,1,0,0,0,0,0,0,0
+T,Oh. ,1,0,0,0,0,0,0,0
+X,For like different stages. Let's see here. Pressure,1,0,0,0,0,0,0,0
+T,"I mean so would for a compressor, would kinetic energy matter? I mean my notes say it doesn't always, but I feel like there's gonna be a -",1,0,0,0,0,0,0,0
+X,Well.,1,0,0,0,0,0,0,0
+T,- change in velocity that's - ,1,0,0,0,0,0,0,0
+X,So.,1,0,0,0,0,0,0,0
+T,- gonna be somewhat significant.,1,0,0,0,0,0,0,0
+X,So the velocity coming in we know what that is.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"Cause that's just the free stream air coming in, right. ",1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,So we that that was like what was it like twenty-five hundred feet per second. And then um.,1,0,0,0,0,0,0,0
+A,I don't know.,1,0,0,0,0,0,0,0
+X,Yeah and then but we don't know really what it is going out. And part of why we won't know what it is going out is we don't know what the appropriate nozzle looks like on the back end of this motor.,0,0,0,0,0,0,1,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"Unfortunately, and I can tell you that in the real world, the nozzles on jet engines are literally done by guess and check. Like they just build a bunch of different nozzles and stick it on and go how much thrust do we get there ok how bout now ok how bout now. Like that's.",0,0,0,1,0,0,0,0
+T,Is that simply because the calculations for that are -,1,0,0,0,0,0,0,0
+X,Yeah I think I think.,1,0,0,0,0,0,0,0
+T,- not accurate enough?,1,0,0,0,0,0,0,0
+X,Um. I'm not actually yeah I don't know exac - I think it's just that it's very difficult to know cause the nozzle affects the rest of the system.,0,0,0,0,1,0,0,0
+T,Right it's too many factors. ,1,0,0,0,0,0,0,0
+X,So yeah so it's easier to. So like or the other way to do it is you just um you make it where the nozzles are variable and then you put the whole thing on a thrust stand and then you just go like ok how bout now? Alright how bout we you know. ,0,0,0,1,0,0,0,0
+T,I like not even commute like simulation models and stuff?,1,0,0,0,0,0,0,0
+X,"Well so CFD is is um it's getting better but like so um so this one professor that I heard say this he's like ok so everybody thinks that oh well CFD's just gonna get good enough that uh one day we won't need wind tunnels we won't need to do this stuff. And he's like alright so let's imagine a computer with as many transistors as there are atoms in the sun and he went through and he calculated ok the typical spacing is this so at the speed of light, the fastest they could communicate would be this fast, and he went through and he's like alright so assuming that's our computer, it would take something like a hundred years for it to compute where every atom um went across the wing on a 747, and it was like it's like so we're not - we're never gonna - Like it's -",1,0,0,0,0,0,0,0
+T,So it's a no. ,1,0,0,0,0,0,0,0
+X,Yeah so it's like so there's always gonna be assumptions. There's always gonna be like -,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,- approximations um to make things -,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,"- you know and averages and stuff um so but yeah so um that's interesting though. I mean I wonder I wonder - you know the other thing too is sometimes some of the things that um that I - some of the people that I work with, they may uh I mean they're all pretty old so it may also be that -",1,0,0,0,0,0,0,0
+T,Right it may have changed a bit.,1,0,0,0,0,0,0,0
+X,- that things have changed. But um I mean as of,1,0,0,0,0,0,0,0
+T,Still super interesting. ,1,0,0,0,0,0,0,0
+X,"I think I was told that like two years ago, so it's you know the place I worked is not that un-cutting edge. It's NASA, so I think they know what they were doing. ",1,0,0,0,0,0,0,0
+T,Yeah. I hope. Um.,1,0,0,0,0,0,0,0
+X,But there are a lot of old people there so so it's um.,1,0,0,0,0,0,0,0
+T,That's fair. Um ok. I don't think that this equation probably helps us that much. ,1,0,0,0,0,0,0,0
+X,"No? Ok let me. Oh shoot ok we're not actually in Word, we're on the internet.",1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Sorry. ,1,0,0,0,0,0,0,0
+T,All good.,1,0,0,0,0,0,0,0
+X,Ok ok here we go.,1,0,0,0,0,0,0,0
+T,"Um yeah so I just - I mean how yeah I feel like to do any more math than this, we might have to make many many assumptions. ",1,0,0,0,0,0,0,0
+X,Ok. So do -,1,0,0,0,0,0,0,0
+T,It depends on what kind of - I don't know - I think - it'd be still nice to try to get kind of -,1,0,0,0,0,0,0,0
+X,Rough numbers?,1,0,0,0,0,0,0,0
+T,- rough numbers for like.,1,0,0,0,0,0,0,0
+X,"Well so I think a good number would be to say our compression ratio is ten to one, our um we want the air to be subsonic when it enters the compressor, um uh and then you know beyond that, um I guess if we were looking for like a maximum temperature to go under the into the turbine, we could probably say uh Inconel is probably the best material that we could possibly think of to make the turbine blades out of, so we just look at whatever temperatures that can take, and then that will give us sort of an upper range on how much heat we can really put in there.",0,0,0,0,0,0,1,0
+T,Yeah. So how do you spell that?,1,0,0,0,0,0,0,0
+X,Inconel. Uh I N Inconel I N C O L - C O N E L. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Um. Let's just pick one. Let's do X-750 and see what the temperature range is for that. Um. Let's see so they say it has oxidation resistance up to eighteen hundred degrees Fahrenheit and high strength up to thirteen hundred degrees Fahrenheit. Um. Let's see I don't know if that's gonna be enough for us actually um.,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,So what they actually do in jet engines now is they have um lots of holes drilled in the uh turbine blades - ,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,- so that they actually get cooled,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Um so the thing doesn't actually see those temperatures. Um. ,1,0,0,0,0,0,0,0
+T,Right. We talked about that in Materials and Manufacturing I.,1,0,0,0,0,0,0,0
+X,Oh nice. Yeah. It's actually really cool cause we're like well how do they get the air through it? And it's like actually it's just a function of like there are holes and then like an opening at the bottom and it's just a pressure difference that.,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Um. Sorry I'm trying to find,1,0,0,0,0,0,0,0
+T,All good. ,1,0,0,0,0,0,0,0
+X,Find a...,1,0,0,0,0,0,0,0
+X,Let's see here. No I don't want a history of Frank Whittle. Just tell me what metals you're using. Uh.,1,0,0,0,0,0,0,0
+T,What plane are you basing this off of?,1,0,0,0,0,0,0,0
+X,What airplane?,1,0,0,0,0,0,0,0
+T,Yeah or like.,1,0,0,0,0,0,0,0
+X,Oh I wasn't actually basing it off any,1,0,0,0,0,0,0,0
+T,Oh ok. Ok then.  ,1,0,0,0,0,0,0,0
+X,- particular one.,1,0,0,0,0,0,0,0
+T,Cause I was thinking one way we could do it is just like choose a plane and say like what is the mass.,0,0,1,0,0,0,0,0
+X,Yeah.,1,0,0,0,0,0,0,0
+T,There might be more data if we - ,1,0,0,0,0,0,0,0
+X,"Ok so we - let's say we want a um a current uh so maybe uh let's see is it GE is it the nx? So we probably want like a current engine, right? Cause like the SR-71 thing that we were talking about, that plane's from like 1960-something, so like it's not gonna be recent but um uh is it the Trent 1000 motor? Ok so Rolls-Royce Trent 1000. Let's see what metal they put. So like this is a pretty recent motor. This is um certified in 2007, introduced into the service in 2011. Um. So let's ",0,0,1,0,0,0,0,0
+T,Um ok well the highest turbine inlet temperature is apparently one thousand six hundred degrees Celsius. ,0,0,0,0,0,1,0,0
+X,Ok so we just need a material that can do that. ,0,0,0,0,0,1,0,0
+A,One thousand. ,1,0,0,0,0,0,0,0
+T,So below that. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Um. ,1,0,0,0,0,0,0,0
+X,Uh. ,1,0,0,0,0,0,0,0
+T,Um. Ok yeah it says ,1,0,0,0,0,0,0,0
+X,Let's see here. ,1,0,0,0,0,0,0,0
+T,So this says state of the art is about 1800 Kelvin. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,So I guess. But we can probably assume it's below state of the art. ,1,0,0,0,0,0,0,0
+X,"Yeah. Well yeah, or actually usually jets are pretty close to state of the art - ",1,0,0,0,0,0,0,0
+T,Ok.,1,0,0,0,0,0,0,0
+X,"- because because the higher you can get that compression ratio and the temperature, the more efficient you can make the motor, right.",1,0,0,0,0,0,0,0
+T,Right.,1,0,0,0,0,0,0,0
+X,So um um - oh here we go. High temperature metals for uh let's see here when was this written? ,1,0,0,0,0,0,0,0
+T,But also I feel like the maximum temperature doesn't mean it like needs to be the temperature.,1,0,0,0,0,0,0,0
+X,Oh yeah because also,1,0,0,0,0,0,0,0
+T,We need - cause people might like I guess if you're trying to fly super duper fast.,1,0,0,0,0,0,0,0
+X,Yeah. Um.,1,0,0,0,0,0,0,0
+T,So I guess just.,1,0,0,0,0,0,0,0
+X,"Yeah I mean the best one I could find was one that doesn't oxidize at 1800 degrees, so its surface temperature is up to - so yeah actually that would probably work fine cause it's like well maybe it's not super strong at that temperature, but it's um...",1,0,0,0,0,0,0,0
+T,Ok. Um.,1,0,0,0,0,0,0,0
+X,Oh Hastelloy X. Uh prolonged service life through 1600 degrees Fahrenheit. That doesn't help us. ,1,0,0,0,0,0,0,0
+T,Just a heads up I've gotta go in about like fifteen minutes. ,1,0,0,0,0,0,0,0
+X,Ok ok. Well yeah maybe it doesn't matter. We already got our temperature right if that was just whatever the current state of the art is. ,1,0,0,0,0,0,0,0
+T,Yeah so state of the art is 1800 Kelvin um we'll likely be below this cause we don't need a max temp.,1,0,0,0,0,0,0,0
+A,...max temperature which would be...,1,0,0,0,0,0,0,0
+T,Um. So. Hm could we figure out - ,1,0,0,0,0,0,0,0
+X,So maybe - ,1,0,0,0,0,0,0,0
+T,- pressure.,1,0,0,0,0,0,0,0
+X,"- maybe the deal is is that um maybe the deal is is we don't do a ten to one compression ratio maybe we go lower than that because if you assume say 600-degree temperature rise from your fuel, then you'd wanna have 1200 minus 273 divided by 273 so maybe our compression ratio is really something like four to one. ",1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,So I'll just say assume compression ratio of four to one.,1,0,0,0,0,0,0,0
+X,"Yeah. So we're not terribly efficient, but we won't melt the motor.",1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,Um. Ok. ,1,0,0,0,0,0,0,0
+X,I don't know.,1,0,0,0,0,0,0,0
+A,[inaudible],1,0,0,0,0,0,0,0
+T,So what else do we want to add to this?,1,0,0,0,0,0,0,0
+X,I don't know.,1,0,0,0,0,0,0,0
+T,Pressure? If we can get some kind of temperature for a pressure - or some kind of value for a pressure that we want. ,1,0,0,0,0,0,0,0
+X,Well - ,1,0,0,0,0,0,0,0
+T,I mean it's kind of just gonna be whatever it is.,1,0,0,0,0,0,0,0
+X,"- so if we're - yeah I mean so we had a diffuser to slow the thing down - slow the stuff down. Um. I don't know I guess we'd have to actually figure out how much pressure we were getting from the air coming in, right? And then and then we say ok we increase that four times.",0,0,0,0,1,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,Right so I mean,1,0,0,0,0,0,0,0
+T,So pressure of air in - I mean well but also like are we assuming - do we want to make assumptions of sizes of stuff?,1,0,0,0,0,0,0,0
+X,No.,1,0,0,0,0,0,0,0
+T,No. ,1,0,0,0,0,0,0,0
+X,I don't know. How far do they want us to go with this?,1,0,0,0,0,0,0,0
+T,I don't know. It might already be. ,1,0,0,0,0,0,0,0
+X,I think cause I feel like we're - ,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,- I mean I don't know there's a part of me that's like I doubt most people.,1,0,0,0,0,0,0,0
+A,Will do this much.,1,0,0,0,0,0,0,0
+X,- are gonna get this far.,1,0,0,0,0,0,0,0
+T,Yeah.,1,0,0,0,0,0,0,0
+X,With it you know.,1,0,0,0,0,0,0,0
+T,Yeah ok. ,1,0,0,0,0,0,0,0
+X,But also I don't wanna you know stop if we're worried that we don't have enough. I just I can't.,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,I mean. ,1,0,0,0,0,0,0,0
+T,Yeah. Will depend partly on the cross-sectional area. ,1,0,0,0,0,0,0,0
+X,Yeah desired our desired uh aircraft how much drag do we have to overcome. ,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,Yeah ok I think it's good to leave it at that. ,1,0,0,0,0,0,0,0
+X,Just for fun I'm looking to see what the compression ratio is on the YB-70 cause that was a big high-altitude supersonic plane.,1,0,0,0,0,0,0,0
+T,Hm. ,1,0,0,0,0,0,0,0
+X,Um... YJ...,1,0,0,0,0,0,0,0
+X,Ok we're not that far off. I mean they're saying that uh a J58 and a J93 are around like seven to one or eight to one. ,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,Um. So. I mean,1,0,0,0,0,0,0,0
+T,I think that's -,1,0,0,0,0,0,0,0
+X,We said four but I bet if we really start running a lot of numbers we might be able to find places that it's actually we could you know do some different things to get the ratio higher.,1,0,0,0,0,0,0,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,And stuff but. ,1,0,0,0,0,0,0,0
+T,Ok I mean.,1,0,0,0,0,0,0,0
+X,"Unless we're gonna sit down and really crunch numbers, I don't know how much better we can do. ",1,0,0,0,0,0,0,0
+T,No. I think I'm fine with this. Um and we've spent an hour and fifteen minutes on it. ,1,0,0,0,0,0,0,0
+X,Ok. ,1,0,0,0,0,0,0,0
+T,Which is pretty good. Alright. Yeah I'm good with this. ,1,0,0,0,0,0,0,0
+X,Andrew?,1,0,0,0,0,0,0,0
+T,Anything else to add?,1,0,0,0,0,0,0,0
+X,Are you happy with where we're at?,1,0,0,0,0,0,0,0
+A,"Um the compressor we left it out at the end, right?",0,0,0,1,0,0,0,0
+T,Well no we're saying with a compressor but at certain stages of um - ,0,0,0,1,0,0,0,0
+X,Flight.,1,0,0,0,0,0,0,0
+T,"- of flight we won't need it, and so - ",1,0,0,0,0,0,0,0
+A,"Cause of the diffuser, right? The diffuser does most of the compression.",0,0,0,0,1,0,0,0
+X,The diffuser - so let's see - wait I'm sorry say that again.,0,0,0,1,0,0,0,0
+A,Um the diffuser will do most of the compression of the air? That's why we don't need the compressor afterwards?,0,0,0,0,1,0,0,0
+X,Well so the diffuser slows the air down um.,0,0,0,0,1,0,0,0
+A,Which will increase the pressure?,0,0,0,0,0,1,0,0
+X,Let's see I think it might actually increase the pressure although now I'm trying to think cause when you think of a compressor right you think like it has to get smaller. ,0,0,0,0,0,1,0,0
+T,Mhm. ,1,0,0,0,0,0,0,0
+X,Um cause we gotta slow the air down,0,0,0,0,1,0,0,0
+T,The compressor's gonna speed it up again. Right?,0,0,0,0,1,0,0,0
+X,"Well it's not gonna speed it up, but it's gonna - it's gonna make it go into a smaller volume.",0,0,0,0,0,1,0,0
+A,So it'll slow it down. ,0,0,0,0,1,0,0,0
+X,Right?,1,0,0,0,0,0,0,0
+T,Ok yeah. ,1,0,0,0,0,0,0,0
+X,So so I think we still have to have the diffuser but then do we actually have just like another section after it that like compresses? That'd be weird. ,0,0,0,0,0,0,1,0
+T,Well.,1,0,0,0,0,0,0,0
+X,Like why wouldn't you just do that at the beginning?,0,0,0,1,0,0,0,0
+T,Yeah just change the diffuser?,1,0,0,0,0,0,0,0
+X,To...,1,0,0,0,0,0,0,0
+T,Like alter the dimensions of the diffuser. ,0,0,0,0,0,1,0,0
+X,"Oh maybe yeah maybe you could make the diffuser into like something that's more like a nozzle so it shoves the air in pushes it down to a smaller - does that work though? Right because when you... when you run stuff through a nozzle, the pressure at the nozzle is lower. So actually no the diffuser would would be the thing we want, right? Because right cause the nozzle usually speeds the air up going through it.",0,0,0,0,0,0,1,0
+T,Yeah. ,1,0,0,0,0,0,0,0
+X,"And because the velocity went higher, the -  ",1,0,0,0,0,0,0,0
+A,Pressure goes down. ,1,0,0,0,0,0,0,0
+X,- pressure goes down. ,1,0,0,0,0,0,0,0
+T,Pressure goes down. ,1,0,0,0,0,0,0,0
+X,"Whereas we're slowing the velocity down, so I think the pressure might actually go up. That's kinda counterintuitive. ",1,0,0,0,0,0,0,0
+T,Yeah I've always found it really counterintuitive. ,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,But I mean is that fine? Like. ,1,0,0,0,0,0,0,0
+X,I think I think I mean.,1,0,0,0,0,0,0,0
+T,It's fine for the pressure to go up. ,1,0,0,0,0,0,0,0
+X,Well we want the pressure to go up.,1,0,0,0,0,0,0,0
+T,Yeah we want it to go up.,1,0,0,0,0,0,0,0
+X,We want it to go up.,1,0,0,0,0,0,0,0
+T,And so.,1,0,0,0,0,0,0,0
+X,Um. ,1,0,0,0,0,0,0,0
+T,But that means that we probably don't need the compressor because ,0,0,0,1,0,0,0,0
+X,No we still wouldn't need the compressor - so we would bypass - so we would have something that would bypass the compressor and just dump the air into the - in to be burned. ,0,0,0,0,0,0,1,0
+T,So at any - are we getting rid of the compressor entirely?,0,0,0,1,0,0,0,0
+X,No no no cause we can't.,1,0,0,0,0,0,0,0
+T,Ok. ,1,0,0,0,0,0,0,0
+X,"We can't do it from no speed, right. Like we have to have - we have to be able to work up to the speed but then at some point -",1,0,0,0,0,0,0,0
+T,Right so.,1,0,0,0,0,0,0,0
+X,- we just close off the compressor and say we don't need that any more. ,1,0,0,0,0,0,0,0
+T,Ok so at - basically at high speeds we don't.,1,0,0,0,0,0,0,0
+X,Yeah. Yeah. ,1,0,0,0,0,0,0,0
+T,Um like when we're at.,1,0,0,0,0,0,0,0
+X,When we're cruising. Right when we're cruising speed.,1,0,0,0,0,0,0,0
+T,Yeah. At cruising speed we will not need the compressor as the diffuser - oh I always spell that wrong - there will be sufficient to reach the temperature and pressure we need. Um. Ok but up here the - so the diffuser brings velocity of the air down and the temperature up as well as increasing the pressure?,0,0,0,0,0,1,0,0
+X,Brings - I'm sorry say that one more time. ,1,0,0,0,0,0,0,0
+T,The diffuser brings the velocity of the air down and the temperature up. ,0,0,0,0,0,1,0,0
+X,Yes.,1,0,0,0,0,0,0,0
+T,As well as,1,0,0,0,0,0,0,0
+X,And I think - I think that also the pressure goes up which seems.,0,0,0,0,0,1,0,0
+T,Velocity... pressure...,1,0,0,0,0,0,0,0
+X,I think that would have to be what would happen.,1,0,0,0,0,0,0,0
+X,It's either gonna be a diffuser or a nozzle. It's gonna be one of these two. ,0,0,0,1,0,0,0,0
+T,Yeah. Ok. ,1,0,0,0,0,0,0,0
+X,Oh look at this. Why have compressors if diffusers can provide high-pressure air at its exit?,0,0,0,1,0,0,0,0
+A,Oh. ,1,0,0,0,0,0,0,0
+T,That's a question that somebody asked. Ok. So yeah I think we're.,1,0,0,0,0,0,0,0
+A,So compressors are -,1,0,0,0,0,0,0,0
+T,Alright. ,1,0,0,0,0,0,0,0
+X,Cool.,1,0,0,0,0,0,0,0
+T,Cool ok. ,1,0,0,0,0,0,0,0
+X,Very cool.,1,0,0,0,0,0,0,0
+T,Do we feel good?,1,0,0,0,0,0,0,0
+X,I think so. I mean from a homework standpoint I'm hoping that that's more than they were looking for.,1,0,0,0,0,0,0,0
+T,"Yes. I think we're good. Um ok so I will switch off hold, press Stop and turn -",1,0,0,0,0,0,0,0
+X,So long person listening in.,1,0,0,0,0,0,0,0
+T,Thank you.,1,0,0,0,0,0,0,0

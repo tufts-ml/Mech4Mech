@@ -1,0 +1,794 @@
+Student,Text,No evidence,Target phenomena,Set-up conditions,Entities,Activities,Properties,Organization,Chaining
+P,"Yeah. The second problem I have no idea where to start on. I do know that the - and this is not really relevant to what they're asking - but the advantage of having the hybrid systems is you don't have to keep your oxidizer with your actual fuel, so it's not as dangerous. But I don't know what losses that entails. ",0,0,0,1,0,0,0,0
+R,Any ideas for what space rocket we want to use for the next one?,0,0,1,0,0,0,0,0
+P,Oh I don't know. Just some tube with a bomb on the end of it. For our model. ,0,0,1,0,0,0,0,0
+G,Ok. Can you look into the SpaceX Dragon and find out what kind of propellant it uses?,0,0,0,0,0,1,0,0
+P,SpaceX Dragon.,1,0,0,0,0,0,0,0
+G,"And then I think the SLS uses solid? Roger can you look up the SLS and see if it uses solid? I know the Falcon 9 uses liquid, so we just need one that's hybrid.",0,0,0,0,0,1,0,0
+P,So the SpaceX Draco is a family of hypergolic liquid engines designed and built by SpaceX.,1,0,0,0,0,0,0,0
+G,"Ok so they're all liquid. I mean you can also look at the - I'm looking for the um efficiency of the Falcon 9. You can also look for that. I think what we want is an efficiency or information about a hybrid though, cause Falcon 9 is liquid. ",0,0,0,0,0,1,0,0
+R,Liquid.,1,0,0,0,0,0,0,0
+G,Liquid? What about the um...,1,0,0,0,0,0,0,0
+P,I assume it's lower than liquid but...,1,0,0,0,0,0,0,0
+G,Well it must be if all the main sources are using liquid.,1,0,0,0,0,0,0,0
+P,Yeah and I mean just in general when you have more than one interacting component you kill your efficiency. I mean there's a specific example of a hybrid rocket that has 93% combustion efficiency. Did you see uh for the Falcon 9 what the efficiency was like in vacuum for convenience's sake?,1,0,0,0,0,0,0,0
+G,I'm looking for it. ,1,0,0,0,0,0,0,0
+P,Yeah um...,1,0,0,0,0,0,0,0
+P,"This is just Wikipedia. Whatever example they used, which was a...",1,0,0,0,0,0,0,0
+P,This especially efficient hybrid one on Wikipedia which was like uh made by Beech Aircraft and United Technology Center.,1,0,0,0,0,0,0,0
+G,And that's a hybrid?,1,0,0,0,0,0,0,0
+P,That was a hybrid. That got 93% combustion efficiency in vacuum.,1,0,0,0,0,0,0,0
+G,That's a lot.,1,0,0,0,0,0,0,0
+P,Yeah. But I think this is like an exception more than - it's the exceptional rather than the typical.,1,0,0,0,0,0,0,0
+G,"Well we can say based on that, which we know is highly efficient, we know that the average would be less, so let's say it's 80% efficient.",1,0,0,0,0,0,0,0
+P,"Something like that. Um but to compare that to liquid, liquid rocket efficiency. Two f's in efficiency.",1,0,0,0,0,0,0,0
+G,How do you spell efficiency? Oh ok. I just have that it's all very high efficiency.,1,0,0,0,0,0,0,0
+P,It's real good.,1,0,0,0,0,0,0,0
+G,It's real good. ,1,0,0,0,0,0,0,0
+P,Like encroaching on 99 100 or...?,1,0,0,0,0,0,0,0
+G,I don't know. All I've got thus far is it's real good.,1,0,0,0,0,0,0,0
+P,It's real good.,1,0,0,0,0,0,0,0
+R,So have we decided on what type we're going with yet?,1,0,0,0,0,0,0,0
+P,I mean - ,1,0,0,0,0,0,0,0
+G,Well we have to talk about both.,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,The question is compare the two. But we need the efficiency of each one. ,1,0,0,0,0,0,0,0
+P,Keep Googling. ,1,0,0,0,0,0,0,0
+R,So we're thinking one gas rocket and one liquid one?,0,0,1,0,0,0,0,0
+G,One hybrid and one liquid one.,0,0,1,0,0,0,0,0
+R,Gotcha. ,1,0,0,0,0,0,0,0
+G,Cause a hybrid is solid and gas - or solid and liquid - and then liquid - usually gases are not used as a propellant.,0,0,0,0,0,1,0,0
+P,Yeah cause they're dangerous and they take up a lot of space. ,0,0,0,0,0,1,0,0
+G,Yeah and they're also not super efficient usually.,1,0,0,0,0,0,0,0
+P,Yeah. Although I think in the description it said - ,1,0,0,0,0,0,0,0
+G,I mean like liquids and solids usually are harder to launch because you need more of them because they're more massive. But it's just they're better efficiencies than - ,0,0,0,0,0,1,0,0
+P,I found the thrust equation for rockets. I don't know if we need that. F equals m dot times v - ,1,0,0,0,0,0,0,0
+G,That's a good thing to have. ,1,0,0,0,0,0,0,0
+P,Plus pe minus p0 times the cross-sectional area that it's leaving the rocket at. ,1,0,0,0,0,0,0,0
+P,"For starts we can write down this rocket equation, which will probably be useful.",1,0,0,0,0,0,0,0
+D,Thrust equals the change in mass. ve is equal to...,1,0,0,0,0,0,0,0
+P,I don't know. Whatever the subscript is.,1,0,0,0,0,0,0,0
+D,Ok cool.,1,0,0,0,0,0,0,0
+G,Um. ,1,0,0,0,0,0,0,0
+D,The potential energy of the exhaust? What?,1,0,0,0,0,0,0,0
+P,I think it's pressure. I think it's pressure. It's pressure differential.,1,0,0,0,0,0,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+P,"Yeah cause the po is outside of it, which if we're assuming vacuum makes that much easier and then the cross-section area of your like rocket tail - your engine tail.",1,0,0,0,0,0,0,0
+G,I think A is the cross-sectional area - ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,"ve is the velocity, and pe is pressure.",1,0,0,0,0,0,0,0
+D,Oh v is the exit velocity. Ok that makes sense.,1,0,0,0,0,0,0,0
+G,"This is exit velocity, exit area, exit pressure, and initial pressure.",1,0,0,0,0,0,0,0
+D,Initial pressure. Or outside pressure?,1,0,0,0,0,0,0,0
+P,I think it's environment pressure.,1,0,0,0,0,0,0,0
+G,It literally says exit pressure right here.,1,0,0,0,0,0,0,0
+P,Pressure...,1,0,0,0,0,0,0,0
+D,Oh that's weird.,1,0,0,0,0,0,0,0
+P,Like it varies within the actual - I guess in the diagram I saw the p0. I guess there's an error...,1,0,0,0,0,0,0,0
+D,That's weird cause that looks like an O and that looks like a zero. That's kinda weird. ,1,0,0,0,0,0,0,0
+P,Who writes these?,1,0,0,0,0,0,0,0
+G,It doesn't really matter. ,1,0,0,0,0,0,0,0
+D,Keep your characters consistent. It absolutely matters. This is of the utmost importance. Am I drawing this diagram too? ,1,0,0,0,0,0,0,0
+G,No you don't need to.,1,0,0,0,0,0,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+G,Um but this is for liquid.,1,0,0,0,0,0,0,0
+P,Interesting. Um I mean I think - ,1,0,0,0,0,0,0,0
+G,Because it has a combustion changer. It has pumps. There's nothing fluid - there's nothing solid in here.,0,0,0,1,0,0,0,0
+P,So I think - ,1,0,0,0,0,0,0,0
+R,"It says on this NASA website that the SLS took um 537,000 gallons of chilled liquid hydrogen fuel to make an 8.5 minutes. I don't know if we can use that. ",0,0,0,0,0,1,0,0
+G,Ok. Um.,1,0,0,0,0,0,0,0
+P,"Is that to leave um to enter lower orbit? Cause the goal of this is to say like get it to lower orbit, right?",0,1,0,0,0,0,0,0
+R,"It doesn't define. It just says orbit, so I assume.",0,1,0,0,0,0,0,0
+P,6 miles a second. We don't need to look at my teardown project. It's got a big 'ol solenoid in it. ,1,0,0,0,0,0,0,0
+D,Thrust of a liquid rocket so,1,0,0,0,0,0,0,0
+R,Which one are you doing?,1,0,0,0,0,0,0,0
+P,Uh staple gun.,0,0,1,0,0,0,0,0
+R,I'm doing the same thing. ,1,0,0,0,0,0,0,0
+P,Yeah no motor.,0,0,1,0,0,0,0,0
+D,Force equals...,1,0,0,0,0,0,0,0
+G,We have the electric can opener.,1,0,0,0,0,0,0,0
+D,...m dot times the exit velocity - ,1,0,0,0,0,0,0,0
+P,There we go.,1,0,0,0,0,0,0,0
+D,Plus the change in pressure.,1,0,0,0,0,0,0,0
+G,Plus - yeah - the change in pressure times the exit area.,1,0,0,0,0,0,0,0
+P,"So, in principle, this is like a simplified just like physical model that looks at the end of the rocket by the time that solid fuel is burning and ejecting, it's gaseous at that point, so I think this model in its simplified form could be applied to the hybrids as well.",0,0,0,0,0,1,0,0
+G,Well yeah. ,1,0,0,0,0,0,0,0
+D,Mhm. ,1,0,0,0,0,0,0,0
+G,No cause the hybrid - ohhh you're saying this equation.,1,0,0,0,0,0,0,0
+P,Cause you're only thinking - yeah it's only considering what's - ,1,0,0,0,0,0,0,0
+G,No I was saying the diagram is a liquid diagram.,1,0,0,0,0,0,0,0
+P,Oh I see. I see what you're saying. Yeah.,1,0,0,0,0,0,0,0
+D,"So this is for a liquid rocket, this thrust equation.",1,0,0,0,0,0,0,0
+G,Well we're saying it can probably work for either one.,1,0,0,0,0,0,0,0
+P,Yeah. Cause what you're considering - ,1,0,0,0,0,0,0,0
+G,"Cause there's nothing in here that actually is like determinant of the fact that it's a liquid or a solid, but the thing is like, you're also like in order to - the energy you're getting out of it is the conversion from a liquid or a solid to a gas cause it comes out as a gas, and so then it doesn't - it's changing state anyways.",0,0,0,0,0,1,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,We're going to use this for both is the moral of the story. Ok. ,1,0,0,0,0,0,0,0
+P,"So we are looking for um liquid efficiency so that we get a comparison value. And then from there I think we can talk about the energy density of matter required and the total - I mean obviously the total volume that that comprises based on what your fuel is made out of is gonna be important for your rocket ship design, but also mass is way more important for like the rocket equation for like actually getting something to reach escape velocity, though in a lot of simplified models, we just consider escape velocity at the surface of the earth, but obviously it is greatly affected by altitude proportional to 1 over r squared. Um. ",1,0,0,0,0,0,0,0
+G,"All I keep finding is that the high effi - literally this says that the high efficiency of liquid oxygen, liquid hydrogen makes like - they're essentially just like it's high and it doesn't matter.",1,0,0,0,0,0,0,0
+P,It's really good. It's so good.,1,0,0,0,0,0,0,0
+D,So you said nothing about this - just to rephrase your words - nothing about the system was dependent on it being liquid so the same equation can work for.,1,0,0,0,0,0,0,0
+G,Yeah.,1,0,0,0,0,0,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+P,I mean it's very like Newton's second law.,1,0,0,0,0,0,0,0
+G,"Ok. Hold on hold on hold on. For a liquid system, this one literally says theoretical maximum assuming 100% efficiency.",1,0,0,0,0,0,0,0
+P,So - ,1,0,0,0,0,0,0,0
+G,It can't be 100%. Let's just say it's like 98.,1,0,0,0,0,0,0,0
+P,I mean I think it might be just so good in ter - cause it's literally just -,1,0,0,0,0,0,0,0
+G,"You're literally just burning it, and that's why it - ",1,0,0,0,0,0,0,0
+P,"Well it's more than just - it like the burning it is how you're energizing those particles, but it is Newton's second law. You're throwing particles out really fast, you're going the other way with as much energy and as much force in the same direction. ",0,0,0,0,1,0,0,0
+G,But I don't think it's the conversion. I don't think they're talking about the efficiency of - ,1,0,0,0,0,0,0,0
+P,Like energy you said? It's more - ,1,0,0,0,0,0,0,0
+G,I think it's the efficiency of - cause the - ,1,0,0,0,0,0,0,0
+D,Well some of the fuel that they use goes back into combusting.,0,0,0,0,1,0,0,0
+G,No.,1,0,0,0,0,0,0,0
+D,No?,1,0,0,0,0,0,0,0
+G,It says the problem with the efficiency is that for the hybrid is the mixing is not well-controlled and generally a lot of propellant is left unburned.,1,0,0,0,0,0,0,0
+P,Hm. Like it just gets shot out as a solid stone or something.,0,0,0,0,1,0,0,0
+G,"Or no it just doesn't mix, so it just doesn't get used.",0,0,0,0,1,0,0,0
+P,Ok. ,1,0,0,0,0,0,0,0
+G,That's what the question says the problem with the efficiency is for hybrid.,1,0,0,0,0,0,0,0
+P,Let's define efficiency differently for a bunch of different systems and just pretend it's all fine. This is us expressing our frustration with our engineering forebearers to a recording device.,1,0,0,0,0,0,0,0
+G,I'm really more frustrated with the number of different v's.,1,0,0,0,0,0,0,0
+P,Little v with a tiny corner.,1,0,0,0,0,0,0,0
+G,Like there are 26 letters and a lot of them look different capital and lowercase. Like q. Q is fine.,1,0,0,0,0,0,0,0
+R,If my memory serves me...,1,0,0,0,0,0,0,0
+P,We talked a lot about - ,1,0,0,0,0,0,0,0
+G,Also could have picked like j.,1,0,0,0,0,0,0,0
+P,"We talk a lot about velocity in fluids, but we're not considering it as a vector quantity, so we could call it speed.",1,0,0,0,0,0,0,0
+G,Yeah. ,1,0,0,0,0,0,0,0
+P,S.,1,0,0,0,0,0,0,0
+G,But s is um s is entropy.,1,0,0,0,0,0,0,0
+P,Entropy. You know what entropy could also be? ,1,0,0,0,0,0,0,0
+G,E. Which is energy.,1,0,0,0,0,0,0,0
+P,But we - except we use U for energy most of the time. ,1,0,0,0,0,0,0,0
+G,Yeah. I don't know why we don't use E for energy. ,1,0,0,0,0,0,0,0
+D,Or KE for kinetic energy.,1,0,0,0,0,0,0,0
+G,"Well that's - because that's two different letters, and all the variables are one letter. ",1,0,0,0,0,0,0,0
+D,Whatever. What if you use K?,1,0,0,0,0,0,0,0
+G,Cause K is a constant.,1,0,0,0,0,0,0,0
+D,K is like four constants in Physics - why not add another K?,1,0,0,0,0,0,0,0
+P,Hold up. We don't need to worry about nomenclature right now. I'm sorry this is all my fault. I did this.,1,0,0,0,0,0,0,0
+G,"Ok. So based on what we've looked up, let's assume - ",1,0,0,0,0,0,0,0
+P,It approaches 100. ,1,0,0,0,0,0,0,0
+G,Let's assume 98 cause I don't want to assume 100. ,1,0,0,0,0,0,0,0
+P,I feel like it's probably just like super - like it's 99.9,1,0,0,0,0,0,0,0
+D,So ridiculously close to 100 that it is 100.,1,0,0,0,0,0,0,0
+G,"Ok fine so we'll say efficiency is 1 for um, for liquid. And then you said you found one that was like very - ",1,0,0,0,0,0,0,0
+P,0.93,1,0,0,0,0,0,0,0
+G,And so but you said that was an exceptionally high one? ,1,0,0,0,0,0,0,0
+P,I think so based on a cursory reading of this Wikipedia article.,1,0,0,0,0,0,0,0
+G,So do we wanna say 0.9? Or 0.85? Or... do we just wanna take the 0.93?,1,0,0,0,0,0,0,0
+P,"Why don't we take the 0.93 and say with a little asterisk, this is an assumption - ",1,0,0,0,0,0,0,0
+G,An assumption.,1,0,0,0,0,0,0,0
+P,Considering an ideal - an extremely good system.,1,0,0,0,0,0,0,0
+G,"Ok, so we'll say 0.93. And then...",1,0,0,0,0,0,0,0
+P,And then we really wanna think about um the mass that those system - I guess,1,0,0,0,0,0,0,0
+G,That's what we're trying to find.,1,0,0,0,0,0,0,0
+P,Yeah so scratch the volumes. We're really thinking about like - ,1,0,0,0,0,0,0,0
+G,It says estimate the weight of fuel necessary to try to get a specific rocket of your choice to low Earth orbit if the fuel is liquid vs. hybrid.,0,1,0,0,0,0,0,0
+P,Ok.,1,0,0,0,0,0,0,0
+G,So let's see. We can find the mass from F equal - we are looking for mass in this equation.,1,0,0,0,0,0,0,0
+P,So m dot. ,1,0,0,0,0,0,0,0
+G,m over t ve plus pe minus po. So - ,1,0,0,0,0,0,0,0
+P,Which is basically - we're basically we're looking for our initial mass cause we're gonna be losing it the whole time.,1,0,0,0,0,0,0,0
+G,We want this. ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,"We found a value of this from the SLS, which is liquid.",1,0,0,0,0,0,0,0
+P,Yeah. And for time?,1,0,0,0,0,0,0,0
+G,Yeah. He found a value.,1,0,0,0,0,0,0,0
+R,Yes.,1,0,0,0,0,0,0,0
+G,Um...,1,0,0,0,0,0,0,0
+R,I said it took 8.5 minutes. ,1,0,0,0,0,0,0,0
+P,And we're assuming that ve is constant? That particles are leaving at the same velocity?,1,0,0,0,0,0,0,0
+G,v is oh yeah yeah yeah yeah it is exit velocity. But we still have a lot of things we don't know. ,1,0,0,0,0,0,0,0
+P,So p - so I guess whether p0 is - I mean obviously those particles are gonna be farther apart at the exit. The free stream pressure is given.,1,0,0,0,0,0,0,0
+G,Wait can you pull up that diagram you had before?,1,0,0,0,0,0,0,0
+P,Yeah I have it right here. I'm just curious so p0 is like the free stream pressure I guess. ,1,0,0,0,0,0,0,0
+G,No p0 is the first pressure. Ohhh.,1,0,0,0,0,0,0,0
+P,"Yeah. Unless it's the outside I guess. I mean obviously if we're starting on Earth's surface, your outside pressure is gonna be changing the whole time you are leaving the planet until you reach some near zero value.",0,0,1,0,0,0,0,0
+G,Oh yeah so it is the free stream pressure.,1,0,0,0,0,0,0,0
+P,But I don't know if that's - if that means what's outside or that means like what is close to the exit.,1,0,0,0,0,0,0,0
+G,Wait sorry say what you were saying again.,1,0,0,0,0,0,0,0
+P,Um so I'm not sure if p0 in this equation refers to the outside pressure or if it's pressure - cause the pressure as it's combusting - like these molecules are getting spread further apart.,0,0,0,0,0,0,1,0
+G,I think the pressure at the exit is what the - what you're talking about.,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,I think the po is pressure outside of the system.,1,0,0,0,0,0,0,0
+P,So it is just - once we reach vacuum it's zero. Why don't we say that the earth has no atmosphere for convenience.,0,0,1,0,0,0,0,0
+G,Yeah but low Earth there's still atmosphere I think.,0,0,1,0,0,0,0,0
+P,Yeah there's still but compared to the - it's - consider the magnitude of - ,1,0,0,0,0,0,0,0
+G,It's only like a third of the radius of Earth.,1,0,0,0,0,0,0,0
+P,"Yeah. Consider that magnitude compared to whatever massive pressure must be leaving. Like if it's even I don't know two orders of magnitude smaller, then maybe we can just neglect it. I mean maybe that'll be like one to ten percent, so maybe we shouldn't neglect it, but um if it's more than that, then we can definitely neglect it. ",1,0,0,0,0,0,0,0
+G,Yeah.,1,0,0,0,0,0,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+P,Um but let's see - we need a p value. We need to see how much pressure this is generating.,1,0,0,0,0,0,0,0
+G,And we need -,1,0,0,0,0,0,0,0
+P,"If it's a megapascal then 100 kPa, whatever.",1,0,0,0,0,0,0,0
+R,What do we put for A?,1,0,0,0,0,0,0,0
+G,I don't know.,1,0,0,0,0,0,0,0
+P,Ah we can just pick a circle.,1,0,0,0,0,0,0,0
+G,Well that's actually a thing that we can look up.,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,"If we're choosing the SLS, there are SLS dimensions. ",1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,So.,1,0,0,0,0,0,0,0
+P,Wanna find that. Find us a circle.,1,0,0,0,0,0,0,0
+R,Yeah.,1,0,0,0,0,0,0,0
+G,And we can also choose the Falcon 9 or the Dragon and say that it's kind of probably gonna be similar.,1,0,0,0,0,0,0,0
+P,Yeah. Close enough.,1,0,0,0,0,0,0,0
+G,Um...,1,0,0,0,0,0,0,0
+P,And we also have to consider the mass of the rocket itself maybe. I guess that was part of our assumption is how long it took so maybe not.,1,0,0,0,0,0,0,0
+G,Hmm.,1,0,0,0,0,0,0,0
+P,That might be worked into the -,1,0,0,0,0,0,0,0
+G,That's a good question. Is that mass of the whole thing or mass of the propellant?,1,0,0,0,0,0,0,0
+P,"I think it's asking for mass of the propellant, but what I'm saying is - ",1,0,0,0,0,0,0,0
+G,No it is asking mass of the propellant. I'm asking what the equation is.,1,0,0,0,0,0,0,0
+P,Oh.,1,0,0,0,0,0,0,0
+D,This mass?,1,0,0,0,0,0,0,0
+G,Yeah what is that mass?,1,0,0,0,0,0,0,0
+D,Well m dot is the mass flow rate so it has to be - ,1,0,0,0,0,0,0,0
+P,It's the mass flow rate. So it is the fuel I think. That's what makes sense to me.,1,0,0,0,0,0,0,0
+G,Ok. So this is - this is what we're looking for.,1,0,0,0,0,0,0,0
+P,Yeah. ,1,0,0,0,0,0,0,0
+G,This we can also look up.,1,0,0,0,0,0,0,0
+P,Yeah. Um pressure - ,1,0,0,0,0,0,0,0
+G,This we're assuming is 1.,1,0,0,0,0,0,0,0
+P,"Or we're assuming is so much greatly smaller that pe that as to be negligible, but we need to find a pe value to confirm that.",1,0,0,0,0,0,0,0
+G,So we need that and we need that.,1,0,0,0,0,0,0,0
+P,Otherwise this is gonna be a function that ranges from a hundred kPa to like 3 kPa or something. Um linearly.,1,0,0,0,0,0,0,0
+G,I bet we could find F equals m a and find the mass of a rocket and find the acceleration of a rocket.,1,0,0,0,0,0,0,0
+P,And then subtract out whatever our fuel value is.,1,0,0,0,0,0,0,0
+G,"And then we could say - well we could say that the mass of the rocket is equal to mass rocket plus mass fuel, and this is mass fuel, and then solve, so we would say mr plus mf a is equal to mf over t ve, which we said was zero. Ae which would then get us to...",1,0,0,0,0,0,0,0
+D,What was your source for that?,1,0,0,0,0,0,0,0
+P,This is um National Aeronautics and Space Administration. Have you heard of them?,1,0,0,0,0,0,0,0
+G,Nah I don't know what you're talking about. ,1,0,0,0,0,0,0,0
+R,Also said it created 2 million pounds of thrust if that makes any difference.,1,0,0,0,0,0,0,0
+G,Oh. Then that's F.,1,0,0,0,0,0,0,0
+P,Yay!,1,0,0,0,0,0,0,0
+G,Yes! Ok so then I don't need this. ,1,0,0,0,0,0,0,0
+P,Can we put that in metric?,1,0,0,0,0,0,0,0
+R,Do you guys want this website? ,1,0,0,0,0,0,0,0
+G,What website is that? Also a NASA website?,1,0,0,0,0,0,0,0
+R,The NASA - ,1,0,0,0,0,0,0,0
+P,Also NASA.,1,0,0,0,0,0,0,0
+G,Love NASA. Love that NASA is the government and has to report everything.,1,0,0,0,0,0,0,0
+P,Thanks for being thorough guys. Sorry you have to live in Florida. No offense if anyone's from Florida.,1,0,0,0,0,0,0,0
+G,No sorry you have to live in Alabama.,1,0,0,0,0,0,0,0
+P,Oh they like cart themselves right?,1,0,0,0,0,0,0,0
+G,"All of the SLS testing in all of the SLS um it's all in Huntsville, Alabama.",1,0,0,0,0,0,0,0
+P,Really?,1,0,0,0,0,0,0,0
+G,So was the Apollo stuff. They actually still have all the Apollo stuff up.,1,0,0,0,0,0,0,0
+P,Cool.,1,0,0,0,0,0,0,0
+G,Yeah. ,1,0,0,0,0,0,0,0
+P,So you're saying we should go visit.,1,0,0,0,0,0,0,0
+G,"If you can get on base, yeah, it's super cool. ",1,0,0,0,0,0,0,0
+P,So you're saying I should break onto a military base. ,1,0,0,0,0,0,0,0
+G,Yeah maybe not that. They're actually talking about tearing the Apollo stuff down though. ,1,0,0,0,0,0,0,0
+P,Why?,1,0,0,0,0,0,0,0
+G,Because - ,1,0,0,0,0,0,0,0
+P,That's gotta be like landmark at this point.,1,0,0,0,0,0,0,0
+G,"Well it's kinda complicated in that like that particular base has a joint thing with the army and so like they get a certain number of square footage and the army gets a certain number of square footage, and if they want to expand more, they have to take down buildings. So because the Apollo stuff doesn't help them anymore, they might have to like take it down.",1,0,0,0,0,0,0,0
+P,Well I will be happy to take it off their hands. Um alright so - ,1,0,0,0,0,0,0,0
+G,This is the Apollo T stand.,1,0,0,0,0,0,0,0
+P,Just still hanging out.,1,0,0,0,0,0,0,0
+G,Which is just still hanging out. And this was the Redstone.,1,0,0,0,0,0,0,0
+P,You were there?,1,0,0,0,0,0,0,0
+G,Yeah I went in the fall.,1,0,0,0,0,0,0,0
+P,That's so dope. ,1,0,0,0,0,0,0,0
+R,Yeah the fuel tank is 27 - boy this has everything man - 27.5 feet diameter and 130 feet long. ,1,0,0,0,0,0,0,0
+G,Ok so from that we can get the area. ,1,0,0,0,0,0,0,0
+P,Um we just need - ,1,0,0,0,0,0,0,0
+G,Wait so it's - say that again.,1,0,0,0,0,0,0,0
+R,Uh the fuel - the liquid hydrogen rocket fuel tank is 27.5 feet in diameter and it just says over 130 feet long.,0,0,1,0,0,0,0,0
+P,So we need - ,1,0,0,0,0,0,0,0
+G,Ok so we'll just say 130.,1,0,0,0,0,0,0,0
+R,Yeah sure.,1,0,0,0,0,0,0,0
+P,We need pressure of the gas as it's escaping before it starts to dissipate infinitely into the aether. ,0,0,0,0,1,0,0,0
+G,Wait area exit is just the cross-sectional area of that right?,1,0,0,0,0,0,0,0
+P,Yup.,1,0,0,0,0,0,0,0
+G,Ok so we don't actually need the length.,1,0,0,0,0,0,0,0
+P,Yeah it's pi r squared. All you care about. ,1,0,0,0,0,0,0,0
+G,Or pi - ,1,0,0,0,0,0,0,0
+P,Pi d over 4.,1,0,0,0,0,0,0,0
+G,Pi over 4. ,1,0,0,0,0,0,0,0
+P,d squared over 4.,1,0,0,0,0,0,0,0
+G,d squared. So this we have. This we still want.,1,0,0,0,0,0,0,0
+P,So we need to probably - ,1,0,0,0,0,0,0,0
+G,This we have. ,1,0,0,0,0,0,0,0
+P,That's probably - ,1,0,0,0,0,0,0,0
+G,This we have. ,1,0,0,0,0,0,0,0
+P,- a lookup thing. Um.,1,0,0,0,0,0,0,0
+G,We need to find the exit velocity and the exit pressure.,1,0,0,0,0,0,0,0
+R,"Do we need to find the - oh we're solving for the mass of the fuel, correct?",1,0,0,0,0,0,0,0
+G,We're solving for the mass of the fuel. ,1,0,0,0,0,0,0,0
+R,Gotcha.,1,0,0,0,0,0,0,0
+P,Hm. ,1,0,0,0,0,0,0,0
+R,"Cause it says it holds 537,000 gallons. ",1,0,0,0,0,0,0,0
+G,Welp. We can figure out whether or not we did it right. But that's what we want.,1,0,0,0,0,0,0,0
+P,So from your first equation...or from your second equation I guess - ,1,0,0,0,0,0,0,0
+R,How are we supposed to know velocity?,1,0,0,0,0,0,0,0
+G,But how are we - ,1,0,0,0,0,0,0,0
+P,Do we know the acceleration?,1,0,0,0,0,0,0,0
+G,How are you fitting efficiency into this?,1,0,0,0,0,0,0,0
+P,So we - ,1,0,0,0,0,0,0,0
+D,Are we assuming the efficiency is 1?,1,0,0,0,0,0,0,0
+P,I think we're assuming this is an idealized value.  ,1,0,0,0,0,0,0,0
+G,Oh this is an ideal - this is the ideal one.,1,0,0,0,0,0,0,0
+R,Yeah. ,1,0,0,0,0,0,0,0
+P,Yeah. So basically the - whatever we get for the mass - ,1,0,0,0,0,0,0,0
+G,But we do need - ,1,0,0,0,0,0,0,0
+P,This is gonna be the liquid.,1,0,0,0,0,0,0,0
+G,Oh but then for the other one we need to do um...,1,0,0,0,0,0,0,0
+P,It'll be 0.8 at that or 0.93 or whatever.,1,0,0,0,0,0,0,0
+R,Can someone explain to me what pe and po is real quick?,1,0,0,0,0,0,0,0
+G,This is the - can you pull up the thing? It'll be easier with that.,1,0,0,0,0,0,0,0
+P,"So po is literally the pressure outside of the vessel, and pe is the pressure of the gas as it is leaving, as escaping, so that's basically gonna be probably peak for that system.",0,0,0,0,0,1,0,0
+R,So wouldn't po be changing as it goes up?,1,0,0,0,0,0,0,0
+G,It is changing as it goes up.,1,0,0,0,0,0,0,0
+P,But we're assuming it's so much smaller than pe as to be negligible is what we're assuming.,1,0,0,0,0,0,0,0
+R,So we're just counting at zero.,1,0,0,0,0,0,0,0
+P,"And we if we - we're counting - but if we find out that pe is something that's not as crazy high as we're assuming it is, then we will be wrong about that assumption. ",1,0,0,0,0,0,0,0
+G,Yeah and then we're gonna have to figure it out and probably do an integral which I don't really want to do. ,1,0,0,0,0,0,0,0
+P,Yeah. ,1,0,0,0,0,0,0,0
+R,How will we find - ,1,0,0,0,0,0,0,0
+P,We can make it linear. ,1,0,0,0,0,0,0,0
+G,Yeah...yeah. ,1,0,0,0,0,0,0,0
+P,We can just assume it decreases linearly with altitude. ,1,0,0,0,0,0,0,0
+R,How will we find pe then?,1,0,0,0,0,0,0,0
+P,Um.,1,0,0,0,0,0,0,0
+G,That's what we're trying to figure out.,1,0,0,0,0,0,0,0
+P,Yeah. Um. ,1,0,0,0,0,0,0,0
+G,We also need to find ve. ,1,0,0,0,0,0,0,0
+P,pe liquid rocket. Yeah the velocity of that. Um. Liquid rocket engine. Oh that's the same website I was on.,1,0,0,0,0,0,0,0
+R,Oh. I was getting hype cause I saw liquid.,1,0,0,0,0,0,0,0
+P,Exit nozzle pressure. Are you a chart?,1,0,0,0,0,0,0,0
+G,"We have the diameter, so... Oh wait. Wait wait wait wait wait. Pressure is equal to force over area. ",1,0,0,0,0,0,0,0
+D,Yeah.,1,0,0,0,0,0,0,0
+G,"We have area, and we have force. ",1,0,0,0,0,0,0,0
+P,That's great. Um. Pretty sure that's stress though. ,1,0,0,0,0,0,0,0
+D,It's also pressure.,1,0,0,0,0,0,0,0
+G,It's also pressure. ,1,0,0,0,0,0,0,0
+P,It is. No it is. Yeah. I guess just in terms of pressure is a little more philosophical cause you can't have it negative. I will talk about the Casimir effect later. It is technically a little fishier than that. Um. Anyway. Yeah so we have that. We just need pe. Oh no we just need the escape velocity or the escape velocity of the particles - of the flow. ,1,0,0,0,0,0,0,0
+R,Yes.,1,0,0,0,0,0,0,0
+G,Is this the cross-sectional area too though or the area of the whole thing?,1,0,0,0,0,0,0,0
+P,Yup.,1,0,0,0,0,0,0,0
+G,Well then this is just actually - ,1,0,0,0,0,0,0,0
+P,Cancels out.,1,0,0,0,0,0,0,0
+G,Cancels out and ends up being - ,1,0,0,0,0,0,0,0
+P,Wait F equals...,1,0,0,0,0,0,0,0
+G,F equals.,1,0,0,0,0,0,0,0
+P,That doesn't make sense.,1,0,0,0,0,0,0,0
+G,m F over t ve plus F?,1,0,0,0,0,0,0,0
+P,That doesn't work.,1,0,0,0,0,0,0,0
+G,That doesn't work. ,1,0,0,0,0,0,0,0
+D,That doesn't make sense. ,1,0,0,0,0,0,0,0
+G,This doesn't work.,1,0,0,0,0,0,0,0
+P,Scratch that.,1,0,0,0,0,0,0,0
+G,Scratch that. ,1,0,0,0,0,0,0,0
+P,"Uh this is mixture ratio versus chamber pressure, and I don't know if chamber pressure is the same thing, but I'm gonna see if I can find something with pe. Nope. Just control F pe. Pellant.",1,0,0,0,0,0,0,0
+G,Um. Oh I found - I found maybe exit velocities. ,1,0,0,0,0,0,0,0
+P,Oh great. ,1,0,0,0,0,0,0,0
+G,Maybe.,1,0,0,0,0,0,0,0
+P,Mixture ratio is ratio of oxidizer to...,1,0,0,0,0,0,0,0
+G,I found an equation for exit velocity that looks awful.,1,0,0,0,0,0,0,0
+D,Oh yeah that looks miserable. Let's not use that.,1,0,0,0,0,0,0,0
+P,What is it? We can figure out what all those are...,1,0,0,0,0,0,0,0
+D,What's gamma?,1,0,0,0,0,0,0,0
+G,I don't know.,1,0,0,0,0,0,0,0
+P,Some angle or something. ,1,0,0,0,0,0,0,0
+G,"Gamma is the isentropic expansion factor, which is cp over cv.",1,0,0,0,0,0,0,0
+D,Oh.,1,0,0,0,0,0,0,0
+P,Oh. ,1,0,0,0,0,0,0,0
+G,Which we don't have for this mixture. ,1,0,0,0,0,0,0,0
+D,Yeah.,1,0,0,0,0,0,0,0
+P,We can assume that oxygen at pa temperature is an ideal gas?,1,0,0,0,0,0,0,0
+G,Yeah but it's a mixture of oxygen and hydrogen. ,1,0,0,0,0,0,0,0
+P,Hm. Still an ideal gas at that point. ,1,0,0,0,0,0,0,0
+G,Yeah but you don't know the - but cp is specific to a material.,1,0,0,0,0,0,0,0
+P,Unless it's an ideal gas.,1,0,0,0,0,0,0,0
+R,Engine operating pressures usually ranging...,1,0,0,0,0,0,0,0
+P,Cause you can - there's cp - or c values. cp is equal to cv for ideal gases. ,1,0,0,0,0,0,0,0
+G,Yeah but it's still specific to a material.,1,0,0,0,0,0,0,0
+P,"Right but I'm pretty sure in the ideal gas table, like it's - at that point it's just particles bouncing around and they're far enough apart that it kind of equalizes. I thought.",1,0,0,0,0,0,0,0
+G,I don't think - I think - I think it - ,1,0,0,0,0,0,0,0
+P,No maybe you're right. Maybe I'm misremembering that. ,1,0,0,0,0,0,0,0
+R,I think I found a - you found a ve?,1,0,0,0,0,0,0,0
+G,"Uh yeah. I also - I did find a ve. I found one for liquid and one for solid, so then we could average them and say that the one for hybrid is somewhere in between. What did you find for your ve?",1,0,0,0,0,0,0,0
+R,"Uh 3,630 meters per second. ",1,0,0,0,0,0,0,0
+P,That's a lot of meters in a second.  ,1,0,0,0,0,0,0,0
+G,I have - mine's in kilometers per second. ,1,0,0,0,0,0,0,0
+P,Is it -,1,0,0,0,0,0,0,0
+D,That divided by 1000?,1,0,0,0,0,0,0,0
+P,3?,1,0,0,0,0,0,0,0
+G,Yeah it's like 3 to 4.5.,1,0,0,0,0,0,0,0
+P,"Great. Works for me. Anything in that range, happy to take it. ",1,0,0,0,0,0,0,0
+D,Yeah. ,1,0,0,0,0,0,0,0
+G,Ok. So then yeah. ,1,0,0,0,0,0,0,0
+D,What was yours?,1,0,0,0,0,0,0,0
+P,You guys want to take 4?,1,0,0,0,0,0,0,0
+R,Uh.,1,0,0,0,0,0,0,0
+P,3.75?,1,0,0,0,0,0,0,0
+R,3.67 kilometers per second.,1,0,0,0,0,0,0,0
+D,Ok.,1,0,0,0,0,0,0,0
+G,Yeah.,1,0,0,0,0,0,0,0
+P,3.6 is good.,1,0,0,0,0,0,0,0
+D,That's like in the middle of your range too cause yours starts at 2.9 so. ,1,0,0,0,0,0,0,0
+G,Yeah so let's say 3.6 so ve is 3.6 kilometers per second. ,1,0,0,0,0,0,0,0
+P,Yup. So as - well I mean we could... ,1,0,0,0,0,0,0,0
+G,Is yours on NASA?,1,0,0,0,0,0,0,0
+R,Is yours?,1,0,0,0,0,0,0,0
+P,Britannica.,1,0,0,0,0,0,0,0
+G,Oh Britannica's good. That's fine.,1,0,0,0,0,0,0,0
+D,That sounds a lot more reliable than Wikipedia.,1,0,0,0,0,0,0,0
+P,Wikipedia's plenty reliable.,1,0,0,0,0,0,0,0
+G,We could also - ,1,0,0,0,0,0,0,0
+D,Not when it says 2.9 to 4.5 and that gives 3.6 exactly so.,1,0,0,0,0,0,0,0
+G,Well...,1,0,0,0,0,0,0,0
+P,That's still fine.,1,0,0,0,0,0,0,0
+G,That's still - I mean - ,1,0,0,0,0,0,0,0
+P,Averaging. ,1,0,0,0,0,0,0,0
+G,Not all rockets are the same. Ok.,1,0,0,0,0,0,0,0
+P,Um.,1,0,0,0,0,0,0,0
+D,They're all exactly the same. ,1,0,0,0,0,0,0,0
+G,And then - ,1,0,0,0,0,0,0,0
+P,pe is our problem child.,1,0,0,0,0,0,0,0
+G,pe is indeed our problem child.,1,0,0,0,0,0,0,0
+P,Um. ,1,0,0,0,0,0,0,0
+G,Oh this gives the same equation for specific impulse. We love to see that. ,1,0,0,0,0,0,0,0
+P,Excellent.,1,0,0,0,0,0,0,0
+G,Excellent. ,1,0,0,0,0,0,0,0
+P,"Hey if you multiply - or divide that by delta t, you get back to the force. Can we do that? I mean I guess it's over a range so it doesn't really work out that well, but...",1,0,0,0,0,0,0,0
+G,I don't envision - I don't want us to get another force is equal to something plus force equation. That's gonna work out super well for us. ,1,0,0,0,0,0,0,0
+P,Yeah this website is not helpful. What time do you have to go to your class?,1,0,0,0,0,0,0,0
+G,Uh I need to leave at like 1:20. ,1,0,0,0,0,0,0,0
+D,Same. ,1,0,0,0,0,0,0,0
+P,Ok.,1,0,0,0,0,0,0,0
+G,Are you...you're the one who also has class right after this.,1,0,0,0,0,0,0,0
+D,Yeah but I have Diff Eq literally like upstairs so. ,1,0,0,0,0,0,0,0
+G,Ok. I'm going to another building. ,1,0,0,0,0,0,0,0
+D,I can leave in like 5 minutes before the class starts. ,1,0,0,0,0,0,0,0
+G,Ok. So we have like probably fifteen - we have like probably twenty minutes. ,1,0,0,0,0,0,0,0
+P,Um. ,1,0,0,0,0,0,0,0
+G,Ok but we...,1,0,0,0,0,0,0,0
+D,p equals n R T over v?,1,0,0,0,0,0,0,0
+P,I just found a uh 10 or so page thing on rocket performance and efficiency. Hopefully there will be something good in here. Um let's start with remembering that for rocket t equals p...,1,0,0,0,0,0,0,0
+G,Mmm no cause then we'd have to find the number of moles. ,1,0,0,0,0,0,0,0
+R,Yeah it says engine operating pressures usually range from a thousand to ten thousand kilopascals. That - does that help?,1,0,0,0,0,0,0,0
+P,That's - wait - that's what they operate at?,1,0,0,0,0,0,0,0
+R,Yeah. ,1,0,0,0,0,0,0,0
+P,"We have a range. It's big. It's an order of magnitude, but - ",1,0,0,0,0,0,0,0
+G,Is it actually an order of magnitude?,1,0,0,0,0,0,0,0
+P,But this is fine for feasibility. A thousand to ten thousand. Um. Kilopascals. Which um is you know a lot bigger than a hundred so I think assuming that we're still in that range or even if we're at - we - let's just assume we're at the maximum range for the sake of expediency um and cause we're really just doing a feasibility check more than anything else.,1,0,0,0,0,0,0,0
+G,"If we also assume the same pressure for both of them, then it will be fine. ",1,0,0,0,0,0,0,0
+P,Yeah. So let's say it's ten thousand maximum.,1,0,0,0,0,0,0,0
+D,Ten thousand. ,1,0,0,0,0,0,0,0
+P,Um and we um ,1,0,0,0,0,0,0,0
+G,It'd be fine but fine. ,1,0,0,0,0,0,0,0
+D,Debatable.,1,0,0,0,0,0,0,0
+P,Then we have an equation we can get m.,1,0,0,0,0,0,0,0
+G,This is like a super neat piece of paper. I think we should turn this one in. ,1,0,0,0,0,0,0,0
+D,Honestly - ,1,0,0,0,0,0,0,0
+R,All organized just a bunch of arrows next to this. ,1,0,0,0,0,0,0,0
+P,That's what my exam looked like guys. I'm not gonna lie. ,1,0,0,0,0,0,0,0
+G,"This is what all of my exams look like. This is what my homework looks like. Cause I write an equation of what I'm looking for, and then I'm like ok I have this I don't have that and then I need that I need that. And then I like yeah. This is what everything I do looks like.",1,0,0,0,0,0,0,0
+P,Not a linear process.,1,0,0,0,0,0,0,0
+G,No. ,1,0,0,0,0,0,0,0
+P,Gotta let it do its thing. Um. Ok so let's crunch numbers. ,1,0,0,0,0,0,0,0
+G,Ok so now let's solve for mf. So F minus...this is zero...F minus p0 Ae.,1,0,0,0,0,0,0,0
+D,"How bout you do all this out, and then once everything's written out, we'll figure out how to do it nicely.",1,0,0,0,0,0,0,0
+G,Is equal to...mf over tp.,1,0,0,0,0,0,0,0
+P,So I guess my question is...it would be nice if we could see how efficiency is specifically - ,1,0,0,0,0,0,0,0
+G,This is our mf equation?,1,0,0,0,0,0,0,0
+P,Yup.,1,0,0,0,0,0,0,0
+G,Have you been writing down our things as we went?,1,0,0,0,0,0,0,0
+D,"Not the values, but all the assumptions we've been talking about I've been writing down. So I still need to write down like - like all these values that we got I need to write that down I guess.",1,0,0,0,0,0,0,0
+P,So we had 3.6 something for - ,1,0,0,0,0,0,0,0
+G,Kilometers per second. ,1,0,0,0,0,0,0,0
+P,For velocity. Um. And we had ten thousand kilopascals.,1,0,0,0,0,0,0,0
+G,Which is in - you have that actually in meters. Which is 3 - that's move it three times over? Three six zero zero meters per second?,1,0,0,0,0,0,0,0
+P,Should be...,1,0,0,0,0,0,0,0
+G,Is a kilometer to a meter a hundred or a thousand?,1,0,0,0,0,0,0,0
+P,Should be more meters than kilometers. ,1,0,0,0,0,0,0,0
+G,Yeah.,1,0,0,0,0,0,0,0
+P,Yeah. So - ,1,0,0,0,0,0,0,0
+G,But is it a hundred or a thousand?,1,0,0,0,0,0,0,0
+D,A thousand. ,1,0,0,0,0,0,0,0
+G,"So it's three, six, and then three zeros meters per second.",1,0,0,0,0,0,0,0
+P,"We're at ten thousand kilopascals, which is um.",1,0,0,0,0,0,0,0
+D,What are you - what are you asking?,1,0,0,0,0,0,0,0
+P,Ten thousand Pascals is - ,1,0,0,0,0,0,0,0
+G,"How many...? If I'm trying to convert three point 6 kilometers per second to 3.6 meters per second, but I'm - ",1,0,0,0,0,0,0,0
+D,Three six zero zero.,1,0,0,0,0,0,0,0
+G,Only two zeros.,1,0,0,0,0,0,0,0
+D,Yes. ,1,0,0,0,0,0,0,0
+R,Yes.,1,0,0,0,0,0,0,0
+G,Ok. Thanks. That's what I wanted to know.,1,0,0,0,0,0,0,0
+P,Um yeah. Yeah you're good.,1,0,0,0,0,0,0,0
+G,Ok so what did you get for t?,1,0,0,0,0,0,0,0
+P,Uh t was...,1,0,0,0,0,0,0,0
+R,t was 8.5 minutes.,1,0,0,0,0,0,0,0
+P,Yeah. Some num - I can tell you how many seconds. ,1,0,0,0,0,0,0,0
+G,"Minutes, which is...",1,0,0,0,0,0,0,0
+P,8.5 you said?,1,0,0,0,0,0,0,0
+G,Liquid is equal to...,1,0,0,0,0,0,0,0
+P,Just 510 seconds. ,1,0,0,0,0,0,0,0
+G,Um thank you. Can - and then 2 million pounds of thrust is how many Newtons?,1,0,0,0,0,0,0,0
+P,I will Google convert that for you. How many did we say? 10 million?,1,0,0,0,0,0,0,0
+G,2 million. ,1,0,0,0,0,0,0,0
+P,2 million. 2 million lbf in Newtons. ,1,0,0,0,0,0,0,0
+D,Time equals...,1,0,0,0,0,0,0,0
+P,You ready to write down a number?,1,0,0,0,0,0,0,0
+G,Yeah I got it. ,1,0,0,0,0,0,0,0
+P,Do you want it in kilo?,1,0,0,0,0,0,0,0
+G,No I want it in Newtons.,1,0,0,0,0,0,0,0
+P,Ok. Um so 8896443.2 Newtons. We definitely have that many sig figs in our measurement. ,1,0,0,0,0,0,0,0
+G,Oh for sure. ,1,0,0,0,0,0,0,0
+P,We could say - we could say 9 million. ,1,0,0,0,0,0,0,0
+G,Let's say 9.,1,0,0,0,0,0,0,0
+P,I think that's fair. We have one sig fig. We have one. Let's be real. ,1,0,0,0,0,0,0,0
+R,p0 is...you said we're just gonna take the maximum?,1,0,0,0,0,0,0,0
+P,Uh we were saying p0 is negligible compared to the pressure regardless of whether it's on our surface or in vacuum. It's so small that it doesn't really affect our final value that much. ,1,0,0,0,0,0,0,0
+D,So what is this? This is um F?,1,0,0,0,0,0,0,0
+G,Yeah that's F. So this is equal to 510 s times 9 one two three four five six minus - what letter is that? What did I write?,1,0,0,0,0,0,0,0
+P,What did I write here?,1,0,0,0,0,0,0,0
+G,Maybe not. ,1,0,0,0,0,0,0,0
+P,Oh right so my question was if we can find how efficiency of these rockets is actually defined because how are we multiplying that efficiency to our final answer? Is it literally - ,1,0,0,0,0,0,0,0
+G,Yeah that's what I wanted to know.,1,0,0,0,0,0,0,0
+P,- gonna be like one minus that - we need that much more mass? Or - ,1,0,0,0,0,0,0,0
+G,Well so this one is - I think we probably need that much more mass.,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,"Because if it's only 8% efficient, then we need to have - ",1,0,0,0,0,0,0,0
+P,20% more mass. Yeah.,1,0,0,0,0,0,0,0
+G,Yeah. ,1,0,0,0,0,0,0,0
+P,Roughly.,1,0,0,0,0,0,0,0
+G,Yeah. Or 80%.,1,0,0,0,0,0,0,0
+P,Or 93. Whatever. So 7% more mass.,1,0,0,0,0,0,0,0
+G,Ok pe - What is pe? I thought we found that.,1,0,0,0,0,0,0,0
+R,Uh ten thousand kilopascals.,1,0,0,0,0,0,0,0
+P,"Ten thousand kPa was our max value, so we were just assuming. ",1,0,0,0,0,0,0,0
+G,Is SI kPa or Pa? ,1,0,0,0,0,0,0,0
+P,Um as long as you're consistent.,1,0,0,0,0,0,0,0
+G,But it's only used once. ,1,0,0,0,0,0,0,0
+P,"It's gonna be kilonewtons per meter squared. Is kPa, so if you have Newtons on that side, you could just add three zeros to it. ",1,0,0,0,0,0,0,0
+G,Ok so that's...,1,0,0,0,0,0,0,0
+D,Ten million.,1,0,0,0,0,0,0,0
+G,Thanks. Pascal...,1,0,0,0,0,0,0,0
+P,You just wrote ten billion. One of those days.,1,0,0,0,0,0,0,0
+G,I'm the literal worst at unit conversions. Unit conversion and subtraction is the number one area I lose points on exams. Um feet can you do this to meters?,1,0,0,0,0,0,0,0
+P,Yeah 27.5? And the - whatever the other one - oh we don't need the length. We don't need it. 27.5 feet. ,1,0,0,0,0,0,0,0
+D,Did we need the mass?,1,0,0,0,0,0,0,0
+P,8.382.,1,0,0,0,0,0,0,0
+G,The mass? That's what we're looking for. ,1,0,0,0,0,0,0,0
+D,"Oh I'm actually stupid. It's been a long day, and it's only 1 o'clock.",1,0,0,0,0,0,0,0
+G,Wait sorry what was the diameter?,1,0,0,0,0,0,0,0
+P,Uh 8.382. Or you know - ,1,0,0,0,0,0,0,0
+G,2,1,0,0,0,0,0,0,0
+P,8.4? I don't know. Round it. ,1,0,0,0,0,0,0,0
+R,8.382 meters. ,1,0,0,0,0,0,0,0
+D,Oh that's 27.5 ok. Never mind. ,1,0,0,0,0,0,0,0
+P,Wow.,1,0,0,0,0,0,0,0
+D,I was like wow 275 to 8 meters. And I was like wait 275 feet is an awfully big diameter. ,1,0,0,0,0,0,0,0
+P,8 meters is not small for a diameter though. ,1,0,0,0,0,0,0,0
+G,Oh wait that's diameter - oh fuck. ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+D,Still significantly smaller than 275 though. ,1,0,0,0,0,0,0,0
+G,Pi times 8.4 squared over 4.,1,0,0,0,0,0,0,0
+P,We got some negative number. That's scary. ,1,0,0,0,0,0,0,0
+G,For the mass?,1,0,0,0,0,0,0,0
+P,We've broken physics!,1,0,0,0,0,0,0,0
+G,We love that. ,1,0,0,0,0,0,0,0
+P,We can - with negative mass we can beat the speed of light. Congratulations guys. Wait -,1,0,0,0,0,0,0,0
+G,It's because this number is bigger than this number. ,1,0,0,0,0,0,0,0
+R,Yeah.,1,0,0,0,0,0,0,0
+G,So we assumed too high of an exit pressure. ,1,0,0,0,0,0,0,0
+R,So just assume like middle.,1,0,0,0,0,0,0,0
+G,Yeah. Picking the maximum isn't gonna work. ,1,0,0,0,0,0,0,0
+P,Ok um.,1,0,0,0,0,0,0,0
+R,So let's go 5 million?,1,0,0,0,0,0,0,0
+P,I mean at this point it's gonna be between - well it should still - ,1,0,0,0,0,0,0,0
+R,It's still negative. ,1,0,0,0,0,0,0,0
+P,"That doesn't make sense to me cause the pressure should be adding - like that exit pressure should be presumably adding to your um thrust, right? It is plus. That's what - that's all. Oh because when you rearrange - ",1,0,0,0,0,0,0,0
+G,Yeah but I solved for mass.,1,0,0,0,0,0,0,0
+P,When you rearranged I see.  ,1,0,0,0,0,0,0,0
+G,You have to subtract.,1,0,0,0,0,0,0,0
+P,Yeah I see what you're saying. Um. So it would just be F minus that value divided by our exit velocity.,1,0,0,0,0,0,0,0
+G,"You put this in, right?",1,0,0,0,0,0,0,0
+P,What's our F value?,1,0,0,0,0,0,0,0
+G,Oh you're using Desmos cool.,1,0,0,0,0,0,0,0
+P,Our F value was 10 million?,1,0,0,0,0,0,0,0
+R,Our F value - we converted that to pounds. I got converted that to 9 million.,1,0,0,0,0,0,0,0
+G,It should be 9 million. ,1,0,0,0,0,0,0,0
+R,Oh so we're not doing the exact number.,1,0,0,0,0,0,0,0
+P,Yeah just rounding. 9 million Newtons. Um 9 million Newtons times...,1,0,0,0,0,0,0,0
+P,But it's still gonna give us a negative number.,1,0,0,0,0,0,0,0
+P,Or minus - Yeah. ,1,0,0,0,0,0,0,0
+G,That's not the problem. The problem is this. It's either this assumption is too small.,1,0,0,0,0,0,0,0
+P,Or that assumption is too - ,1,0,0,0,0,0,0,0
+G,Or this assumption is too big. ,1,0,0,0,0,0,0,0
+P,That's a - ,1,0,0,0,0,0,0,0
+G,This is the only thing we assumed in the top row.,1,0,0,0,0,0,0,0
+P,Yeah. So we're - ,1,0,0,0,0,0,0,0
+G,So it's this one. ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,"Cause this was from SLS, this was from SLS, and that was also from SLS.",1,0,0,0,0,0,0,0
+P,Ok. So it's our pe value?,1,0,0,0,0,0,0,0
+G,So it's our pe value.,1,0,0,0,0,0,0,0
+P,"Yeah. So we need to adjust that. I mean right now it's at...what we originally had it at like 10 MPa? I mean that's like a lot, but I don't think it's something that doesn't occur in the universe. ",1,0,0,0,0,0,0,0
+G,No I think we had it at 10 kPa.,1,0,0,0,0,0,0,0
+R,Well we just leave it in kPa?,1,0,0,0,0,0,0,0
+P,10 kPa is one tenth of air pressure. So that makes no sense.,1,0,0,0,0,0,0,0
+G,Never mind never mind never mind. ,1,0,0,0,0,0,0,0
+P,Um. We're just like blowing very lightly out that.,1,0,0,0,0,0,0,0
+G,Whoops.,1,0,0,0,0,0,0,0
+P,So it's gotta be MPa but um - just trying to think. pe...,1,0,0,0,0,0,0,0
+G,What is the lowest value on that range that you had? ,1,0,0,0,0,0,0,0
+P,It went from a thousand to ten thousand.,1,0,0,0,0,0,0,0
+R,A thousand to ten thousand kilopascals.,1,0,0,0,0,0,0,0
+P,kPa. Unless we just did a unit conversion silly.,1,0,0,0,0,0,0,0
+G,Well let's do a thousand. ,1,0,0,0,0,0,0,0
+P,Did we do a unit conversion silly?,1,0,0,0,0,0,0,0
+G,We might have done a unit conversion silly. That's possible.,1,0,0,0,0,0,0,0
+P,Oh no you did it right. Um. ,1,0,0,0,0,0,0,0
+G,Ten to the sixth. ,1,0,0,0,0,0,0,0
+R,"If we assumed a thousand, would it be one hundred thousand Pascals?",1,0,0,0,0,0,0,0
+G,A thousand would be one times ten to the sixth. So it'd be one with six zeros. ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,What does that give you?,1,0,0,0,0,0,0,0
+P,One with...yeah.,1,0,0,0,0,0,0,0
+R,So one million? Or a hundred thousand. ,1,0,0,0,0,0,0,0
+P,One million. ,1,0,0,0,0,0,0,0
+D,One million. ,1,0,0,0,0,0,0,0
+P,Yup. Cause it was ten million before. So that... well then.,1,0,0,0,0,0,0,0
+G,Well.,1,0,0,0,0,0,0,0
+P,I mean a thousand kPa - if it's already at a thousand kPa then we really probably shouldn't neglect p0 cause that's gonna be - at Earth's surface - ,1,0,0,0,0,0,0,0
+G,Yeah the problem is we're neglecting p0.,1,0,0,0,0,0,0,0
+P,"Right cause that's gonna reduce that value. But - so at Earth's surface, it's gonna be 10% of that value. It'll be a hundred kPa. Um. And then it's gonna decrease linearly with altitude. So it's gonna definitely take a little bit from that, but it's over the whole length. ",1,0,0,0,0,0,0,0
+R,What's this pressure?,1,0,0,0,0,0,0,0
+P,It's about a hundred kPa. I think it's 101 or something like that. ,1,0,0,0,0,0,0,0
+G,"Let's just say that it doesn't decrease, which we know is wrong, but let's say it doesn't. What does that give us?",1,0,0,0,0,0,0,0
+P,So minus...,1,0,0,0,0,0,0,0
+G,So in here this would be minus.,1,0,0,0,0,0,0,0
+P,Unless we're wrong about - ,1,0,0,0,0,0,0,0
+G,This would be pe minus po Ae.,1,0,0,0,0,0,0,0
+D,What if we're wrong about the force? About that assumption?,1,0,0,0,0,0,0,0
+G,Well the force though was something that we actually found from the SLS.,1,0,0,0,0,0,0,0
+D,Ok. ,1,0,0,0,0,0,0,0
+R,"This says...liquid and hydrogen, liquid oxygen, to produce two million pounds of thrust. ",1,0,0,0,0,0,0,0
+P,We said...two million. Just confirm that. It is...yeah 9 million Newtons.,1,0,0,0,0,0,0,0
+D,And that's over the course of the entire?,1,0,0,0,0,0,0,0
+P,No force is sort of an instantaneous measure. ,1,0,0,0,0,0,0,0
+D,"I guess I'm just confused cause we're doing - we're multiplying by 510 seconds, but I don't think that matters.",1,0,0,0,0,0,0,0
+G,Cause that's time.,1,0,0,0,0,0,0,0
+P,Yeah. So our area - ,1,0,0,0,0,0,0,0
+G,Well let's and just be like this isn't right.,1,0,0,0,0,0,0,0
+R,But we - should we just try including po?,1,0,0,0,0,0,0,0
+G,Yeah that's what I - oh I thought you did that. ,1,0,0,0,0,0,0,0
+R,No. ,1,0,0,0,0,0,0,0
+P,"So minus one tenth of that, so a hundred thousand. Still negative. ",1,0,0,0,0,0,0,0
+G,It's still negative?,1,0,0,0,0,0,0,0
+R,Aw shit.,1,0,0,0,0,0,0,0
+G,Are you ok?,1,0,0,0,0,0,0,0
+R,Yeah I just deleted all that. ,1,0,0,0,0,0,0,0
+G,Oh. ,1,0,0,0,0,0,0,0
+R,"I tried to click this, but I clicked the X button I'm like aw no I just lost it. ",1,0,0,0,0,0,0,0
+G,Is it still negative?,1,0,0,0,0,0,0,0
+P,Yup. ,1,0,0,0,0,0,0,0
+G,I mean I didn't really expect that to change a whole lot. ,1,0,0,0,0,0,0,0
+P,It's literally just...I guess it is really that pressure difference that's kind of doing the work here. So you would need - so we're not really evaluating - I guess we're evaluating how far it went in terms of like how much time it was moving with this force being applied to it.,1,0,0,0,0,0,0,0
+G,Yeah.,1,0,0,0,0,0,0,0
+P,Um. And it's accelerating that whole time. You know.,1,0,0,0,0,0,0,0
+R,Since velocity is changing.,1,0,0,0,0,0,0,0
+P,"Yes. But the - I mean not the velocity of the - if your inertial frame of reference is the rocket itself, then the velocity of the gas exiting stays the same. Um. But your body is certainly changing velocity, and as you get further away from the earth's pole, that's gonna change too. Um. Who knew rocket science was so hard?",1,0,0,0,0,0,0,0
+G,Surprise. ,1,0,0,0,0,0,0,0
+P,Hm. I think you guys have to go in 8 minutes so.,1,0,0,0,0,0,0,0
+G,Yeah. ,1,0,0,0,0,0,0,0
+P,Let's wait for a catharsis I guess. ,1,0,0,0,0,0,0,0
+G,We need to do the other part of this. ,1,0,0,0,0,0,0,0
+P,"Yeah I mean that's just putting it - that would just be putting it in terms of um the mass of the engine, but um... But we certainly got an answer that didn't make a lick of sense. ",1,0,0,0,0,0,0,0
+G,"I mean it was a lot of math, which makes the sense. ",1,0,0,0,0,0,0,0
+P,"Hold up. Hold up. We're looking at this at the end state of its existence, right?",1,0,0,0,0,0,0,0
+G,Time should be negative.,1,0,0,0,0,0,0,0
+P,We're looking at - or it's mass that we have lost. ,1,0,0,0,0,0,0,0
+R,Ahh.,1,0,0,0,0,0,0,0
+D,So is velocity negative?,1,0,0,0,0,0,0,0
+G,I hate us. ,1,0,0,0,0,0,0,0
+P,You can't have negative mass.,1,0,0,0,0,0,0,0
+G,You can't have - no -,1,0,0,0,0,0,0,0
+P,But you can lose mass.,1,0,0,0,0,0,0,0
+G,But because it's m dot and we went from m dot to m.,1,0,0,0,0,0,0,0
+R,Ohh.,1,0,0,0,0,0,0,0
+P,Yeah. ,1,0,0,0,0,0,0,0
+D,Fuck that's actually the most annoying thing in the world.,1,0,0,0,0,0,0,0
+P,So I think our zero - ,1,0,0,0,0,0,0,0
+G,I think our thing was actually right.,1,0,0,0,0,0,0,0
+P,Yeah if we go to the - ,1,0,0,0,0,0,0,0
+R,To the original - ,1,0,0,0,0,0,0,0
+P,"- so we have the um the 10 million um 10 million Pascals, so delete that and add one zero to that. ",1,0,0,0,0,0,0,0
+R,Another zero?,1,0,0,0,0,0,0,0
+P,One more zero. We need 77 million kilograms.,1,0,0,0,0,0,0,0
+G,Wait how much was the actual?,1,0,0,0,0,0,0,0
+R,Um the tank holds 537 thousand gallons of liquid.,1,0,0,0,0,0,0,0
+G,Off by an order of magnitude but it's ok. We probably assumed a higher exit pressure than the one that it was.,1,0,0,0,0,0,0,0
+P,"Yeah we went to the max. Although that's in the subtraction term, so that would lower our value.",1,0,0,0,0,0,0,0
+G,"Oh you're right. Well then I don't know. Oh we likely then assumed a lower velocity because that was the other value and it's division by velocity, so we likely assumed a lower exit velocity than what it actually is. ",1,0,0,0,0,0,0,0
+R,Yeah cause you had the 3.5 to 4.,1,0,0,0,0,0,0,0
+G,To 4. Or I had 2.9 to 4. To 4.5 so. ,1,0,0,0,0,0,0,0
+P,"So Saturn 5 used about 300,000 pounds, which is gonna be less kilograms.",1,0,0,0,0,0,0,0
+G,But Saturn 5 also went to the moon. No - yeah - no no no no no no. I don't know which one - ,1,0,0,0,0,0,0,0
+P,History.,1,0,0,0,0,0,0,0
+G,Oh yeah Saturn 5 was the rocket that went to the moon. ,1,0,0,0,0,0,0,0
+P,So further. ,1,0,0,0,0,0,0,0
+G,If you wanna look at - look up Redstone or look up um yeah Redstone was what they used to get to the Mercury astronauts into orbit. ,1,0,0,0,0,0,0,0
+P,"So it had oh ok so it had um 5 thousand kilograms of alcohol, 11,500 kilograms of oxygen, and 360 kilograms of hydrogen peroxide, so - ",1,0,0,0,0,0,0,0
+G,Oh wait so this is - ,1,0,0,0,0,0,0,0
+P,So this was like - ,1,0,0,0,0,0,0,0
+G,Here Roger can he just copy what you have on your computer? The Desmos equation.,1,0,0,0,0,0,0,0
+P,"Close to 20,000. ",1,0,0,0,0,0,0,0
+D,What are the last of the values that I haven't put in yet?,1,0,0,0,0,0,0,0
+P,"So we're certainly quite a bit - so this thing used maybe like 20,000 kilograms of fuel, and we're at like 70 million, so we're quite a bit off. Um. And 70 million kilograms of oxygen would occupy a lot of space. ",0,0,0,0,0,1,0,0
+G,Yeah. I wonder what happens - ,1,0,0,0,0,0,0,0
+D,D equals 8.3.,1,0,0,0,0,0,0,0
+G,Sorry. Why are there so many things right here? Thank you for letting me look at your - ,1,0,0,0,0,0,0,0
+P,I mean I think that's what happens when you get values from like different sources. ,1,0,0,0,0,0,0,0
+G,Different sources.,1,0,0,0,0,0,0,0
+P,"Even if it was all SLS, it might - ",1,0,0,0,0,0,0,0
+G,Well it - ,1,0,0,0,0,0,0,0
+P,It might be like SLS speaking about different things contextually that we kinda like missed in our hurry.,1,0,0,0,0,0,0,0
+R,"We kinda breezed over everything, but we could just say that in our assumptions. ",1,0,0,0,0,0,0,0
+G,Yeah even the maximum that we found still gives us like 61 million. ,1,0,0,0,0,0,0,0
+P,Yeah.,1,0,0,0,0,0,0,0
+G,If we had assumed the maximum velocity. ,1,0,0,0,0,0,0,0
+P,Yeah. What about maximum velocity and - no I guess maximum velocity and maximum - ,1,0,0,0,0,0,0,0
+G,We were already assuming maximum pressure. ,1,0,0,0,0,0,0,0
+P,Yeah. So. That makes sense. More pressure you need less mass. Um. ,1,0,0,0,0,0,0,0
+D,So we get...,1,0,0,0,0,0,0,0
+P,"And to achieve a higher velocity, you need more mass so. And then we just need to multiply by 1.7 to see how much mass of the equivalent.",1,0,0,0,0,0,0,0
+G,Well technically we would need to change...,1,0,0,0,0,0,0,0
+P,"Assuming all else is held equal, which obviously it's not. ",1,0,0,0,0,0,0,0
+G,It's not. ,1,0,0,0,0,0,0,0
+D,So 76 or negative 76 million. ,1,0,0,0,0,0,0,0
+G,The first one. ,1,0,0,0,0,0,0,0
+D,Right what are our sig figs? 76 million? Seventy-something million?,1,0,0,0,0,0,0,0
+G,I don't know. ,1,0,0,0,0,0,0,0
+P,One or two.,1,0,0,0,0,0,0,0
+G,I don't think they care. ,1,0,0,0,0,0,0,0
+D,77 million.,1,0,0,0,0,0,0,0
+P,"Yeah. We have one or two. How many sig figs does a wrong answer need? Well I feel like we very expertly came to this wrong answer, so good job guys.",1,0,0,0,0,0,0,0
+G,We expertly came to this wrong answer. Love that. ,1,0,0,0,0,0,0,0
+R,I feel like we could definitely work for NASA right now. ,1,0,0,0,0,0,0,0
+P,Thank you. It's a good thing I would have totally walked off without that. ,1,0,0,0,0,0,0,0
+G,I mean nice pretty textbook but. ,1,0,0,0,0,0,0,0
+D,What else do we need to write down for this? ,1,0,0,0,0,0,0,0
+P,The... did you do the um equivalent mass and...?,1,0,0,0,0,0,0,0
+G,Did you explain why we got rid of the negative?,1,0,0,0,0,0,0,0
+D,Or you can - ok I was gonna take the notebook back but you can use it. ,1,0,0,0,0,0,0,0
+P,I guess you could also say - ,1,0,0,0,0,0,0,0
+D,I also just left it as a positive number and didn't put the negative sign in the answer.  ,1,0,0,0,0,0,0,0
+P,Alternatively you could say the direction of the force is downward.,1,0,0,0,0,0,0,0
+D,Hm. ,1,0,0,0,0,0,0,0
+P,Whatever. ,1,0,0,0,0,0,0,0
+R,That works. ,1,0,0,0,0,0,0,0
+G,That wouldn't make it better. ,1,0,0,0,0,0,0,0
+D,That would make it worse because - ,1,0,0,0,0,0,0,0
+G,That would make it worse.,1,0,0,0,0,0,0,0
+D,Then you get a negative force minus - ,1,0,0,0,0,0,0,0
+P,Well it's the - we're just calling it the same negative sign I guess. At some point you're considering something to be moving in the backward direction. ,1,0,0,0,0,0,0,0
+G,Yeah. ,1,0,0,0,0,0,0,0
+P,In your frame of reference. ,1,0,0,0,0,0,0,0
+D,That doesn't make it that much worse. Alright fuck everything.,1,0,0,0,0,0,0,0
+P,Yeah the force is an arrow pointing that way. ,1,0,0,0,0,0,0,0
+D,Negative 77 to negative 79. That's not too bad. ,1,0,0,0,0,0,0,0
+G,Ok. Um. I need to go. Cause I have class in another building.,1,0,0,0,0,0,0,0
+D,I can stick around for another 5 minutes. ,1,0,0,0,0,0,0,0
+G,Well I need to take the recorder and I also need to take the paper. ,1,0,0,0,0,0,0,0
+D,Oh ok. ,1,0,0,0,0,0,0,0
+G,Cause I'm supposed to turn it in.,1,0,0,0,0,0,0,0
+D,So...ok. ,1,0,0,0,0,0,0,0
+P,Alright. ,1,0,0,0,0,0,0,0
+R,We could meet before class tomorrow. ,1,0,0,0,0,0,0,0
+P,I think we're supposed to do it all in one - I don't know if it's supposed to be all in one session or not but. ,1,0,0,0,0,0,0,0
+G,You can end the thing. ,1,0,0,0,0,0,0,0
+D,Probably makes it easier for the transcriber in terms of her.,1,0,0,0,0,0,0,0
+G,You can end the thing if you want to. ,1,0,0,0,0,0,0,0
+P,Thank you for your time.,1,0,0,0,0,0,0,0

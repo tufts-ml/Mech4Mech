@@ -4,17 +4,21 @@ import jax.random as jr
 import numpy as np
 
 """
-Defines the sticky Dirichlet prior that is used on the assumed cateogrical distributions over entity and system states. 
+Defines the priors for the transition parameters in the probabilistic models. 
 """
 
 @jdc.pytree_dataclass
 class SystemTransitionPrior_JAX:
     """
-    Gives the parameters of a "sticky" Dirichlet prior on tpm's.
-    In particular, the prior has independent Dirichlet priors on each of the k=1,...,K rows
-    where each Dirichlet is ALMOST symmmetric, except that self-transitions are upweighted, i.e.
-    pi_k ~ Dir(alpha * 1_K + kappa * e_k)
-            pi_k ~ Dir(alpha * 1_K + kappa * e_k)
+    Purpose: This prior is for the transition probability matrix parameters Pi (L x L) for system and Ps (K x K) for entity.
+    In particular, the prior has independent Dirichlet priors on each of the L or K rows in the matrix (each row sums to 1). 
+    where each Dirichlet is ALMOST symmmetric, except that self-transitions are upweighted aka "sticky".
+
+    Attributes: 
+        alpha: controls base concentration for transition. 
+        kappa: controls how much boost for self-transition (i.e. controls stickyness). 
+
+    Return: the parameters of a "sticky" Dirichlet prior distribution.
     """
 
     alpha: float

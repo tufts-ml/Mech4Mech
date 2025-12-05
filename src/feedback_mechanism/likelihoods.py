@@ -2,6 +2,12 @@
 import torch
 
 class CategoricalLikelihood(torch.nn.Module):
+    """
+    Purpose: Define the categorical likelihood. 
+
+    Attributes: 
+        num_classes: number of classes/categories for labels 
+    """
     def __init__(self, num_classes):
         super().__init__()
         

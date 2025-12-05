@@ -20,18 +20,13 @@ from utilities.types import (
     NumpyArray3D,
 )
 
-from run_sim import system_regimes_gt
 from model import Model 
 from params import (
     AllParameters_JAX,
     ContinuousStateParameters_JAX,
-    ContinuousStateParameters_Gaussian_JAX,
     Dims,
-    EmissionsParameters_JAX,
-    EntityTransitionParameters_JAX,
     EntityTransitionParameters_MetaSwitch_JAX,
     InitializationParameters_JAX,
-    InitializationParameters_Gaussian_JAX,
     SystemTransitionParameters_JAX,
 )
 from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
@@ -42,7 +37,8 @@ from maximization_step import (
     run_M_step_for_IP,
     run_M_step_for_STP_in_closed_form,
     run_M_step_for_STP_via_gradient_descent,
-    compute_closed_form_M_step_on_posterior_summaries
+    compute_STP_closed_form_M_step,
+    compute_ETP_closed_form_M_step_on_posterior_summaries
 )
 from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
@@ -56,6 +52,20 @@ Computes the model initialization strategy.
 
 @dataclass
 class InitializationResults:
+
+    """
+    Purpose: defines the variables necessary for saving all of the initialization results. 
+
+    Attributes: 
+        params: STP, ETP, CSP, IP
+        ES_summary: contains the posterior summary for the system latent marginals and pairwise marginals
+                given the entire observation sequence, and the probability density over emissions.  
+        EZ_summaries: contains the posterior summary for the entity latent marginals and pairwise marginals
+                given the entire observation sequence, and the probability density over the observations. 
+        record_of_most_likely_system_states: argmax(VES_summary.expected_regimes) over all time steps T across N examples 
+        record_of_most_likely_entity_states: argmax(VEZ_summary.expected_regimes) over all time steps T across N examples foe each of the J entities   
+    """
+
     params: AllParameters_JAX
     ES_summary: HMM_Posterior_Summary_JAX
     EZ_summaries: HMM_Posterior_Summaries_JAX
@@ -66,32 +76,40 @@ class InitializationResults:
 @dataclass
 class ResultsFromBottomHalfInit:
     """
-    Attributes:
-        record_of_most_likely_states:  Has shape (T,J,num_EM_iterations).
-            Note that this is NOT most likely in the Viterbi sense,
-            it's just the argmax from the expected unary marginals.
-        ETP: Entity transition parameters.  They're optional for backwards compatibility;
-            the original initialization code for circles didn't store these, even though
-            they are learned by the EM algorithm for the bottom-level HMM.
+    Purpose: defines the variables necessary for saving the results from the bottom half - i.e. the VEZ summary (maringals, pairwise marginals, emission density),
+    the continuous state and entity state MODEL paremeters.  
+
+    Attributes: 
+        CSP: the observation parameters A[j,k], b[j,k], Q[j,k]
+        EZ_summaries: contains the posterior summary for the entity latent marginals and pairwise marginals
+            given the entire observation sequence, and the probability density over the observations. 
+        record_of_most_likely_states: argmax(VEZ_summary.expected_regimes) over all time steps T across N examples foe each of the J entities  
+        ETP: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K) 
     """
 
     CSP: ContinuousStateParameters_JAX
     EZ_summaries: HMM_Posterior_Summaries_JAX
     record_of_most_likely_states: NumpyArray3D  # TxJx num_EM_iterations
-    ETP: Optional[EntityTransitionParameters_JAX] = None
+    ETP: Optional[EntityTransitionParameters_MetaSwitch_JAX] = None
 
 
 @dataclass
 class ResultsFromTopHalfInit:
     """
-    Attributes:
-        record_of_most_likely_states:  Has shape (T, num_EM_iterations).
-            Note that this is NOT most likely in the Viterbi sense,
-            it's just the argmax from the expected unary marginals.
+    Purpose: defines the variables necessary for saving the results from the top half - i.e. the VES summary (maringals, pairwise marginals, emission density),
+    the system and entity state MODEL paremeters.  
+
+    Attributes: 
+        STP: The system state parameters Upsilon has shape (L, D_s) and Pi has shape (L, L)
+        ETP: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K) 
+        ES_summaries: contains the posterior summary for the system latent marginals and pairwise marginals
+            given the entire observation sequence, and the probability density over emissions.  
+        record_of_most_likely_states: argmax(VES_summary.expected_regimes) over all time steps T across N examples 
     """
 
+
     STP: SystemTransitionParameters_JAX
-    ETP: EntityTransitionParameters_JAX
+    ETP: EntityTransitionParameters_MetaSwitch_JAX
     ES_summary: HMM_Posterior_Summary_JAX
     record_of_most_likely_states: NumpyArray2D  # Txnum_EM_iterations
 
@@ -99,29 +117,41 @@ class ResultsFromTopHalfInit:
 @dataclass
 class RawInitializationResults:
     """
-    Compared to `InitializationResults`, this representation is closer to how the initialization was constructed:
-    there's info from a "bottom-level" AR-HMM and from a "top-level" AR-HMM.
-
-    These results are also useful for inspecting the quality of the initialization
+    Purpose: Compared to `InitializationResults`, this representation is closer to how the initialization was constructed:
+    there's info from a "bottom-level" AR-HMM and from a "top-level" AR-HMM. These results are also useful for inspecting the quality of the initialization
     (e.g. via `top.record_of_most_likely_states` or `bottom.record_of_most_likely_states`)
     with respect to known truth.
+
+    Attributes: 
+        bottom: CSP parms, EZ_summaries, record_of_most_likely_states, ETP params
+        top: STP parms, ES_summaries, record_of_most_likely_states, ETP params
+        IP: the initial emission parameters pi_system, pi_entities, mu_0s, Sigma_0s
     """
 
     bottom: ResultsFromBottomHalfInit
     top: ResultsFromTopHalfInit
     IP: InitializationParameters_JAX
-    EP: EmissionsParameters_JAX
 
 
 def initialization_results_from_raw_initialization_results(
     raw_initialization_results: RawInitializationResults,
     params_frozen: Optional[AllParameters_JAX] = None,
 ):
+    """
+    Purpose: Return the full initialization results from the "raw" initialization results from the top and bottom half.
+
+    Attributes: 
+        raw_initialization_results: the specific summaries and parameters from from the top and bottom half pre-training 
+        params_frozen: frozen version of all params STP, ETP, CSP, IP
+
+    Returns: 
+        Initialization results (VES summary, VEZ summary, most likely states for system (top), most likely states for bottom (entity))
+    """
     RI = raw_initialization_results
     if params_frozen:
         params = params_frozen
     else:
-        params = AllParameters_JAX(RI.top.STP, RI.top.ETP, RI.bottom.CSP, RI.EP, RI.IP)
+        params = AllParameters_JAX(RI.top.STP, RI.top.ETP, RI.bottom.CSP, RI.IP)
     return InitializationResults(
         params,
         RI.top.ES_summary,
@@ -131,25 +161,45 @@ def initialization_results_from_raw_initialization_results(
     )
 
 
-def make_data_free_preinitialization_of_IP_JAX(DIMS, shared_variance=1.0) -> InitializationParameters_Gaussian_JAX:
+def make_data_free_preinitialization_of_IP_JAX(DIMS, shared_variance=1.0) -> InitializationParameters_JAX:
+    """
+    Purpose: Return the initialization parameters without any influence from data. All uniform initial parameters. 
+
+    Attributes: 
+        DIMS: list of amounts of all parameters 
+        shared_variance: the variance of the observation gaussian distributions for each entity 
+
+    Returns: 
+        IP: the initial emission parameters pi_system, pi_entities, mu_0s, Sigma_0s
+    """
     pi_system = np.ones(DIMS.L) / DIMS.L
     pi_entities = np.ones((DIMS.J, DIMS.K)) / DIMS.K
     mu_0s = jnp.zeros((DIMS.J, DIMS.K, DIMS.D))
     Sigma_0s = jnp.tile(shared_variance * jnp.eye(DIMS.D), (DIMS.J, DIMS.K, 1, 1))
-    return InitializationParameters_Gaussian_JAX(pi_system, pi_entities, mu_0s, Sigma_0s)
+    return InitializationParameters_JAX(pi_system, pi_entities, mu_0s, Sigma_0s)
 
 
 def make_tpm_only_preinitialization_of_STP_JAX(
     DIMS: Dims, fixed_self_transition_prob: float
 ) -> SystemTransitionParameters_JAX:
-    # TODO: Support fixed or random draws from prior.
+    """
+    Purpose: Return the transition probability parameters for the system states without any influence from data. Sample from a Sticky Dirichlet prior
+    to obtain the Pi parameters across time, and take the log. Set Upsilon parameters to all zeros.  
+
+    Attributes: 
+        DIMS: list of amounts of all parameters 
+        fixed_self_transition_prob: probability of remaining in the current state at the next time-step
+
+    Returns: 
+        STP: The system state parameters Upsilon has shape (L, D_s) and Pi has shape (L, L)
+    """
+   
     L, J, K, D_s = DIMS.L, DIMS.J, DIMS.K, DIMS.D_s
     # make a tpm
     tpm = make_fixed_sticky_tpm_JAX(fixed_self_transition_prob, num_states=L)
     Pi = jnp.log(tpm)
-    Gammas = jnp.zeros((J, L, K))  # Gammas must be zero for no feedback.
     Upsilon = jnp.zeros((L, D_s))
-    return SystemTransitionParameters_JAX(Gammas, Upsilon, Pi)
+    return SystemTransitionParameters_JAX(Upsilon, Pi)
 
 
 def make_data_free_preinitialization_of_STP_JAX(
@@ -159,13 +209,22 @@ def make_data_free_preinitialization_of_STP_JAX(
     seed: int,
 ) -> SystemTransitionParameters_JAX:
     """
-    method_for_Psis : zeros or rnorm
+    Purpose: Return the transition probability parameters for the system states without any influence from data. Sample from a Sticky Dirichlet prior
+    to obtain the Pi parameters across time, and then take the log. The Upsilon parameters can be all zeros or can be sampled from a normal distribution. 
+
+    Attributes: 
+        DIMS: list of amounts of all parameters 
+        method_for_Upsilon: str to indicate the initialization method for Upsilon (e.g. "zeros")
+        fixed_self_transition_prob: probability of remaining in the current state at the next time-step
+        seed: Randomized seed for Upsilon parameters 
+
+    Returns: 
+        STP: The system state parameters Upsilon has shape (L, D_s) and Pi has shape (L, L)
     """
     key = jr.PRNGKey(seed)
     # TODO: Support fixed or random draws from prior.
     L, J, K, D_s = DIMS.L, DIMS.J, DIMS.K, DIMS.D_s
 
-    Gammas = jnp.zeros((J, L, K))
 
     # make a tpm
     tpm = make_fixed_sticky_tpm_JAX(fixed_self_transition_prob, num_states=L)
@@ -177,7 +236,7 @@ def make_data_free_preinitialization_of_STP_JAX(
         Upsilon = jnp.zeros((L, D_s))
     else:
         raise ValueError("What is the method for Upsilon?")
-    return SystemTransitionParameters_JAX(Gammas, Upsilon, Pi)
+    return SystemTransitionParameters_JAX(Upsilon, Pi)
 
 
 def make_data_free_preinitialization_of_ETP_JAX(
@@ -187,11 +246,21 @@ def make_data_free_preinitialization_of_ETP_JAX(
     fixed_self_transition_prob: float = 0.90,
 ) -> EntityTransitionParameters_MetaSwitch_JAX:
     """
-    method_for_Psis : zeros or rnorm
+    Purpose: Return the transition probability parameters for the entity states without any influence from data.
+    Sample from a Sticky Dirichlet prior to obtain the Ps parameters across time, and then take the log.
+    The Psis parameters can be all zeros or can be sampled from a normal distribution. 
+
+    Attributes: 
+        DIMS: list of amounts of all parameters 
+        method_for_Upsilon: str to indicate the initialization method for Upsilon (e.g. "zeros")
+        seed: Randomized seed for Psis parameters 
+        fixed_self_transition_prob: probability of remaining in the current state at the next time-step
+
+    Returns: 
+        ETP: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K)
     """
     key = jr.PRNGKey(seed)
-    # TODO: Support fixed or random draws from prior.
-    L, J, K, M_e, D_e = DIMS.L, DIMS.J, DIMS.K, DIMS.M_e, DIMS.D_e
+    L, J, K, D_e = DIMS.L, DIMS.J, DIMS.K, DIMS.D_e
     # make a tpm
     tpm = make_fixed_sticky_tpm_JAX(fixed_self_transition_prob, num_states=K)
     Ps = jnp.tile(np.log(tpm), (J, L, 1, 1))
@@ -201,88 +270,90 @@ def make_data_free_preinitialization_of_ETP_JAX(
         Psis = jnp.zeros((J, L, K, D_e))
     else:
         raise ValueError("What is the method for Psis?")
-    Omegas = jnp.zeros((J, L, K, M_e))
-    return EntityTransitionParameters_MetaSwitch_JAX(Psis, Omegas, Ps)
+    return EntityTransitionParameters_MetaSwitch_JAX(Psis,Ps)
 
 
 def make_tpm_only_preinitialization_of_ETP_JAX(
     DIMS: Dims, fixed_self_transition_prob: float
 ) -> EntityTransitionParameters_MetaSwitch_JAX:
-    # TODO: Support fixed or random draws from prior.
-    L, J, K, M_e, D_e = DIMS.L, DIMS.J, DIMS.K, DIMS.M_e, DIMS.D_e
+    """
+    Purpose: Return the transition probability parameters for the entity states without any influence from data.
+    Sample from a Sticky Dirichlet prior to obtain the Ps parameters across time, and then take the log.
+
+    Attributes: 
+        DIMS: list of amounts of all parameters 
+        fixed_self_transition_prob: probability of remaining in the current state at the next time-step
+
+    Returns: 
+        ETP: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K)
+    """
+    L, J, K, D_e = DIMS.L, DIMS.J, DIMS.K, DIMS.D_e
     # make a tpm
     tpm = make_fixed_sticky_tpm_JAX(fixed_self_transition_prob, num_states=K)
     Ps = jnp.tile(np.log(tpm), (J, L, 1, 1))
     Psis = jnp.zeros((J, L, K, D_e))
-    Omegas = jnp.zeros((J, L, K, M_e))
-    return EntityTransitionParameters_MetaSwitch_JAX(Psis, Omegas, Ps)
+    return EntityTransitionParameters_MetaSwitch_JAX(Psis, Ps)
 
-
-class PreInitialization_Strategy_For_CSP(Enum):
-    LOCATION = 1
-    DERIVATIVE = 2
 
 
 def make_kmeans_preinitialization_of_CSP_JAX(
     DIMS: Dims,
-    continuous_states: JaxNumpyArray3D,
-    strategy: PreInitialization_Strategy_For_CSP,
+    observations: JaxNumpyArray3D,
     example_end_times: NumpyArray1D,
-    use_continuous_states: Optional[JaxNumpyArray2D] = None,
+    mask_observations: Optional[JaxNumpyArray2D] = None,
     save_dir: Optional[str] = None,
     verbose: bool = True,
     plotbose: bool = False,
-) -> Tuple[ContinuousStateParameters_Gaussian_JAX, sklearn.cluster._kmeans.KMeans]:
+) -> Tuple[ContinuousStateParameters_JAX, sklearn.cluster._kmeans.KMeans]:
     """
-    We assign the continuous_states to K regimes by applying k-means to either the locations (values)
-        or velocities (discrete derivatives) of the continuous_states.
+    Purpose: Initizlize the emission parameters CSP by assigning the observations to K regimes by applying k-means to the values of the observations. 
     We then initialize CSP parameters by running separate vector autoregressions within each cluster/regime:
         - We find regime-specific state matrix (CSP.As) and biases (CSP.bs) by applying a (multi-outcome) linear regression
-            to predict the next continuous_state from the previous continuous_state.
+            to predict the next observation from the previous observation.
         - We estimate the regime-specific covariance matrices (CSP.Qs) from the residuals of the above linear regresssion.
+    Note that all x_t^j from a single k regime are predicted from its x_{t-1}^j that can be from another k cluster. 
 
     Arguments:
-        strategy: an Enum which determines whether we apply k-means to the locations (values)
-            or velocities (discrete derivatives) of the continuous_states.
-        use_continuous_states: If None, we assume all states should be utilized in inference.
-            Otherwise, this is a (T,J) boolean vector such that
-            the (t,j)-th element  is 1 if continuous_states[t,j] should be utilized
-            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
-            that info to do the M-step.
+        DIMS: list of amounts of all parameters 
+        observations: np.array of shape (T,J,D) where the (t,j)-th entry is in R^D.
+        example_end_times: optional, has shape (N+1,)
+            An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
+            If there are N examples, then along with the observations, we store
+            end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
+        mask_observations: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
+            observations[t,j] should be utilized in inference and False otherwise.
+        save_dir: str for the path to save the file
+        verbose: True boolean if we want to print update statements during training 
         plotbose: verbose in plotting
+
+    Return: Initialized CSP parameters: A[j,k], b[j,k], Q[j,k]
     """
     if verbose:
         print("Now performing k-means pre-initialization of CSP parameters.")
 
     ### Up-front computations
-    continuous_states = jnp.asarray(continuous_states)
-    T, J, D = np.shape(continuous_states)
+    observations = jnp.asarray(observations)
+    T, J, D = np.shape(observations)
     K = DIMS.K
 
-    ### Make sample weights (as a combo of `use_continuous_states`` and `example_end_times`)
+    ### Make sample weights (as a combo of `mask_observations`` and `example_end_times`)
     sample_weights = make_sample_weights_which_mask_the_initial_timestep_for_each_event(
-        continuous_states,
+        observations,
         example_end_times,
-        use_continuous_states,
+        mask_observations,
     )
 
     As = np.zeros((J, K, D, D))
     bs = np.zeros((J, K, D))
     Qs = np.tile(np.eye(D)[None, None, :, :], (J, K, 1, 1))
 
-    ### Find cluster memberships based on locations (values) or velocities (discrete derivatives) of continuous states
-    continuous_state_diffs = continuous_states[1:, :, :] - continuous_states[:-1, :, :]
+    continuous_state_diffs = observations[1:, :, :] - observations[:-1, :, :]
 
-    if strategy == PreInitialization_Strategy_For_CSP.LOCATION:
-        data_for_kmeans = continuous_states
-        weights_for_kmeans = sample_weights
-    elif strategy == PreInitialization_Strategy_For_CSP.DERIVATIVE:
-        data_for_kmeans = continuous_state_diffs
-        weights_for_kmeans = sample_weights[
-            1:, :
-        ]  # if response is initial time step for event, then give the pair of obs zero weight.
-    else:
-        raise ValueError(f"I don't understand the requested preinitialization strategy for CSP, {strategy}.")
+    data_for_kmeans = observations
+    weights_for_kmeans = sample_weights
+
 
     kms = [None] * J
     for j in range(J):
@@ -293,13 +364,6 @@ def make_kmeans_preinitialization_of_CSP_JAX(
             warnings.simplefilter(action="ignore", category=FutureWarning)
             kms[j] = KMeans(K, random_state=120).fit(data_for_kmeans[:, j, :], sample_weight=weights_for_kmeans[:, j])
 
-    ### Initialize parameters by running separate vector autoregressions within each cluster.
-
-    # For each state, initialize CSP via a (multivariate-outcome) linear regression
-    # finding weights A,b by predicting the next continuous_state from the previous continuous_state.
-    # We then estimate the regime-specific covariance matrices (Q’s) from the residuals.
-
-    # TODO: Parallelize this for speed
     for j in range(J):
         for k in range(K):
             ### find which samples to use
@@ -308,17 +372,11 @@ def make_kmeans_preinitialization_of_CSP_JAX(
             samples_are_in_cluster_jk = kms[j].labels_ == k
             bools_use_pair_for_cluster_jk = samples_are_in_cluster_jk * weights_for_kmeans[:, j]
 
-            if strategy == PreInitialization_Strategy_For_CSP.LOCATION:
-                outcome_indices_jk = np.where(bools_use_pair_for_cluster_jk)[0]
-                predictor_indices_jk = outcome_indices_jk - 1
-            elif strategy == PreInitialization_Strategy_For_CSP.DERIVATIVE:
-                outcome_indices_jk = np.where(bools_use_pair_for_cluster_jk)[0] + 1
-                predictor_indices_jk = outcome_indices_jk - 1
-            else:
-                raise ValueError(f"I don't understand the requested preinitialization strategy for CSP, {strategy}.")
+            outcome_indices_jk = np.where(bools_use_pair_for_cluster_jk)[0]
+            predictor_indices_jk = outcome_indices_jk - 1
 
-            outcomes_jk = continuous_states[outcome_indices_jk, j, :]
-            predictors_jk = continuous_states[predictor_indices_jk, j, :]
+            outcomes_jk = observations[outcome_indices_jk, j, :]
+            predictors_jk = observations[predictor_indices_jk, j, :]
             ### run vector autoregression
             lr = LinearRegression(fit_intercept=True)
             lr.fit(predictors_jk, outcomes_jk)
@@ -332,19 +390,7 @@ def make_kmeans_preinitialization_of_CSP_JAX(
     As = jnp.asarray(As)
     bs = jnp.asarray(bs)
     Qs = jnp.asarray(Qs)
-    return ContinuousStateParameters_Gaussian_JAX(As, bs, Qs), kms
-
-
-def make_data_free_preinitialization_of_EP_JAX(
-    DIMS: Dims,
-) -> EmissionsParameters_JAX:
-    J, D, N = DIMS.J, DIMS.D, DIMS.N
-
-    Cs = jnp.zeros((J, N, D))
-    ds = jnp.zeros((J, N))
-    Rs = jnp.tile(jnp.eye(N)[None, :, :], (J, 1, 1))
-
-    return EmissionsParameters_JAX(Cs, ds, Rs)
+    return ContinuousStateParameters_JAX(As, bs, Qs), kms
 
 
 ###
@@ -353,33 +399,50 @@ def make_data_free_preinitialization_of_EP_JAX(
 
 
 def fit_rARHMM_to_bottom_half_of_model(
-    continuous_states: JaxNumpyArray3D,
+    observations: JaxNumpyArray3D,
     example_end_times: Optional[JaxNumpyArray1D],
-    CSP_JAX: ContinuousStateParameters_Gaussian_JAX,
+    CSP_JAX: ContinuousStateParameters_JAX,
     ETP_JAX: EntityTransitionParameters_MetaSwitch_JAX,
-    IP_JAX: InitializationParameters_Gaussian_JAX,
+    IP_JAX: InitializationParameters_JAX,
     model: Model,
     num_EM_iterations: int,
     treat_ETP_params_as_tpm: bool = False,
-    use_continuous_states: Optional[JaxNumpyArray2D] = None,
+    mask_observations: Optional[JaxNumpyArray2D] = None,
     params_frozen: Optional[AllParameters_JAX] = None,
+    outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
     verbose: bool = True,
 ) -> ResultsFromBottomHalfInit:
     """
-    We assume the transitions are governed by an ordinary tpm.
-    We ignore the system-level toggles.
+    Purpose: Initizlize the bottom half of the HSRDM - meaning the CSP and the ETP parameters. The initialized CSP, ETP, and IP 
+    parameters are instantiated. Then we start with a uniform expected VES regimes and take the expectation of the MODEL log entity transition probabilities with respect to the VES posterior. 
+    Then one computes forwards-backwards to obtain the 
+    VEZ posterior. The MODEL parameters are then updated via an M-step. 
 
     Arguments:
-        use_continuous_states: If None, we assume all states should be utilized in inference.
-            Otherwise, this is a (T,J) boolean vector such that
-            the (t,j)-th element is True if continuous_states[t,j] should be utilized
-            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
-            that info to do the M-step (on STP, ETP, or CSP), nor the VES step.
-            We leave the VEZ steps as is, though.  Note that This means that the ELBO is wrong.
-    """
-    ### TODO: We assume that (0,j) was always observed! If not, raise a ValueError.
+        observations: np.array of shape (T,J,D) where the (t,j)-th entry is in R^D.
+        example_end_times: optional, has shape (N+1,)
+            An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
+            If there are N examples, then along with the observations, we store
+            end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
+        CSP_JAX: the observation parameters A[j,k], b[j,k], Q[j,k]
+        ETP_JAX: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K)
+        IP_JAX: the initial emission parameters pi_system, pi_entities, mu_0s, Sigma_0s
+        model: joint distribution defined in -> (model.py)
+        num_EM_iterations: total number of EM iterations
+        treat_ETP_params_as_tpm: Boolean to treat ETP parameters as a tmp; has to do with doing a closed_form M step for ETP parameters. Set to False. 
+        mask_observations: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
+            observations[t,j] should be utilized in inference and False otherwise.
+        params_frozen: frozen version of all params STP, ETP, CSP, IP
+        outside_entity_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
+        verbose: True boolean if we want to print update statements during training 
 
-    T = len(continuous_states)
+    Return: Results from bottom initialization: CSP params, EZ_summaries, ETP params, most likely entity states  
+    """
+
+    T = len(observations)
     J, L, K, _ = np.shape(ETP_JAX.Ps)
 
     record_of_most_likely_states = np.zeros((T, J, num_EM_iterations), dtype=int)
@@ -395,16 +458,16 @@ def fit_rARHMM_to_bottom_half_of_model(
         ###
 
         VES_expected_regimes__uniform = np.ones((T, L)) / L
-        VES_expected_regimes__good = system_regimes_gt(10, [1227, 2840, 6128, 7392, 9553, 9680])
 
         EZ_summaries = run_VEZ_step_JAX(
             CSP_JAX,
             ETP_JAX,
             IP_JAX,
-            continuous_states,
+            observations,
             VES_expected_regimes__uniform, 
             model,
             example_end_times,
+            outside_entity_recurrence
         )
 
         for j in range(J):
@@ -428,16 +491,15 @@ def fit_rARHMM_to_bottom_half_of_model(
                 # We need it to have shape (J,L,K,K).  So just do it with (J,K,K), then tile it over L.
                 # TODO: This is rewriting the logic of "compute_closed_form_M_step."  Be sure that that can
                 # work when we have J tpms, and then
-                tpms = compute_closed_form_M_step_on_posterior_summaries(
+                tpms = compute_ETP_closed_form_M_step_on_posterior_summaries(
                     EZ_summaries,
-                    use_continuous_states,
+                    mask_observations,
                     example_end_times,
                 )
                 Ps_new = jnp.tile(jnp.log(tpms[:, None, :, :]), (1, L, 1, 1))
-                ETP_JAX = EntityTransitionParameters_MetaSwitch_JAX(ETP_JAX.Psis, ETP_JAX.Omegas, Ps_new)
+                ETP_JAX = EntityTransitionParameters_MetaSwitch_JAX(ETP_JAX.Psis, Ps_new)
 
             else:
-                ### New way: update ETP_JAX by using gradient descent
                 num_M_step_iterations_for_ETP_gradient_descent = 5
                 ES_summary_uniform = HMM_Posterior_Summary_JAX(
                     expected_regimes=VES_expected_regimes__uniform,  
@@ -448,12 +510,13 @@ def fit_rARHMM_to_bottom_half_of_model(
                     ETP_JAX,
                     ES_summary_uniform,
                     EZ_summaries,
-                    continuous_states,
+                    observations,
                     i,
                     num_M_step_iterations_for_ETP_gradient_descent,
                     model,
                     example_end_times,
-                    use_continuous_states,
+                    outside_entity_recurrence,
+                    mask_observations,
                     verbose,
                 )
 
@@ -462,9 +525,9 @@ def fit_rARHMM_to_bottom_half_of_model(
             # ###
             CSP_JAX = run_M_step_for_CSP_in_closed_form__Gaussian_case(
                 EZ_summaries.expected_regimes,
-                continuous_states,
+                observations,
                 example_end_times,
-                use_continuous_states,
+                mask_observations,
             )
     return ResultsFromBottomHalfInit(CSP_JAX, EZ_summaries, record_of_most_likely_states, ETP_JAX)
 
@@ -475,36 +538,58 @@ def fit_rARHMM_to_bottom_half_of_model(
 
 
 def fit_ARHMM_to_top_half_of_model(
-    continuous_states: NumpyArray3D,
-    system_covariates: Optional[NumpyArray2D],
+    observations: NumpyArray3D,
     example_end_times: Optional[JaxNumpyArray1D],
     STP_JAX: SystemTransitionParameters_JAX,
     ETP_JAX: EntityTransitionParameters_MetaSwitch_JAX,
-    IP_JAX: InitializationParameters_Gaussian_JAX,
+    IP_JAX: InitializationParameters_JAX,
     EZ_summaries: HMM_Posterior_Summaries_JAX,
     model: Model,
     num_EM_iterations: int,
     num_M_step_iterations_for_ETP_gradient_descent: int,
-    use_continuous_states: Optional[JaxNumpyArray2D] = None,
+    mask_observations: Optional[JaxNumpyArray2D] = None,
     params_frozen: Optional[AllParameters_JAX] = None,
+    outside_system_recurrence: Optional[JaxNumpyArray2D] = None,
+    outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
     verbose: bool = True,
 ) -> ResultsFromTopHalfInit:
-    """
-    Arguments:
-        use_continuous_states: If None, we assume all states should be utilized in inference.
-            Otherwise, this is a (T,J) boolean vector such that
-            the (t,j)-th element  is True if continuous_states[t,j] should be utilized
-            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
-            that info to do the M-step (on STP, ETP, or CSP), nor the VES step.
-            We leave the VEZ steps as is, though.
 
     """
-    T = len(continuous_states)
+    Purpose: Initizlize the top half of the HSRDM - meaning the STP parameters. The initialized STP parameters are instantiated. 
+    Then we start with the current VEZ regimes and take the expectation of the MODEL log system transition probabilities with respect to the VEZ posterior. 
+    Then one computes forwards-backwards to obtain the new VES posterior. The MODEL parameters for STP and ETP are then updated via an M-step. 
+
+    Arguments:
+        observations: np.array of shape (T,J,D) where the (t,j)-th entry is in R^D.
+        example_end_times: optional, has shape (N+1,)
+            An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
+            If there are N examples, then along with the observations, we store
+            end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
+        STP_JAX: The system state parameters Upsilon has shape (L, D_s) and Pi has shape (L, L)
+        ETP_JAX: the entity transition parameters Psis has shape (J, L, K, D_e) and Ps has shape (J, L, K, K)
+        IP_JAX: the initial emission parameters pi_system, pi_entities, mu_0s, Sigma_0s
+        EZ_summaries: contains the posterior summary for the entity latent marginals and pairwise marginals
+            given the entire observation sequence, and the probability density over the observations. 
+        model: joint distribution defined in -> (model.py)
+        num_EM_iterations: total number of EM iterations
+        num_M_step_iterations_for_ETP_gradient_descent: number of iterations for ETP gradient descent 
+        mask_observations: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
+            observations[t,j] should be utilized in inference and False otherwise.
+        params_frozen: frozen version of all params STP, ETP, CSP, IP
+        outside_system_recurrence: The recurrence features (T-1, D_s) are provided, which are computed from the observations
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
+        outside_entity_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
+        verbose: True boolean if we want to print update statements during training 
+
+    Return: Results from bottom initialization: CSP params, EZ_summaries, ETP params, most likely entity states  
+    """
+   
+    T = len(observations)
     record_of_most_likely_states = np.zeros((T, num_EM_iterations))
 
-    if system_covariates is None:
-        # TODO: Check that D_s=0 as well; if not there is an inconsistency in the implied desire of the caller.
-        system_covariates = np.zeros((T, 0))
 
     if verbose:
         print("\n--- Now running AR-HMM on top half of Model 2a. ---")
@@ -516,25 +601,22 @@ def fit_ARHMM_to_top_half_of_model(
         ###
         # E-step
         ###
-
-        # TODO: Handle system covariates properly in this function.
         ES_summary = run_VES_step_JAX(
             STP_JAX,
             ETP_JAX,
             IP_JAX,
-            continuous_states,
+            observations,
             EZ_summaries,
             model,
             example_end_times,
-            system_covariates,
-            use_continuous_states=use_continuous_states,
+            outside_system_recurrence,
+            outside_entity_recurrence,
+            mask_observations=mask_observations,
         )
         
 
         record_of_most_likely_states[:, iteration] = np.array(np.argmax(ES_summary.expected_regimes, axis=1), dtype=int)
 
-
-       
         ###
         # M-step
         ###
@@ -548,22 +630,22 @@ def fit_ARHMM_to_top_half_of_model(
                 ETP_JAX,
                 ES_summary,
                 EZ_summaries,
-                continuous_states,
+                observations,
                 iteration,
                 num_M_step_iterations_for_ETP_gradient_descent,
                 model,
                 example_end_times,
-                use_continuous_states,
+                outside_entity_recurrence,
+                mask_observations,
                 verbose,
             )
 
-            # TODO: Incorporate the system transition prior.  Can I can do this is closed form?
             system_transition_prior = None
 
             ### M-step (STP)
             num_system_states = np.shape(STP_JAX.Pi)[0]
             if num_system_states == 1:
-                # TODO: I had written earlier that the VES step has already taken care of the `use_continuous_states` mask.
+                # TODO: I had written earlier that the VES step has already taken care of the `mask_observations` mask.
                 # But I might want to double check that.
                 STP_JAX = run_M_step_for_STP_in_closed_form(STP_JAX, ES_summary, example_end_times)
             else:
@@ -576,8 +658,8 @@ def fit_ARHMM_to_top_half_of_model(
                     NUM_M_STEP_ITERATIONS_FOR_STP_GRADIENT_DESCENT,
                     model,
                     example_end_times,
-                    system_covariates,
-                    continuous_states,
+                    outside_system_recurrence,
+                    observations,
                     verbose,
                 )
     
@@ -589,82 +671,69 @@ def fit_ARHMM_to_top_half_of_model(
 ###
 
 
-def smart_initialize_model_2a(
+def initialize_HSRDM(
     DIMS: Dims,
-    continuous_states: Union[NumpyArray3D, JaxNumpyArray3D],
+    observations: Union[NumpyArray3D, JaxNumpyArray3D],
     example_end_times: Optional[NumpyArray1D],
     model: Model,
-    preinitialization_strategy_for_CSP: PreInitialization_Strategy_For_CSP,
     num_em_iterations_for_bottom_half: int = 5,
     num_em_iterations_for_top_half: int = 20,
     seed: int = 120,
-    system_covariates: Optional[NumpyArray2D] = None,
-    use_continuous_states: Optional[JaxNumpyArray2D] = None,
+    mask_observations: Optional[JaxNumpyArray2D] = None,
     save_dir: Optional[str] = None,
     treat_ETP_params_as_tpm_during_bottom_half_inference: bool = True,
     params_frozen: Optional[AllParameters_JAX] = None,
+    outside_system_recurrence: Optional[JaxNumpyArray2D] = None,
+    outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
     verbose: bool = True,
     plotbose: bool = False,
 ) -> InitializationResults:
     """
+    Purpose: Initializes the STP, ETP, CSP and IP parameters of the HSRDM. The STP params are initialized as a sticky transition matrix and sampled from a random normal for the recurrence. 
+        The ETP params are initialized as a sticky transition matrices and sampled from a random normal for the recurrence. The IP params are initialized with 
+        a uniform categorical distribution for the latent state and the continuous states having zero mean with an identity isotropic covariance. This is all a "data free" initialization.
+        For the CSP parameters, we currently initialize with a k-means scheme. Could make this data free in the future.
     Arguments:
-        example_end_times: optional, has shape (E+1,)
-            Provides `example` boundaries, which allows us to interpret a time series of shape (T,J,:)
-            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across i.i.d "examples".
-            An example boundary might be induced by a large time gap between timesteps, and/or a discontinuity in the continuous states x.
+        DIMS: list of amounts of all parameters 
+        observations: np.array of shape (T,J,D) where the (t,j)-th entry is in R^D.
+        example_end_times: optional, has shape (N+1,)
+            An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
+            If there are N examples, then along with the observations, we store
+            end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
+        model: joint distribution defined in -> (model.py)
+        num_EM_iterations_for_bottom_half: total number of EM iterations for the bottom 
+        num_EM_iterations_for_top_half: total number of EM iterations for the top
+        seed: for random initializations 
+        mask_observations: If None, we assume all states should be utilized in inference.
+            Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
+            observations[t,j] should be utilized in inference and False otherwise.
+        save_dir: str for the path to save the file
+        treat_ETP_params_as_tpm_during_bottom_half_inference: Boolean to treat ETP parameters as a tmp; has to do with doing a closed_form M step for ETP parameters. Set to True
+        as in the bottom half, the ETP is like the "system state". 
+        params_frozen: frozen version of all params STP, ETP, CSP, IP
+        outside_system_recurrence: The recurrence features (T-1, D_s) are provided, which are computed from the observations
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
+        outside_entity_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
+        verbose: True boolean if we want to print update statements during training 
+        plotbose: Verbose in plotting 
 
-            If there are E examples, then along with the observations, we store
-                end_times=[-1, t_1, …, t_E], where t_e is the timestep at which the e-th example ended.
-            So to get the timesteps for the e-th example, you can index from 1,…,T_grand by doing
-                    [end_times[e-1]+1 : end_times[e]].
-
-        use_continuous_states: If None, we assume all states should be utilized in inference.
-            Otherwise, this is a (T,J) boolean vector such that
-            the (t,j)-th element  is True if continuous_states[t,j] should be utilized
-            and False otherwise.  For any (t,j) that shouldn't be utilized, we don't use
-            that info to do the M-step (on STP, ETP, or CSP), nor the VES step.
-            We leave the VEZ steps as is, though.
-
-        treat_ETP_params_as_tpm_during_bottom_half_inference: If True, the ETP (entity transition parameters) parameters
-            will be treated as a transition probability matrix during the initialization step of the bottom-half rAR-HMMs.
-            This is True by default for backwards compatibility.  I think the original motivation for this was that the ETP
-            parameters would get overriden anyhow during the top-half ARHMM initialization.  Still, it might be useful to get a better
-            estimate due to the fact that the top-half ARHMM initialization starts with a VES step, which requires parameter
-            values for ETP.
-
-        params_frozen: Typically this will be None.  However, non-None values can be useful
-            for test set inference, when we need to run the E-step on the (context) portion of new data.
-
-        plotbose: plot version of verbose.  Currently this just toggles whether or not we create the expensive
-            set of plots where we show the steps (discrete derivatives) assigned to each entity state.
-
-    Remarks:
-        1) Note that the regime labeling (for entities and system) can differ from the truth, and also even
-            from entity to entity!  For example, for the Figure 8 experiment, we could have
-            0=bottom circle, 1=top circle for one entity, and flipped for the other.
-        2) Currently, the only thing random here is the
-        3) The initialization is actually specific for the Figure 8 experiment.  It's ALMOST good for Model 2a generally,
-            but isn't QUITE general enough.  The main things missing are:
-            a) smart initialization for covariates [Figure 8 experiment has no covariates]
-            b) y-level observations, rather than x-level observations.
+    Return: Initialization results. 
     """
-    ### TODO: Make smart initialization better. E.g.
-    # 1) Run init x times, pick the one with the best ELBO.
-    # 2) Find a way to do smarter init for the recurrence parameters
-    # 3) Add prior into the M-step for the system-level tpm (currently it's doing closed form ML).
-
+ 
     if example_end_times is None:
-        T = len(continuous_states)
+        T = len(observations)
         example_end_times = np.array([-1, T])
 
-    if not example_end_times_are_proper(example_end_times, len(continuous_states)):
+    if not example_end_times_are_proper(example_end_times, len(observations)):
         raise ValueError(
             f"Event end times do not have the proper format. Consult the `events` module "
             f"and try again.  Event_end_times MUST begin with -1 and end with T, the length "
             f"of the grand time series."
         )
 
-    continuous_states = jnp.asarray(continuous_states)
+    observations = jnp.asarray(observations)
 
     ###
     # Initialize Params
@@ -674,34 +743,27 @@ def smart_initialize_model_2a(
         CSP_JAX = params_frozen.CSP
         ETP_JAX = params_frozen.ETP
         IP_JAX = params_frozen.IP
-        EP_JAX = params_frozen.EP
 
     else:
-        # TODO: Support fixed or random draws from prior for As, Qs.
         CSP_JAX, kms = make_kmeans_preinitialization_of_CSP_JAX(
             DIMS,
-            continuous_states,
-            preinitialization_strategy_for_CSP,
+            observations,
             example_end_times,
-            use_continuous_states,
+            mask_observations,
             save_dir,
             verbose,
             plotbose,
         )
-        # TODO: Support fixed or random draws from prior.
         ETP_JAX = make_data_free_preinitialization_of_ETP_JAX(
-            DIMS, method_for_Psis="rnorm", fixed_self_transition_prob=0.90, seed=seed
-        )  # Psis is (J, L, K, D_e)
-        # TODO: Support fixed or random draws from prior.
+            DIMS, method_for_Psis="rnorm", fixed_self_transition_prob=0.90, seed=seed)
         IP_JAX = make_data_free_preinitialization_of_IP_JAX(DIMS)
-        # EP_JAX is a placeholder; not used for Figure 8.
-        EP_JAX = make_data_free_preinitialization_of_EP_JAX(DIMS)
+
 
     ###
     # Fit Bottom-level HMM
     ###
     results_bottom = fit_rARHMM_to_bottom_half_of_model(
-        continuous_states,
+        observations,
         example_end_times,
         CSP_JAX,
         ETP_JAX,
@@ -709,13 +771,11 @@ def smart_initialize_model_2a(
         model,
         num_em_iterations_for_bottom_half,
         treat_ETP_params_as_tpm_during_bottom_half_inference,
-        use_continuous_states,
+        mask_observations,
         params_frozen,
+        outside_entity_recurrence,
         verbose,
     )
-    # zhats = np.argmax(
-    #    results_bottom.EZ_summaries.expected_regimes, axis=2
-    # )  # zhats is (J,T) with each entry in {1,..K} (but zero-indexed)
 
     ###
     # Top-level HMM
@@ -731,17 +791,13 @@ def smart_initialize_model_2a(
             fixed_self_transition_prob=0.95,
             seed=seed,
         )
-        # TODO: Is there a better way to init the recurrence matrices and covariances matrices in STP_JAX and ETP_JAX than randomly?
   
     ### run HMM
     num_M_step_iterations_for_ETP_gradient_descent = 5
 
-    # num_M_step_iterations_for_STP_gradient_descent is specified within `fit_ARHMM_to_top_half_of_model`, since
-    # we only run gradient descent when there are system covariates
 
     results_top = fit_ARHMM_to_top_half_of_model(
-        continuous_states,
-        system_covariates,
+        observations,
         example_end_times,
         STP_JAX,
         results_bottom.ETP,
@@ -750,8 +806,10 @@ def smart_initialize_model_2a(
         model,
         num_em_iterations_for_top_half,
         num_M_step_iterations_for_ETP_gradient_descent,
-        use_continuous_states,
+        mask_observations,
         params_frozen,
+        outside_system_recurrence,
+        outside_entity_recurrence,
         verbose=verbose,
     )
 
@@ -764,10 +822,10 @@ def smart_initialize_model_2a(
             M_Step_Toggle_Value.CLOSED_FORM_GAUSSIAN,
             results_top.ES_summary,
             results_bottom.EZ_summaries,
-            continuous_states,
+            observations,
             example_end_times,
         )
 
 
-    results_raw = RawInitializationResults(results_bottom, results_top, IP_JAX, EP_JAX)
+    results_raw = RawInitializationResults(results_bottom, results_top, IP_JAX)
     return initialization_results_from_raw_initialization_results(results_raw, params_frozen)

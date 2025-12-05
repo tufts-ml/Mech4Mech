@@ -3,6 +3,16 @@ import math
 import torch
 
 class IsotropicGaussianPrior(torch.nn.Module):
+
+    """
+    Purpose: The Isotropic Gaussian Prior defines a single variance across outputs with zero everywhere else in the covariance 
+    matrix. This is the prior over model parameters, and this assumes probabilistic independence in the parameters. 
+
+    Attributes: 
+        prior_params: params of the prior 
+        num_params: total number of parameters 
+        prior_variance: variance parameter of the prior 
+    """
     def __init__(self, num_params=None, prior_params=None, prior_variance=1.0):
         super().__init__()
         self.prior_params = prior_params
@@ -10,6 +20,14 @@ class IsotropicGaussianPrior(torch.nn.Module):
         self.prior_variance = torch.tensor(prior_variance, dtype=torch.float32)
 
     def kl(self, params, sigma):
+        """
+        Purpose: Computes the KL divergence between the prior and the assumed posterior 
+
+        Attributes: 
+            params: params of the posterior 
+            sigma: variance of the prior  
+        Return: KL of the probability distributions 
+        """
         assert len(params) == self.num_params
         params_diff_norm = (params**2).sum() if self.prior_params is None else ((params - self.prior_params)**2).sum()
         if sigma.shape == ():
@@ -26,6 +44,14 @@ class IsotropicGaussianPrior(torch.nn.Module):
         return kl
     
     def log_prob(self, params):
+        """
+        Purpose: Computes the log probabilities of the prior 
+
+        Attributes: 
+            params: params of the model
+
+        Return: Log probs 
+        """
         assert len(params) == self.num_params
         params_diff_norm = (params**2).sum() if self.prior_params is None else ((params - self.prior_params)**2).sum()
         log_norm_const = self.num_params * math.log(2.0 * math.pi)

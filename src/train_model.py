@@ -1,5 +1,6 @@
 import numpy as np
 import jax.numpy as jnp
+from pathlib import Path
 import numpy.random as npr
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -11,20 +12,19 @@ import os
 from sklearn.cluster import KMeans
 
 from utilities.util import (
-    get_current_datetime_as_string, ensure_dir
+    prepare_run_directories, ensure_dir
 )
 
-from run_sim import system_regimes_gt, generate_training_data
+from data_generation import get_training_data, get_test_data
 from model import Model, save_model_type
-from recurrence import identity_recurrence_entity, cluster_trigger_system_recurrence_transformation
+from recurrence import mechanisticfeedback_recurrence_transformation
 from initialize import (
-    PreInitialization_Strategy_For_CSP,
-    smart_initialize_model_2a,
+    initialize_HSRDM,
 )
 from params import (
     Dims,
-    get_dim_of_entity_recurrence_output,
-    get_dim_of_system_recurrence_output,
+    get_dim_of_internal_entity_recurrence,
+    get_dim_of_internal_system_recurrence,
     save_params,
 )
 from compute_transitions import (
@@ -36,118 +36,102 @@ from compute_emissions import(compute_log_continuous_state_emissions_after_initi
 from maximization_step import M_step_toggles_from_strings
 from compute_posterior import save_hmm_posterior_summary
 from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
-from metrics import get_aligned_estimate, compute_regime_labeling_accuracy
+from metrics import compute_monotonicity_correlation, windowed_spearman_no_evidence_prob
 
 
 
 """
-Main script to train of the HSRDM. 
+Main script to train the HSRDM. 
 """
 
 ###
-# Configs
-###a
+# DATA SPLITTING & PRE-PROCESSING
+###
+gen = get_training_data()
+DATA = np.concatenate(gen[0], axis=0)
+example_end_times = gen[3]
 
-# Model specification
-n_train_sequences = 10
-K = 4
-L = 6
 
 ###
 # SPECIFY MODEL
 ###
+
+# Structure
+n_train_sequences = 8 #Number of training segments 
+J = 4 #Max number of students
+K = 2 #Set to 2 for no evidence of mechanistic reasoning, evidence of mechanistic reasoning
+L = 3 #Tunable
+
+
 model = Model(
     compute_log_initial_continuous_state_emissions_JAX,
     compute_log_continuous_state_emissions_after_initial_timestep_JAX,
     compute_log_system_transition_probability_matrices_JAX,
     compute_log_entity_transition_probability_matrices_JAX,
-    identity_recurrence_entity,
-    cluster_trigger_system_recurrence_transformation
+    internal_entity_recurrence_JAX= None,
+    internal_system_recurrence_JAX= None,
 )
-model_adjustment = None  # Options: None, "one_system_regime", "remove_recurrence"
-
-GLOBAL_MSG = "LAUGH" * n_train_sequences
-J = 64
-T = 200
-total_time = 10300
-
+model_adjustment = "None"
 
 # Initialization
 seed_for_initialization = 126
 num_em_iterations_for_bottom_half_init = 1
 num_em_iterations_for_top_half_init = 1
-preinitialization_strategy_for_CSP = PreInitialization_Strategy_For_CSP.LOCATION 
+
 
 # Inference
 n_cavi_iterations = 10
-M_step_toggle_for_STP = "gradient_descent"  # "closed_form_tpm"
+M_step_toggle_for_STP = "gradient_descent"  
 M_step_toggle_for_ETP = "gradient_descent"
 M_step_toggle_for_continuous_state_parameters = "closed_form_gaussian"
 M_step_toggle_for_IP = "closed_form_gaussian"
-system_covariates = None
 num_M_step_iters = 50
 alpha_system_prior, kappa_system_prior = 1.0, 10.0 
 show_system_states = False 
 
-# Directories
-datetime_as_string = get_current_datetime_as_string()
-run_description = f"seed_{seed_for_initialization}_timestamp__{datetime_as_string}_none"
-home_dir = os.path.expanduser("~")
-plots_dir = f"{home_dir}/team-dynamics-time-series/src/dynagroup/model2a/marching_band/results/plots/{run_description}/"
-artifacts_dir = f"{home_dir}/team-dynamics-time-series/src/dynagroup/model2a/marching_band/results/artifacts/{run_description}/"
-frames_dir = f"{home_dir}/team-dynamics-time-series/src/dynagroup/model2a/marching_band/results/frames/"
+# Create directories
+run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}"
+prepare_run_directories(run_description)
 
-###
-# I/O
-###
+repo_root = Path(__file__).resolve().parents[1]
+base_dir = repo_root / "results" / "unsupervised_inference" / f"{run_description}"
+plots_dir = f"{base_dir}/plots"
+artifacts_dir = f"{base_dir}/artifacts"
+
 ensure_dir(plots_dir)
 ensure_dir(artifacts_dir)
 
-# For diagnostics
-show_plots_after_learning = True 
-T_snippet_for_fit_to_observations = 400
-
-
-###
-# MAKE PRIOR
-###
+# Make prior
 system_transition_prior = SystemTransitionPrior_JAX(alpha_system_prior, kappa_system_prior)
 
-
-###
-# Data splitting and preprocessing
-###
-
-gen = generate_training_data(GLOBAL_MSG, J, T, 0)
-DATA = gen[0]
-example_end_times = gen[1]
-cluster_states = gen[2] 
-true_system_regimes = np.argmax(system_regimes_gt(10,  [1227, 2840, 6128, 7392, 9553, 9680]), axis=1)
-###
-# MASKING
-###
-use_continuous_states = None  
-
-
-
 #### Setup Dims
-N = 0
-D = 2
-D_e = get_dim_of_entity_recurrence_output(D, model)
-D_s = get_dim_of_system_recurrence_output(D, J, system_covariates, model)
-M_e = 0 
-DIMS = Dims(J, K, L, D, D_e, N, D_s, M_e)
+D = 128
+D_e = 1
+D_s = 4
+DIMS = Dims(J, K, L, D, D_e, D_s)
 
 ###
 # MODEL ADJUSTMENTS
 ###
+# Remove system and/or Internal recurrence 
 if model_adjustment == "one_system_regime":
     DIMS.L = 1
 elif model_adjustment == "remove_recurrence":
     model.transform_of_continuous_state_vector_before_premultiplying_by_entity_recurrence_matrix_JAX = (
         lambda x_vec: np.zeros(DIMS.D_e)  
     )
+elif model_adjustment == "no_recurrence_and_system":
+    DIMS.L = 1
+    model.transform_of_continuous_state_vector_before_premultiplying_by_entity_recurrence_matrix_JAX = (
+        lambda x_vec: np.zeros(DIMS.D_e)  
+    )
 
+# External recurrence 
+outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system")
+outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity")
+
+# Masking
+mask_observations = None  
 
 ###
 # INITIALIZATION
@@ -156,28 +140,28 @@ start_time = time.time()
 print("Running smart initialization.")
 
 
-results_init = smart_initialize_model_2a(
+results_init = initialize_HSRDM(
     DIMS,
     DATA,
     example_end_times, 
     model,
-    preinitialization_strategy_for_CSP,
     num_em_iterations_for_bottom_half_init,
     num_em_iterations_for_top_half_init,
     seed_for_initialization,
-    system_covariates,
-    use_continuous_states,
+    mask_observations,
     save_dir=plots_dir,
+    outside_system_recurrence = outside_system_recurrence,
+    outside_entity_recurrence= outside_entity_recurrence,
 )
 params_init = results_init.params
 VES_init, VEZ_init = results_init.ES_summary, results_init.EZ_summaries
 
 
 ####
-# Inference
+# INFERENCE
 ####
 
-VES_summary, VEZ_summaries, params_learned, elbo_decomposed, classification_accuracy = run_CAVI_with_JAX(
+VES_summary, VEZ_summaries, params_learned, elbo_decomposed = run_CAVI_with_JAX(
     params_init,
     VES_init, VEZ_init,
     system_transition_prior,
@@ -192,9 +176,9 @@ VES_summary, VEZ_summaries, params_learned, elbo_decomposed, classification_accu
         M_step_toggle_for_IP,
     ),
     num_M_step_iters,
-    system_covariates,
-    use_continuous_states,
-    true_system_regimes,
+    outside_system_recurrence,
+    outside_entity_recurrence,
+    mask_observations,
 )
 
 
@@ -202,106 +186,137 @@ end_time = time.time()
 elapsed_time = end_time - start_time
 print(f"Code execution time: {elapsed_time} seconds")
 
-
-
 ### Save model, learned params, latent state distribution
 save_model_type(artifacts_dir, basename_prefix=run_description)
-save_params(params_learned, artifacts_dir, basename_prefix=run_description)
-save_hmm_posterior_summary(VES_summary, "qS", artifacts_dir, basename_prefix=run_description)
-save_hmm_posterior_summary(VEZ_summaries, "qZ", artifacts_dir, basename_prefix=run_description)
+save_params(params_learned, artifacts_dir)
+save_hmm_posterior_summary(VES_summary, "qS", artifacts_dir)
+save_hmm_posterior_summary(VEZ_summaries, "qZ", artifacts_dir)
 
 ####
-# Plotting and Model Validation for Data 
+# MODEL VALIDATION 
 ####
 
-def plot_ca(classification_accuracy): 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    plt.plot(classification_accuracy)
-    plt.xlabel("Number of CAVI Iterations")
-    plt.ylabel("Accuracy")
-    plt.title("Classification Accuracy")
-    plt.savefig(plots_dir + f"accuracy")
-    plt.show()
+elbo_history = [d["elbo"] for d in elbo_decomposed]
 
-def plot_system_segments(system_data): 
-    letters = ["L", "A", "U", "G", "H", "C"]
-    ground_truth = true_system_regimes
-    colors=['#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#a6cee3']
+def plot_elbo(elbo_values, plots_dir, filename="elbo_over_iterations.pdf"):
+    """
+    Purpose: Plot ELBO over iterations and save to plots_dir.
 
-    accuracy = compute_regime_labeling_accuracy(system_data, ground_truth)
-    print(f"System State Classification Accuracy: {accuracy:.02f}")
-    unique_values = np.unique(system_data)
-    
-    color_map = dict(zip(unique_values, colors[:len(unique_values)]))
-    letter_map = dict(zip(unique_values, letters[:len(unique_values)]))
-    
-    fig, ax = plt.subplots(figsize=(10, 2))
-    for i, value in enumerate(system_data):
-        rect = patches.Rectangle((i, -1), 1, 2, linewidth=0, edgecolor='none', facecolor=color_map[value])
-        ax.add_patch(rect)
-        ax.text(i + 0.5, 0, letter_map[value], ha='center', va='center', fontsize=12, color='black')
+    Arguments: 
+        elbo_values : list or np.ndarray
+            Sequence of ELBO values (inlcudes ELBO computation at every step in training VES-step, VEZ-step, M-step for each param).
+        plots_dir : pathlib.Path or str
+            Directory where the plot will be saved.
+        filename : str
+            Name of the output image file.
+    """
 
-    ax.set_xlim(0, len(system_data))
-    ax.set_ylim(0, 1)
-    ax.set_yticks([])
-    handles = [patches.Patch(color=color_map[val], label=f'{letter_map[val]}') for val in unique_values]
-    ax.legend(handles=handles, loc='upper right')
-    plt.savefig(plots_dir + f"system_states")
-    plt.show()
-    
-def plot_k_means_entities(entity_data):
-    letters = ["L", "A", "U", "G", "H", "C"]
-    ground_truth = true_system_regimes
-    k = 6
-    T = len(entity_data)
-    one_hot_encoded = np.eye(k)[entity_data]
-    reshaped_data = one_hot_encoded.reshape(T, -1)
-    kmeans = KMeans(n_clusters=6, random_state=120)
-    cluster_labels = kmeans.fit_predict(reshaped_data)
-    colors=['#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#a6cee3']
+    elbo_values = np.asarray(elbo_values)
 
-    accuracy = compute_regime_labeling_accuracy(cluster_labels, ground_truth)
-    print(f"Entity Cluster Classification Accuracy: {accuracy}")
-    aligned_estimate = get_aligned_estimate(cluster_labels, ground_truth)
-    unique_values = np.unique(aligned_estimate)
-    
-    color_map = dict(zip(unique_values, colors[:len(unique_values)]))
-    letter_map = dict(zip(unique_values, letters[:len(unique_values)]))
-    
-    fig, ax = plt.subplots(figsize=(10, 2))
-    for i, value in enumerate(aligned_estimate):
-        # Draw the rectangle segment for each predicted cluster
-        rect = patches.Rectangle((i, -1), 1, 2, linewidth=0, edgecolor='none', facecolor=color_map[value])
-        ax.add_patch(rect)
-        # Add text to the middle of the rectangle for each segment
-        ax.text(i + 0.5, 0, letter_map[value], ha='center', va='center', fontsize=12, color='black')
+    plt.figure(figsize=(8, 5))
+    plt.plot(elbo_values, linewidth=2)
+    plt.title("ELBO Over Iterations")
+    plt.xlabel("Iteration")
+    plt.ylabel("ELBO")
+    plt.grid(True, linestyle="--", alpha=0.5)
 
-    # Customize plot
-    ax.set_xlim(0, len(aligned_estimate))
-    ax.set_ylim(0, 1)
-    ax.set_yticks([])
-    handles = [patches.Patch(color=color_map[val], label=f'{letter_map[val]}') for val in unique_values]
-    ax.legend(handles=handles, loc='upper right')
-    plt.show()
+    save_path = Path(plots_dir) / filename
+    plt.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close()
 
+    print(f"[plot_elbo] Saved ELBO plot to {save_path}")
 
-if show_plots_after_learning:
+plot_elbo(elbo_history, plots_dir)
 
-    if model_adjustment == "one_system_regime" : 
-        most_likely_entity_regimes = np.argmax(VEZ_summaries.expected_regimes, axis=2)
-        plot_k_means_entities(most_likely_entity_regimes)
+expected = VEZ_summaries.expected_regimes   # shape (T, J, 2)
+zero_val = expected[..., 0] #Just takes index 0 
+one_val = expected[..., 1] #Just takes index 1
+evidence_strengths = np.argmax(np.concatenate(gen[1], axis=0), axis=2) + 1
 
-    else: 
-        most_likely_system_regimes = np.argmax(VES_summary.expected_regimes, axis=1) 
-        system_aligned_sequence = get_aligned_estimate(most_likely_system_regimes, true_system_regimes)
-        system_raw = np.asarray(system_aligned_sequence)
-        plot_system_segments(system_raw)
-        #plot_ca(classification_accuracy)
+print(expected)
+print(zero_val)
+print(one_val)
+print(evidence_strengths)
+# We compute for both placeholders (0,1) as we're not sure which one corresponds most to evidence of mechanistic reasoning
+# We'll take the higher one of the two scores 
 
-    
+#Computing monotonicity 
+rho, p_value = compute_monotonicity_correlation(zero_val, evidence_strengths)
+print("zero rho: " + str(rho))
+print("zero p-value: " + str(p_value))
 
+rho, p_value = compute_monotonicity_correlation(one_val, evidence_strengths)
+print("one rho: " + str(rho))
+print("one p-value: " + str(p_value))
 
+# We compute for both placeholders (0,1) as we're not sure which one corresponds most to evidence of mechanistic reasoning
+# We'll take the higher one of the two scores 
 
+#Computing contextual monotonicity: correlation between probabilities of the "no evidence" labels in a set of 20 
+# and the mean evidence across all sets of 20 in an episode; discarding the <20 observations at the end. 
+
+rho, p_value = windowed_spearman_no_evidence_prob(
+    zero_val,
+    evidence_strengths,
+    evidence_strengths,
+    example_end_times[1:],
+    window_size=20,
+    no_evidence_class=1,
+)
+print("zero cluster rho: " + str(rho))
+print("zero cluster p-value: " + str(p_value))
+
+rho, p_value = windowed_spearman_no_evidence_prob(
+    one_val,
+    evidence_strengths,
+    evidence_strengths,
+    example_end_times[1:],
+    window_size=20,
+    no_evidence_class=1,
+)
+print("one cluster rho: " + str(rho))
+print("one cluster p-value: " + str(p_value))
+
+def plot_vals_scatter(values, plots_dir, filename="vals_scatter.pdf"):
+    """
+    Purpose: Scatter plot the vals (T x J_max), where each J_max is plotted
+        in a different color over time steps.
+
+    Arguments: 
+        values : np.ndarray
+            Array of shape (T, J_max) containing max values per student per time.
+        plots_dir : Path or str
+            Directory where to save the plot.
+        filename : str
+            Output file name.
+    """
+
+    values = np.asarray(values)
+    T, J_max = values.shape
+
+    plt.figure(figsize=(10, 6))
+
+    for j in range(J_max):
+        plt.scatter(
+            np.arange(T),
+            values[:, j],
+            s=20,
+            alpha=0.8,
+            label=f"Student {j}",
+        )
+
+    plt.xlabel("Time step (t)")
+    plt.ylabel("Probability")
+    plt.title("Mechanistic Reasoning Probability per Student Over Time")
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.legend()
+
+    save_path = Path(plots_dir) / filename
+    plt.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close()
+
+plot_vals_scatter(zero_val, plots_dir, filename="zero_vals_scatter.pdf")
+plot_vals_scatter(one_val, plots_dir, filename="one_vals_scatter.pdf")
 
 
             

@@ -3,9 +3,13 @@ import functools
 import torch
 import torchvision
 # Importing our custom module(s)
-import utils
+import utilities.util
 
 class RandomFourierFeaturesGaussianProcess(torch.nn.Module):
+
+    """
+    Purpose: Define the variational layers for various model architecture types. ASK ETHAN 
+    """
     def __init__(self, in_features, out_features, learnable_lengthscale=False, learnable_outputscale=False, lengthscale=20.0, outputscale=1.0, rank=1024):
         super().__init__()
         
@@ -16,14 +20,14 @@ class RandomFourierFeaturesGaussianProcess(torch.nn.Module):
         self.learnable_outputscale = learnable_outputscale
         
         if self.learnable_lengthscale:
-            self.raw_lengthscale = torch.nn.Parameter(utils.inv_softplus(torch.tensor(lengthscale, dtype=torch.float32)))
+            self.raw_lengthscale = torch.nn.Parameter(util.inv_softplus(torch.tensor(lengthscale, dtype=torch.float32)))
         else:
-            self.register_buffer("raw_lengthscale", utils.inv_softplus(lengthscale, dtype=torch.float32))
+            self.register_buffer("raw_lengthscale", util.inv_softplus(lengthscale, dtype=torch.float32))
         
         if self.learnable_outputscale:
-            self.raw_outputscale = torch.nn.Parameter(utils.inv_softplus(torch.tensor(outputscale, dtype=torch.float32)))
+            self.raw_outputscale = torch.nn.Parameter(util.inv_softplus(torch.tensor(outputscale, dtype=torch.float32)))
         else:
-            self.register_buffer("raw_outputscale", utils.inv_softplus(torch.tensor(outputscale, dtype=torch.float32)))
+            self.register_buffer("raw_outputscale", util.inv_softplus(torch.tensor(outputscale, dtype=torch.float32)))
                     
         self.rank = rank
         self.register_buffer("feature_weight", torch.randn(self.rank, self.in_features))

@@ -30,7 +30,8 @@ from maximization_step import (
 )
 
 """
-Uses a Coordinate Ascent Variational Inference (CAVI) method to train the HSRDM. 
+Uses a Coordinate Ascent Variational Inference (CAVI) method to train the HSRDM. Runs both the E-step computed in -> (expectation_step.py)
+and the M-step computed in -> (maximizations-step.py) for a user specified number of iterations. 
 """
 
 def run_CAVI_with_JAX(
@@ -39,65 +40,57 @@ def run_CAVI_with_JAX(
     VEZ_summaries: HMM_Posterior_Summaries_JAX,
     system_transition_prior: Optional[SystemTransitionPrior_JAX] = None,
     model: Model = None,
-    continuous_states: Union[JaxNumpyArray2D, JaxNumpyArray3D] = None, 
+    observations: Union[JaxNumpyArray2D, JaxNumpyArray3D] = None, 
     example_end_times: Optional[JaxNumpyArray1D] = None,
     n_iterations: int = 1,
     M_step_toggles: Optional[M_Step_Toggles] = None,
     num_M_step_iters: int = 50,
-    system_covariates: Optional[JaxNumpyArray2D] = None,
-    use_continuous_states: Optional[NumpyArray2D] = None,
+    outside_system_recurrence: Optional[JaxNumpyArray2D] = None,
+    outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
+    mask_observations: Optional[NumpyArray2D] = None,
     true_system_regimes: Optional[NumpyArray1D] = None,
     true_entity_regimes: Optional[NumpyArray2D] = None,
     verbose: bool = True,
 ) -> Tuple[HMM_Posterior_Summary_JAX, HMM_Posterior_Summaries_JAX, AllParameters_JAX]:
     """
+
+    Purpose: Implemnt the variational inference procedure for the MODEL parameters and the assumed posterior distribution.
+    The goal is to find the posterior that maximizes the Evidence Lower Bound (ELBO). The E-step finds the current optimal 
+    posterior given fixed MODEL params and the M-step finds improved MODEL params given the current optimal posterior. The 
+    ELBO is maximized over iterations. 
+
     Arguments:
-        continuous_states: jnp.array with shape (T,J) or (T, J, D)
-            If (T,J), we assume this means (T,J,D) where D=1, and convert it to have 3 array dims.
-        transform_of_continuous_state_vector_before_premultiplying_by_recurrence_matrix: transform R^D -> R^D
-            of the continuous state vector before pre-multiplying by the the recurrence matrix.
-        example_end_times: optional, has shape (E+1,)
+        all_params: STP, ETP, CSP, IP
+        VES_summary: contains the posterior summary for the system latent marginals and pairwise marginals
+            given the entire observation sequence, and the probability density over emissions.
+        VEZ_summaries: contains the posterior summary for the entity latent marginals and pairwise marginals
+            given the entire observation sequence, and the probability density over the observations. 
+        system_transition_prior: Dirichlet distribution over the categorical parameters in -> (prior.py)
+        model: joint distribution defined in -> (model.py)
+        observations: np.array of shape (T,J,D) where the (t,j)-th entry isin R^D
+        example_end_times: optional, has shape (N+1,)
             An `example` (or event) takes an ordinary sampled group time series of shape (T,J,:) and interprets it
-            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across i.i.d "examples".
-            An example might induce a largetime gap between timesteps, and a discontinuity in the continuous states x.
-
-            If there are E examples, then along with the observations, we store
-                end_times=[-1, t_1, …, t_E], where t_e is the timestep at which the e-th example ended.
-            So to get the timesteps for the e-th example, you can index from 1,…,T_grand by doing
-                    [end_times[e-1]+1 : end_times[e]].
-
-        M_step_toggles: Describes what kind of M-step should be done (gradient-descent, closed-form, or None)
-            for each subclass of parameters (STP, ETP, CSP, IP).
-
-            As of 4/20/23, supported values are:
-                STP: Closed-form, gradient decent, or none
-                ETP: Gradient decent, or none
-                CSP: Closed-form, gradient decent, or none  (but gradient descent doesn't work very well)
-                IP: Closed-form or none
-        use_continuous_states: If None, we assume all states should be utilized in inference.
+            as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
+            If there are N examples, then along with the observations, we store
+            end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
+        n_iterations: total number of CAVI iterations
+        M_step_toggles: Toggle value for the optimization setting (e.g. closed_form, gradient_descent)
+        num_M_step_iters: number of iterations for optimization (e.g. gradient descent)
+        outside_system_recurrence: The recurrence features (T-1, D_s) are provided, which are computed from the observations/continuous states
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model. 
+        outside_entity_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations/continuous states
+            outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model. 
+        mask_observations: If None, we assume all states should be utilized in inference.
             Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
-            continuous_states[t,j] should be utilized in inference and False otherwise.
-            In particular, the M-step for the entity-level parameters and the VES step have no insight into this info.
-            Note that because this functionality was added just prior on 5/12/23, just prior to the NeurIPS deadline,
-            the VEZ step still has access to this info. But the mask prevents the VEZ step from feeding masked
-            data into the M step and the VES step. The only glitch is that the ELBO ignores the mask,
-            and is still always computed for the full data set. But the ELBO is not used to determine inference steps
-            -- it's just computed post-hoc for informational purposes.
+            observations[t,j] should be utilized in inference and False otherwise.
         true_system_regimes: Array with shape (T,)
             Each entry is in {1,...,L}
         true_entity_regimes: has shape (T, J)
             Each entry is in {1,...,K}
-
+        verbose: True boolean if we want to print loss statements during training 
     Returns:
         VES_Summary, VEZ_Summaries, all parameters.
 
-    Notation:
-        T: number of timesteps
-        J: number of entities
-        L: number of system-level regimes
-        K: number of entity-level regimes
-        D: dimension of continuous states
-        E: number of examples
     """
 
     ###
@@ -105,30 +98,29 @@ def run_CAVI_with_JAX(
     ###
     
     DIMS = dims_from_params(all_params)
-    T = np.shape(continuous_states)[0]
-    classification_list = np.zeros(n_iterations)
+    T = np.shape(observations)[0]
     ed_list = list()
 
-    if continuous_states.ndim == 2:
+    if observations.ndim == 2:
         print("Continuous states has only two array dimensions; now adding a third array dimension with 1 element.")
-        continuous_states = continuous_states[:, :, None]
+        observations = observations[:, :, None]
 
-    if use_continuous_states is None:
-        use_continuous_states = np.full((T, DIMS.J), True)
+    if mask_observations is None:
+        mask_observations = np.full((T, DIMS.J), True)
     else:
-        # TODO: Raise error if use_continuous_states has False followed by True for any entity j;
+        # TODO: Raise error if mask_observations has False followed by True for any entity j;
         # in the current implementation, inference will not be done correctly, because the VEZ step will not correctly
         # remove the missing data -- so the inference after the missing data will be artificially good.
         warnings.warn(
-            f"Selecting only some continuous states for usage correctly alters inference -- the M-step and VES "
-            f"steps are changes so as to remove the influence of unused states.  However, the "
+            f"Selecting only some observations for usage correctly alters inference -- the M-step and VES "
+            f"steps are changed so as to remove the influence of unused states.  However, the "
             f"ELBO is still computed on the full dataset. This is because of the current implementation: under "
             f"the hood, we compute the full VEZ step, and only ablate post-hoc."
         )
 
-    if False in use_continuous_states[0]:
+    if False in mask_observations[0]:
         raise NotImplementedError(
-            f"We currently assume the initial continuous state is used for all entities. "
+            f"We currently assume the initial observations is used for all entities. "
             f"The implementation can be changed to handle this case, though: Update the "
             f"code for doing the M-step for the initialization parameters."
         )
@@ -136,24 +128,18 @@ def run_CAVI_with_JAX(
     if example_end_times is None:
         example_end_times = np.array([-1, T])
 
-    if not example_end_times_are_proper(example_end_times, len(continuous_states)):
+    if not example_end_times_are_proper(example_end_times, len(observations)):
         raise ValueError(
             f"Event end times do not have the proper format. Consult the `examples` module "
             f"and try again.  `example_end_times` MUST begin with -1 and end with T, the length "
             f"of the grand time series."
         )
 
-    if system_covariates is None:
-        # TODO: Check that D_s=0 as well; if not there is an inconsistency in the implied desire of the caller.
-        system_covariates = np.zeros((T, 0))
-
     if DIMS.L == 1:
         # Automatically turn off M-step for system level parameters if there is only one system state.
         M_step_toggles.STP = M_Step_Toggle_Value.OFF
 
-    # TODO:  I need to have a way to do a DUMB (default/non-data-informed) init for both VEZ and VES summaries
-    # so that we can get ELBO baselines BEFORE the smart-initialization.... Maybe make VEZ, VES uniform? And
-    # use the data-free inits for everything else?
+
     def local_calc_elbo(**kws):
         all_params = kws.get('all_params')
         VES_summary, VEZ_summaries = kws.get('VES_summary'), kws.get('VEZ_summaries')
@@ -161,10 +147,10 @@ def run_CAVI_with_JAX(
         model = kws.get('model')
         data_TJD, example_end_times, mask_TJ = [
             kws.get(s) for s in [
-                'continuous_states', 'example_end_times', 'use_continuous_states']]
+                'observations', 'example_end_times', 'mask_observations']]
         elbo_dict = elbo_utils.calc_elbo(
             all_params, VES_summary, VEZ_summaries, STP_prior,
-            model, data_TJD, example_end_times, mask_TJ, return_dict=True)
+            model, data_TJD, example_end_times, mask_TJ, outside_system_recurrence, outside_entity_recurrence, return_dict=True)
         return elbo_dict
     def pretty_print_elbo(**elbo_kws):
         fstr = "elbo={elbo:9.5f} energy={energy:9.5f} entrp={entropy:9.5f}"
@@ -192,12 +178,13 @@ def run_CAVI_with_JAX(
             all_params.STP,
             all_params.ETP,
             all_params.IP,
-            continuous_states,
+            observations,
             VEZ_summaries,
             model,
             example_end_times,
-            system_covariates,
-            use_continuous_states,
+            outside_system_recurrence,
+            outside_entity_recurrence,
+            mask_observations,
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after VES"
@@ -218,10 +205,11 @@ def run_CAVI_with_JAX(
             all_params.CSP,
             all_params.ETP,
             all_params.IP,
-            continuous_states,
+            observations,
             VES_summary.expected_regimes,
             model,
             example_end_times,
+            outside_entity_recurrence,
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after VEZ"
@@ -229,10 +217,6 @@ def run_CAVI_with_JAX(
         if verbose:
             pretty_print_elbo(**elbo_dict)
      
-
-        # TODO: I probably don't really need separate functions of the form run_M_step_for_<xxxx>.  Make this a single wrapper that in
-        # turn calls the appropriate functions for closed-form or gradient descent inference.
-
         ###
         # M-step (ETP)
         ###
@@ -242,12 +226,13 @@ def run_CAVI_with_JAX(
             M_step_toggles.ETP,
             VES_summary,
             VEZ_summaries,
-            continuous_states,
+            observations,
             i,
             num_M_step_iters,
             model,
             example_end_times,
-            use_continuous_states,
+            outside_entity_recurrence,
+            mask_observations,
             verbose-1,
         )
         elbo_dict = local_calc_elbo(**locals())
@@ -261,7 +246,6 @@ def run_CAVI_with_JAX(
         # M-step (STP)
         ###
 
-        # Note the VES step has already taken care of the `use_continuous_states` mask.
         all_params = run_M_step_for_STP(
             all_params,
             M_step_toggles.STP,
@@ -271,8 +255,8 @@ def run_CAVI_with_JAX(
             num_M_step_iters,
             model,
             example_end_times,
-            system_covariates,
-            continuous_states,
+            outside_system_recurrence,
+            observations,
             verbose-1,
         )
         elbo_dict = local_calc_elbo(**locals())
@@ -280,8 +264,6 @@ def run_CAVI_with_JAX(
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
-
-    
 
 
         ###
@@ -292,12 +274,12 @@ def run_CAVI_with_JAX(
             all_params,
             M_step_toggles.CSP,
             VEZ_summaries,
-            continuous_states,
+            observations,
             i,
             num_M_step_iters,
             model,
             example_end_times,
-            use_continuous_states,
+            mask_observations,
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after Mstep:CSP"
@@ -314,18 +296,14 @@ def run_CAVI_with_JAX(
             M_step_toggles.IP,
             VES_summary,
             VEZ_summaries,
-            continuous_states,
+            observations,
             example_end_times,
         )
-        all_params = AllParameters_JAX(all_params.STP, all_params.ETP, all_params.CSP, all_params.EP, IP_new)
+        all_params = AllParameters_JAX(all_params.STP, all_params.ETP, all_params.CSP, IP_new)
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after Mstep:IP"
         ed_list.append(elbo_dict)
         if verbose:
             pretty_print_elbo(**elbo_dict)
 
-        # TODO: Make all `run_M_step[...]` have consistent call signatures.
-        # I think the current more compact one is better; otherwise we have to construct
-        # a full all parameters instance (with lots of extraneous info) when all we want to do is an operation
-        # on the initial params.
-    return VES_summary, VEZ_summaries, all_params, ed_list, classification_list 
+    return VES_summary, VEZ_summaries, all_params, ed_list, 
