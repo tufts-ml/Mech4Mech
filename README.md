@@ -18,5 +18,5 @@ To model latent entity transitions at each time step, we assume an entity specif
 
 To model latent system transitions at each time step, we assume one categorical distribution over discrete states with a linear transformation of the states at the previous time step and of the outputs of the recurrent feedback from all entities. 
 
-
+![How the HSRDM came to be!](how.png)
 
