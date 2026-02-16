@@ -36,7 +36,7 @@ from compute_emissions import(compute_log_continuous_state_emissions_after_initi
 from maximization_step import M_step_toggles_from_strings
 from compute_posterior import save_hmm_posterior_summary
 from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
-from metrics import plot_elbo, get_entity_correlation_table, get_entity_correlation_metric, get_transition_posteriors_conditioned_on_speaker_evidence, get_system_correlation_metric, plot_speaking_and_evidence_boxes, plot_posteriors_per_entity
+from metrics import plot_elbo, get_entity_correlation_table, get_entity_correlation_metric, get_transition_posteriors_conditioned_on_speaker_evidence, get_system_correlation_metric, plot_speaking_and_evidence_boxes, plot_posteriors_per_entity, get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence
 
 
 """
@@ -94,7 +94,7 @@ alpha_system_prior, kappa_system_prior = 1, 0
 show_system_states = False 
 
 # Create directories
-run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}_new_metrics3"
+run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}_full_evidence"
 prepare_run_directories(run_description)
 
 repo_root = Path(__file__).resolve().parents[1]
@@ -222,7 +222,7 @@ compute_entity_correlations = get_entity_correlation_table(posterior_probabiliti
 
 #Compute the mean posterior probabilities we care about 
 get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
-
+get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
 
 #Get the post-training diagnostics
 save_state_frequency_counts(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities)

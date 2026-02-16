@@ -204,6 +204,82 @@ def get_system_silent_correlation_table(
     return df
 
 
+def get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(
+    probs: np.ndarray,        # (T, J, K)
+    evid_onehot: np.ndarray,  # (T, J, C)
+    observations: np.ndarray, # (T, J, D)
+    k_target: int = 1,
+    require_not_silent_at_t: bool = True,
+    out_csv: str | None = None,
+) -> pd.DataFrame:
+    """
+    Purpose: Look at each time t, take the speaker sp = speaker(t).
+    Keep only events where the speaker is silent at t+1 (and optionally not silent at t),
+    then split by whether the speaker has mechanistic evidence at t.
+
+    Arguements: 
+    Probs: Posterior probabilities output from the training (T, J, K)
+    evid_onehot: One hot vector labels that are the annotated class evidence of mechanistic reasoning 
+    obervations: np.array of shape (T,J,D) where the (t,j)-th entry isin R^D
+    k_target: this state is k=1 in our experiments 
+    require_not_silent_at_t: must be set to true to only care about the speaker at time t 
+    out_csv: Name of the csv file that the table of results will save to 
+
+    Returns: mean posterior P(z_{t+1, sp} = k_target) for each scenario + counts.
+    """
+
+    probs = np.asarray(probs)
+    evid_onehot = np.asarray(evid_onehot)
+    observations = np.asarray(observations)
+
+    T, J, K = probs.shape
+    assert evid_onehot.shape[0] == T and evid_onehot.shape[1] == J, "evid_onehot must be (T,J,C)"
+    assert observations.shape[0] == T and observations.shape[1] == J, "observations must be (T,J,D)"
+    assert 0 <= k_target < K
+
+    speaker_idx = speaker_index_per_t(observations)          # (T,)
+    silent = silent_mask_from_observations(observations)     # (T,J) bool
+    evid_present = np.any(evid_onehot[..., 1:] > 0, axis=-1) # (T,J) bool
+
+    mech_vals, no_mech_vals = [], []
+
+    for t in range(T - 1):
+        sp = int(speaker_idx[t])
+
+        # speaker must be silent at t+1
+        if not silent[t + 1, sp]:
+            continue
+
+        # optionally require an actual transition: not silent at t -> silent at t+1
+        if require_not_silent_at_t and silent[t, sp]:
+            continue
+
+        val = float(probs[t + 1, sp, k_target])
+
+        if bool(evid_present[t, sp]):
+            mech_vals.append(val)
+        else:
+            no_mech_vals.append(val)
+
+    def summarize(vals, label):
+        arr = np.asarray(vals, dtype=float)
+        return {
+            "scenario": label,
+            "k_target": int(k_target),
+            "n_events": int(arr.size),
+            "mean_posterior_k": float(np.mean(arr)) if arr.size else np.nan,
+        }
+
+    df = pd.DataFrame([
+        summarize(mech_vals, "mech_evidence"),
+        summarize(no_mech_vals, "no_mech_evidence"),
+    ])
+
+    if out_csv:
+        df.to_csv(f"{out_csv}speaker_transition_to_silence_k{k_target}_by_mech_evidence.csv", index=False)
+
+    return df
+
 
 def get_transition_posteriors_conditioned_on_speaker_evidence(
     probs: np.ndarray,        # (T, J, K)
@@ -214,7 +290,7 @@ def get_transition_posteriors_conditioned_on_speaker_evidence(
     out_csv: str | None = None,
 ) -> pd.DataFrame:
     """
-    For ALL time points t and entities j, compute conditional averages:
+    Purpose: For ALL time points t and entities j, compute conditional averages:
 
     Condition is determined by the SPEAKER at time t:
       - evidence_present(t) = True iff evid_onehot[t, speaker(t), 0] is NOT the active class
@@ -224,7 +300,16 @@ def get_transition_posteriors_conditioned_on_speaker_evidence(
       1) mean probs[t+1, j, k_silent_to_talk] over (t,j) where silent(t,j)=True and silent(t+1,j)=False
       2) mean probs[t+1, j, k_silent_to_silent] over (t,j) where silent(t,j)=True and silent(t+1,j)=True
 
-    Returns a small 2x2 table (with counts).
+    Arguements: 
+        Probs: Posterior probabilities output from the training (T, J, K)
+        evid_onehot: One hot vector labels that are the annotated class evidence of mechanistic reasoning 
+        obervations: np.array of shape (T,J,D) where the (t,j)-th entry isin R^D
+        k_silent_to_talk: this state is k=3 in our experiments 
+        k_silent_to_silent: this state is k=1 in our experiments 
+        out_csv: Name of the csv file that the table of results will save to 
+
+
+    Returns:  a small 2x2 table (with counts).
     """
 
     probs = np.asarray(probs)
@@ -290,6 +375,8 @@ def get_transition_posteriors_conditioned_on_speaker_evidence(
         df.to_csv(f"{out_csv}transition_posteriors_conditioned_on_speaker_evidence.csv", index=False)
 
     return df
+
+
 
 
 
