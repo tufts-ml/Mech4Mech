@@ -14,6 +14,7 @@ from utilities.types import (
     JaxNumpyArray3D,
     JaxNumpyArray4D,
     NumpyArray1D,
+    NumpyArray3D,
 )
 
 from model import Model 
@@ -96,7 +97,7 @@ def compute_expected_log_entity_transition_probability_matrices_wrt_entity_regim
         T-1, 
         observations[:-1],
         inside_recurrence=model.internal_entity_recurrence_JAX,
-        outside_recurrence=outside_recurrence
+        outside_recurrence=outside_recurrence,
     )
 
     expected_log_transition_matrices = jnp.einsum(
@@ -230,7 +231,12 @@ def compute_expected_log_entity_transition_probability_matrices_wrt_system_regim
     VES_expected_regimes: JaxNumpyArray2D,
     observations: JaxNumpyArray3D,
     model: Model,
-    outside_recurrence: Optional[JaxNumpyArray3D] = None
+    outside_recurrence: Optional[JaxNumpyArray3D] = None,
+    one_hot_evid: Optional[NumpyArray3D] = None,
+    save_dir: Optional[str] = None,
+    iteration: Optional[int] = None,
+    make_table: Optional[bool] = False, 
+
 ) -> JaxNumpyArray3D:
     """
     Purpose: Compute expected log transition probability matrices from the MODEL, where the expectations are taken with
@@ -245,6 +251,15 @@ def compute_expected_log_entity_transition_probability_matrices_wrt_system_regim
         model: joint distribution defined in -> (model.py)
         outside_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations/continuous states
             outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model. 
+        one_hot_evidence:
+            One-hot evidence labels of shape (T, J, C).
+            Class 0 is assumed to mean "no evidence".
+        iteration:
+            Training_iteration.
+        save_dir: 
+            Directory to save the csv file.
+         make_table: 
+            Only true if making and saving a table for the transition and emission parameters during training 
 
     Returns:
         np.array of size (T-1,J,K,K) whose (t,j,k,k')-th element gives
@@ -259,7 +274,11 @@ def compute_expected_log_entity_transition_probability_matrices_wrt_system_regim
         T-1,
         observations[:-1],
         inside_recurrence=model.internal_entity_recurrence_JAX,
-        outside_recurrence=outside_recurrence
+        outside_recurrence=outside_recurrence,
+        one_hot_evidence = one_hot_evid,
+        save_dir = save_dir,
+        iteration = iteration,
+        table_save = make_table,
     )
 
     expected_log_transition_matrices = jnp.einsum( #Compute expectations 
@@ -277,6 +296,10 @@ def compute_log_entity_emissions_JAX(
     observations: JaxNumpyArray3D,
     model: Model,
     example_end_times: Optional[NumpyArray1D] = None,
+    one_hot_evid: Optional[NumpyArray3D] = None,
+    save_dir: Optional[str] = None,
+    iteration: Optional[int] = None,
+    make_table: Optional[bool] = False, 
 ):
     """
     Purpose: 
@@ -297,7 +320,15 @@ def compute_log_entity_emissions_JAX(
             as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
             If there are N examples, then along with the observations, we store
             end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
-
+        one_hot_evidence:
+            One-hot evidence labels of shape (T, J, C).
+            Class 0 is assumed to mean "no evidence".
+        iteration:
+            Training_iteration.
+        save_dir: 
+            Directory to save the csv file.
+         make_table: 
+            Only true if making and saving a table for the transition and emission parameters during training 
     Returns:
         np.array of shape (T,J,K), where the (t,j,k)-th element gives the log emissions
         probability of the t-th observation (given the (t-1)-st observation)
@@ -309,7 +340,7 @@ def compute_log_entity_emissions_JAX(
         example_end_times = np.array([-1, T])
 
     ### Compute log emissions assuming a single example.
-    log_entity_emissions = compute_log_entity_emissions_JAX__assuming_single_example(CSP, IP, observations, model)
+    log_entity_emissions = compute_log_entity_emissions_JAX__assuming_single_example(CSP, IP, observations, model, one_hot_evid = one_hot_evid, save_dir=save_dir, iteration = iteration, make_table = make_table)
 
     ### Patch emissions if there are separate examples.
     return fix__log_emissions_from_entities__at_example_boundaries(
@@ -322,6 +353,10 @@ def compute_log_entity_emissions_JAX__assuming_single_example(
     IP: InitializationParameters_JAX,
     observations: JaxNumpyArray3D,
     model: Model,
+    one_hot_evid: Optional[NumpyArray3D] = None,
+    save_dir: Optional[str] = None,
+    iteration: Optional[int] = None,
+    make_table: Optional[bool] = False 
 ):
     """
     Purpose: 
@@ -337,7 +372,15 @@ def compute_log_entity_emissions_JAX__assuming_single_example(
         IP: the initial emission parameters pi_sytem, pi_entities, mu_0s, Sigma_0s
         observations : np.array of shape (T,J,D) where the (t,j)-th entry is in R^D.
         model: joint distribution defined in -> (model.py)
-
+        one_hot_evidence:
+            One-hot evidence labels of shape (T, J, C).
+            Class 0 is assumed to mean "no evidence".
+        iteration:
+            Training_iteration.
+        save_dir: 
+            Directory to save the csv file.
+         make_table: 
+            Only true if making and saving a table for the transition and emission parameters during training 
     Returns:
         np.array of shape (T,J,K), where the (t,j,k)-th element gives the log emissions
         probability of the t-th continuous state (given the (t-1)-st continuous state)
@@ -351,7 +394,11 @@ def compute_log_entity_emissions_JAX__assuming_single_example(
     )
     #### Remaining times
     log_pdfs_remaining_times = model.compute_log_continuous_state_emissions_after_initial_timestep_JAX( #compute log probabilities 
-        CSP, observations
+        CSP, observations,
+        one_hot_evidence = one_hot_evid,
+        save_dir = save_dir,
+        iteration = iteration,
+        table_save = make_table,
     )
 
     ### Combine them
@@ -368,7 +415,11 @@ def run_VEZ_step_JAX(
     VES_expected_regimes: JaxNumpyArray2D,
     model: Model,
     example_end_times: NumpyArray1D,
-    outside_recurrence: Optional[JaxNumpyArray3D] = None
+    outside_recurrence: Optional[JaxNumpyArray3D] = None,
+    one_hot_evid: Optional[NumpyArray3D] = None,
+    save_dir: Optional[str] = None,
+    iteration: Optional[int] = None,
+    make_table: Optional[bool] = False, 
 ) -> HMM_Posterior_Summaries_JAX:
     """
     Purpose:
@@ -401,8 +452,15 @@ def run_VEZ_step_JAX(
             end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
         outside_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations/continuous states
             outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model. 
-
-
+        one_hot_evidence:
+            One-hot evidence labels of shape (T, J, C).
+            Class 0 is assumed to mean "no evidence".
+        iteration:
+            Training_iteration.
+        save_dir: 
+            Directory to save the csv file.
+        make_table: 
+            Only true if making and saving a table for the transition and emission parameters during training 
 
     """
 
@@ -413,6 +471,10 @@ def run_VEZ_step_JAX(
         observations,
         model,
         example_end_times,
+        one_hot_evid = one_hot_evid,
+        iteration = iteration,
+        save_dir = save_dir,
+        make_table = make_table,
     )
 
     # `transitions` has shape (T-1,J,K,K)
@@ -422,7 +484,11 @@ def run_VEZ_step_JAX(
             VES_expected_regimes,
             observations,
             model,
-            outside_recurrence
+            outside_recurrence,
+            one_hot_evid = one_hot_evid,
+            iteration = iteration,
+            save_dir = save_dir,
+            make_table = make_table, 
         )
     )
 

@@ -6,8 +6,8 @@ import types
 from pathlib import Path
 from typing import Union
 from feedback_mechanism.utils import flatten_params, inv_softplus, use_posterior, add_variational_layers
-
 from utilities.types import JaxNumpyArray1D, NumpyArray3D, NumpyArray2D
+import torch.nn.functional as F
 
 """
 Defines the recurrence or feedback functions f(x) and g(x) for entity and system states from the observations, respectively. 
@@ -46,7 +46,8 @@ def identity_recurrence_system(
 
 def mechanisticfeedback_recurrence_transformation(
     observations: NumpyArray3D,
-    latent_variable: str 
+    latent_variable: str, 
+    perf_evidence: bool
 ) -> Union[NumpyArray2D, NumpyArray3D]:
 
     """
@@ -59,6 +60,7 @@ def mechanisticfeedback_recurrence_transformation(
     Arguments:
         observations: has shape (T, J, D). 
         latent_variable: string that specifies the "system"or the "entity" recurrence.
+        perf_evidence: if True the evidence is from the perfect annotations. If False, the evidence is from the classifier 
 
     Returns: the scalar class value of each embedding in TxJxD (observations), predicted by a previously trained NN torch model (in feedback mechanism). 
         Input is a 3D numpy array of TxJxD. If the latent_variable = "system": the output is a (T-1)xJ 2D numpy array. If the latent_variable 
@@ -93,16 +95,53 @@ def mechanisticfeedback_recurrence_transformation(
     x_torch = torch.from_numpy(observations).float()
     x_flat = x_torch.reshape(T * J, D)
     with torch.no_grad():
-        y_pred = model(x_flat)
-    pred_class = y_pred.argmax(dim=-1)
+        logits = model(x_flat)
+    probs = torch.softmax(logits, dim=1)
+    max_probs, preds = torch.max(probs, dim=1)
+    entropy = -(probs * torch.log(probs + 1e-12)).sum(dim=1)
+    pred_prob = probs.argmax(dim=-1)
 
-    y_TJ = pred_class.reshape(T, J)
+    y_TJ_probs = probs.reshape(T, J, 8)
 
-    if latent_variable == "entity": 
-        y_TJ_vector = y_TJ.unsqueeze(-1)
-        y_TJ_np = y_TJ_vector.cpu().numpy()
+    preds_onehot_flat = F.one_hot(preds, num_classes=8).float()
+    y_TJ = preds_onehot_flat.view(T, J, 8)
 
-    elif latent_variable == "system": 
-        y_TJ_np = y_TJ.cpu().numpy()
-        
+    if perf_evidence == False: 
+
+        if latent_variable == "entity": 
+            y_TJ_np = y_TJ.cpu().numpy()
+
+        elif latent_variable == "system": 
+            v = observations[0][1]
+            X8 = torch.as_tensor(y_TJ)
+            XD = torch.as_tensor(observations)
+            v  = torch.as_tensor(v)
+
+            mask = (XD != v.view(1, 1, -1)).any(dim=-1)
+            j_idx = mask.long().argmax(dim=1)
+            X_T8 = X8[torch.arange(X8.shape[0]), j_idx]
+            y_TJ_np = X_T8.cpu().numpy()
+
+    if perf_evidence == True: 
+        repo_root = Path(__file__).resolve().parents[1]
+        data_dir = repo_root / "data" / "unsupervised_inference" / "training"
+        data = np.load(data_dir / "training_dataset.npz", allow_pickle=True)   
+        all_Y = data["Y"].tolist()
+        evidence_strengths = np.concatenate(all_Y , axis=0)
+
+        if latent_variable == "entity": 
+            X8 = torch.as_tensor(evidence_strengths[:-1])
+            y_TJ_np = X8.cpu().numpy()
+
+        elif latent_variable == "system": 
+            v = observations[0][1]
+            X8 = torch.as_tensor(evidence_strengths[:-1])
+            XD = torch.as_tensor(observations)
+            v  = torch.as_tensor(v)
+
+            mask = (XD != v.view(1, 1, -1)).any(dim=-1)
+            j_idx = mask.long().argmax(dim=1)
+            X_T8 = X8[torch.arange(X8.shape[0]), j_idx]
+            y_TJ_np = X_T8.cpu().numpy()
+ 
     return y_TJ_np

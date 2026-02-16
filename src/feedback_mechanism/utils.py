@@ -6,12 +6,12 @@ from sklearn.model_selection import train_test_split
 import scipy
 import matplotlib.pyplot as plt 
 from pathlib import Path
-# PyTorch
 import torch
 import torchvision
 import torchmetrics
-# Importing our custom module(s)
+#Import the below when training the HSRDM. Comment out and just import layers when training the feedback mechanism 
 import feedback_mechanism.layers as layers
+#import layers
 
 def inv_softplus(x):
     """

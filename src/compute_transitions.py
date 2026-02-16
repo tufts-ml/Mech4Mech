@@ -8,11 +8,12 @@ from jax.scipy.stats import multivariate_normal as mvn_JAX
 from scipy.stats import multivariate_normal as mvn
 
 from utilities.util import (
-    normalize_log_potentials_by_axis_JAX,
+    normalize_log_potentials_by_axis_JAX, sample_transitions_for_transition_types_TJLKk
 )
 from utilities.types import (
     JaxNumpyArray3D,
     JaxNumpyArray5D,
+    NumpyArray3D,
 )
 
 from params import (
@@ -90,6 +91,8 @@ def compute_log_system_transition_probability_matrices_JAX(
     log_potentials = (
         bias_from_system_recurrence[:, None, :] + STP.Pi[None, :, :]
     )  
+    log = normalize_log_potentials_by_axis_JAX(log_potentials, axis=2)
+
     return normalize_log_potentials_by_axis_JAX(log_potentials, axis=2)
 
 def compute_log_entity_transition_probability_matrices_JAX(
@@ -97,7 +100,11 @@ def compute_log_entity_transition_probability_matrices_JAX(
     T_minus_1: int,
     observations: JaxNumpyArray3D,
     inside_recurrence: Callable = None,
-    outside_recurrence: Optional[JaxNumpyArray3D] = None
+    outside_recurrence: Optional[JaxNumpyArray3D] = None,
+    one_hot_evidence: Optional[NumpyArray3D] = None,
+    save_dir: Optional[str] = None,
+    iteration: Optional[int] = None, 
+    table_save: Optional[bool] = False,
 ) -> JaxNumpyArray5D:
     """
     Purpose: Compute log entity transition probability matrices: z^j_t | z^j_(t-1), x^(j)_(t-1), s_t for each z^j_t = k, z_(t-1) = k'
@@ -112,7 +119,11 @@ def compute_log_entity_transition_probability_matrices_JAX(
             tracer objects. Thus, these functions can only work with JAX tracer objects. 
         outside_recurrence: The recurrence features (T-1, J, D_e) are provided, which are computed from the observations/continuous states
             outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model. 
-
+        one_hot_evidence: One-hot evidence labels of shape (T, J, C).
+            Class 0 is assumed to mean "no evidence".
+        save_dir: directory for saving the csv table
+        iteration: training iteration; only necessary when saving the csv table
+        table_save: Flag for if True, save the CSV table 
     Returns:
         jnp.array of shape (T-1,J,L,K,K).  The (t,j,l,k,k')-th element gives the probability of
             the j-th entity transitioning from regime k to regime k'
@@ -121,7 +132,7 @@ def compute_log_entity_transition_probability_matrices_JAX(
             for t=1,...,T-1.
     """
     if inside_recurrence is None and outside_recurrence is None:
-        K = np.shape(ETP.Psis)[2]
+        K = np.shape(ETP_JAX.Psis)[2]
         bias_from_recurrence = jnp.zeros((T_minus_1, K))
 
     elif inside_recurrence is not None: 
@@ -135,8 +146,16 @@ def compute_log_entity_transition_probability_matrices_JAX(
     elif outside_recurrence is not None: 
         bias_from_recurrence = jnp.einsum("jlkd,tjd->tjkl", ETP_JAX.Psis, outside_recurrence)
 
+
+
     bias_from_recurrence_reordered_axes = jnp.moveaxis(bias_from_recurrence, [2, 3], [3, 2])  # (T-1, J, L, K)
     log_potentials = (
         bias_from_recurrence_reordered_axes[:, :, :, None, :] + ETP_JAX.Ps[None, :, :, :, :]
     )  # (T-1, J, L, None, K) + (1,J,L, K,K ) = (T-1, J, L, K, K)
-    return normalize_log_potentials_by_axis_JAX(log_potentials, axis=4)
+
+    normalized_potentials = normalize_log_potentials_by_axis_JAX(log_potentials, axis=4)
+
+    if table_save == True: 
+        sample_transitions_for_transition_types_TJLKk(observations = observations, one_hot_evidence = one_hot_evidence, log_transitions = normalized_potentials, save_dir = save_dir, iteration = iteration)
+
+    return normalized_potentials

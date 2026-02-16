@@ -39,10 +39,7 @@ def main():
     D = bundle["emb_dim"] #Embedding dimension
     
     N = len(texts)
-    class_weights = torch.tensor([1/1452 , 1/5 , 1/151 , 1/53, 1/19, 1/29, 1/10, 1/2], dtype=torch.float32)
-
-    X = torch.tensor(embeddings, dtype=torch.float32)
-    y = torch.tensor(labels, dtype=torch.float32)
+    class_weights = torch.tensor([1721 / (8*1452) , 1721 / (8*5), 1721 / (8*151), 1721 / (8*53), 1721 / (8*19),  1721 / (8*29),  1721 / (8*10),  1721 / (8*2)], dtype=torch.float32)
 
     # --- tensors on desired device ---
     X = torch.tensor(embeddings, dtype=torch.float32, device=device)

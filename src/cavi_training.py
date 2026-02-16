@@ -2,7 +2,7 @@ import warnings
 from typing import Optional, Tuple, Union
 import numpy as np
 
-from utilities.util import example_end_times_are_proper
+from utilities.util import example_end_times_are_proper, append_gaussian_params_by_iter_csv
 from compute_posterior import (
     HMM_Posterior_Summaries_JAX,
     HMM_Posterior_Summary_JAX,
@@ -13,11 +13,14 @@ from utilities.types import (
     JaxNumpyArray3D,
     NumpyArray1D,
     NumpyArray2D,
+    NumpyArray3D,
 )
 from model import Model 
 from prior import SystemTransitionPrior_JAX
 from params import AllParameters_JAX, dims_from_params
 import compute_ELBO as elbo_utils
+from metrics import get_entity_correlation_metric, get_system_correlation_metric
+
 
 from expectation_step import run_VES_step_JAX, run_VEZ_step_JAX
 from maximization_step import (
@@ -48,9 +51,9 @@ def run_CAVI_with_JAX(
     outside_system_recurrence: Optional[JaxNumpyArray2D] = None,
     outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
     mask_observations: Optional[NumpyArray2D] = None,
-    true_system_regimes: Optional[NumpyArray1D] = None,
-    true_entity_regimes: Optional[NumpyArray2D] = None,
+    evid_onehot: Optional[NumpyArray3D] = None,
     verbose: bool = True,
+    save_dir: Optional[str] = None, 
 ) -> Tuple[HMM_Posterior_Summary_JAX, HMM_Posterior_Summaries_JAX, AllParameters_JAX]:
     """
 
@@ -83,11 +86,10 @@ def run_CAVI_with_JAX(
         mask_observations: If None, we assume all states should be utilized in inference.
             Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
             observations[t,j] should be utilized in inference and False otherwise.
-        true_system_regimes: Array with shape (T,)
-            Each entry is in {1,...,L}
-        true_entity_regimes: has shape (T, J)
-            Each entry is in {1,...,K}
-        verbose: True boolean if we want to print loss statements during training 
+        evid_onehot: One hot vector labels that are the annotated class evidence of mechanistic reasoning
+        verbose: True boolean if we want to print the correlation during training of the system and entity expected regimes
+        at the next time step and the current evidence strength of the observation 
+        save_dir: str for the path to save the file
     Returns:
         VES_Summary, VEZ_Summaries, all parameters.
 
@@ -192,15 +194,6 @@ def run_CAVI_with_JAX(
         if verbose:
             pretty_print_elbo(**elbo_dict)
 
-        '''
-        if verbose:
-            print(f"\nVES step's log normalizer: {VES_summary.log_normalizer:.02f}")
-            if true_system_regimes is not None:
-                most_likely_system_regimes = np.argmax(VES_summary.expected_regimes, axis=1)
-                pct_correct_system = compute_regime_labeling_accuracy(most_likely_system_regimes, true_system_regimes)
-                print(f"Percent correct classifications for system segmentations {pct_correct_system:.02f}")
-                classification_list[i] = pct_correct_system
-        '''
         VEZ_summaries = run_VEZ_step_JAX(
             all_params.CSP,
             all_params.ETP,
@@ -210,6 +203,10 @@ def run_CAVI_with_JAX(
             model,
             example_end_times,
             outside_entity_recurrence,
+            one_hot_evid = evid_onehot,
+            iteration = i, 
+            save_dir = save_dir,
+            make_table = True, 
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after VEZ"
@@ -233,7 +230,7 @@ def run_CAVI_with_JAX(
             example_end_times,
             outside_entity_recurrence,
             mask_observations,
-            verbose-1,
+            verbose,
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after Mstep:ETP"
@@ -281,6 +278,15 @@ def run_CAVI_with_JAX(
             example_end_times,
             mask_observations,
         )
+
+        append_gaussian_params_by_iter_csv(
+            save_dir=save_dir,
+            iteration=i,
+            As=all_params.CSP.As,   
+            bs=all_params.CSP.bs,
+            Qs=all_params.CSP.Qs,
+            j0=0,
+        )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after Mstep:CSP"
         ed_list.append(elbo_dict)
@@ -306,4 +312,13 @@ def run_CAVI_with_JAX(
         if verbose:
             pretty_print_elbo(**elbo_dict)
 
+        
+        if verbose:
+            entity_correaltions = get_entity_correlation_metric(VEZ_summaries.expected_regimes, evid_onehot)
+            system_correaltions = get_system_correlation_metric(VES_summary.expected_regimes, evid_onehot, observations)
+            print(f"Entity Correlations: {entity_correaltions}")
+            print(f"System Correlations: {system_correaltions}")
+        
+ 
+      
     return VES_summary, VEZ_summaries, all_params, ed_list, 

@@ -12,10 +12,10 @@ import os
 from sklearn.cluster import KMeans
 
 from utilities.util import (
-    prepare_run_directories, ensure_dir
+    prepare_run_directories, ensure_dir, save_state_frequency_counts, save_maxprob_tables, save_posteriors_as_strings, save_embedding_similarity_metrics, save_transition_type_counts_per_entity
 )
 
-from data_generation import get_training_data, get_test_data
+
 from model import Model, save_model_type
 from recurrence import mechanisticfeedback_recurrence_transformation
 from initialize import (
@@ -36,8 +36,7 @@ from compute_emissions import(compute_log_continuous_state_emissions_after_initi
 from maximization_step import M_step_toggles_from_strings
 from compute_posterior import save_hmm_posterior_summary
 from cavi_training import SystemTransitionPrior_JAX, run_CAVI_with_JAX
-from metrics import compute_monotonicity_correlation, windowed_spearman_no_evidence_prob
-
+from metrics import plot_elbo, get_entity_correlation_table, get_entity_correlation_metric, get_transition_posteriors_conditioned_on_speaker_evidence, get_system_correlation_metric, plot_speaking_and_evidence_boxes, plot_posteriors_per_entity
 
 
 """
@@ -47,9 +46,14 @@ Main script to train the HSRDM.
 ###
 # DATA SPLITTING & PRE-PROCESSING
 ###
-gen = get_training_data()
-DATA = np.concatenate(gen[0], axis=0)
-example_end_times = gen[3]
+repo_root = Path(__file__).resolve().parents[1]
+data_dir = repo_root / "data" / "unsupervised_inference" / "training"
+data = np.load(data_dir / "training_dataset.npz", allow_pickle=True)
+all_X = data["X"].tolist()     
+all_Y = data["Y"].tolist()
+DATA = np.concatenate(all_X, axis=0)
+example_end_times = data["example_end_times"].tolist()
+evidence_strengths = np.concatenate(all_Y , axis=0)
 
 
 ###
@@ -59,8 +63,8 @@ example_end_times = gen[3]
 # Structure
 n_train_sequences = 8 #Number of training segments 
 J = 4 #Max number of students
-K = 2 #Set to 2 for no evidence of mechanistic reasoning, evidence of mechanistic reasoning
-L = 3 #Tunable
+K = 4 #The zero and one states are the silent observation states; The other 2 are for no evidence of mechanistic reasoning, evidence of mechanistic reasoning in the specific dialogue 
+L = 2 #Tunable
 
 
 model = Model(
@@ -68,7 +72,7 @@ model = Model(
     compute_log_continuous_state_emissions_after_initial_timestep_JAX,
     compute_log_system_transition_probability_matrices_JAX,
     compute_log_entity_transition_probability_matrices_JAX,
-    internal_entity_recurrence_JAX= None,
+    internal_entity_recurrence_JAX=None,
     internal_system_recurrence_JAX= None,
 )
 model_adjustment = "None"
@@ -80,23 +84,23 @@ num_em_iterations_for_top_half_init = 1
 
 
 # Inference
-n_cavi_iterations = 10
+n_cavi_iterations = 15
 M_step_toggle_for_STP = "gradient_descent"  
 M_step_toggle_for_ETP = "gradient_descent"
 M_step_toggle_for_continuous_state_parameters = "closed_form_gaussian"
 M_step_toggle_for_IP = "closed_form_gaussian"
 num_M_step_iters = 50
-alpha_system_prior, kappa_system_prior = 1.0, 10.0 
+alpha_system_prior, kappa_system_prior = 1, 0
 show_system_states = False 
 
 # Create directories
-run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}"
+run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}_new_metrics3"
 prepare_run_directories(run_description)
 
 repo_root = Path(__file__).resolve().parents[1]
 base_dir = repo_root / "results" / "unsupervised_inference" / f"{run_description}"
 plots_dir = f"{base_dir}/plots"
-artifacts_dir = f"{base_dir}/artifacts"
+artifacts_dir = f"{base_dir}/artifacts/"
 
 ensure_dir(plots_dir)
 ensure_dir(artifacts_dir)
@@ -105,9 +109,9 @@ ensure_dir(artifacts_dir)
 system_transition_prior = SystemTransitionPrior_JAX(alpha_system_prior, kappa_system_prior)
 
 #### Setup Dims
-D = 128
-D_e = 1
-D_s = 4
+D = 128 
+D_e = 8
+D_s = 8
 DIMS = Dims(J, K, L, D, D_e, D_s)
 
 ###
@@ -117,18 +121,21 @@ DIMS = Dims(J, K, L, D, D_e, D_s)
 if model_adjustment == "one_system_regime":
     DIMS.L = 1
 elif model_adjustment == "remove_recurrence":
-    model.transform_of_continuous_state_vector_before_premultiplying_by_entity_recurrence_matrix_JAX = (
-        lambda x_vec: np.zeros(DIMS.D_e)  
+    model.internal_entity_recurrence_JAX = (
+        lambda x_vec: np.zeros(DIMS.D_e) 
     )
 elif model_adjustment == "no_recurrence_and_system":
     DIMS.L = 1
-    model.transform_of_continuous_state_vector_before_premultiplying_by_entity_recurrence_matrix_JAX = (
+    model.internal_entity_recurrence_JAX = (
         lambda x_vec: np.zeros(DIMS.D_e)  
     )
 
 # External recurrence 
-outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system")
-outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity")
+outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system",True)
+# mechanisticfeedback_recurrence_transformation(DATA, "system")
+outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity", True)
+
+#  mechanisticfeedback_recurrence_transformation(DATA, "entity")
 
 # Masking
 mask_observations = None  
@@ -149,7 +156,7 @@ results_init = initialize_HSRDM(
     num_em_iterations_for_top_half_init,
     seed_for_initialization,
     mask_observations,
-    save_dir=plots_dir,
+    save_dir=artifacts_dir,
     outside_system_recurrence = outside_system_recurrence,
     outside_entity_recurrence= outside_entity_recurrence,
 )
@@ -179,6 +186,8 @@ VES_summary, VEZ_summaries, params_learned, elbo_decomposed = run_CAVI_with_JAX(
     outside_system_recurrence,
     outside_entity_recurrence,
     mask_observations,
+    evid_onehot = evidence_strengths, 
+    save_dir=artifacts_dir,
 )
 
 
@@ -192,138 +201,39 @@ save_params(params_learned, artifacts_dir)
 save_hmm_posterior_summary(VES_summary, "qS", artifacts_dir)
 save_hmm_posterior_summary(VEZ_summaries, "qZ", artifacts_dir)
 
+
 ####
 # MODEL VALIDATION 
 ####
 
+#Get stats about the data
+save_embedding_similarity_metrics(X = DATA, Y = evidence_strengths, save_dir = artifacts_dir)
+save_transition_type_counts_per_entity(observations = DATA, one_hot_evidence = evidence_strengths, save_dir = artifacts_dir) 
+
+#Plot the ELBO over time 
 elbo_history = [d["elbo"] for d in elbo_decomposed]
+plot_elbo(elbo_history, plots_dir, example_end_times, J)
 
-def plot_elbo(elbo_values, plots_dir, filename="elbo_over_iterations.pdf"):
-    """
-    Purpose: Plot ELBO over iterations and save to plots_dir.
+#Compute the correlations we care about 
+posterior_probabilities = VEZ_summaries.expected_regimes
+system_posterior_probabilities = VES_summary.expected_regimes
 
-    Arguments: 
-        elbo_values : list or np.ndarray
-            Sequence of ELBO values (inlcudes ELBO computation at every step in training VES-step, VEZ-step, M-step for each param).
-        plots_dir : pathlib.Path or str
-            Directory where the plot will be saved.
-        filename : str
-            Name of the output image file.
-    """
+compute_entity_correlations = get_entity_correlation_table(posterior_probabilities, evidence_strengths, out_csv = artifacts_dir )
 
-    elbo_values = np.asarray(elbo_values)
-
-    plt.figure(figsize=(8, 5))
-    plt.plot(elbo_values, linewidth=2)
-    plt.title("ELBO Over Iterations")
-    plt.xlabel("Iteration")
-    plt.ylabel("ELBO")
-    plt.grid(True, linestyle="--", alpha=0.5)
-
-    save_path = Path(plots_dir) / filename
-    plt.savefig(save_path, dpi=200, bbox_inches="tight")
-    plt.close()
-
-    print(f"[plot_elbo] Saved ELBO plot to {save_path}")
-
-plot_elbo(elbo_history, plots_dir)
-
-expected = VEZ_summaries.expected_regimes   # shape (T, J, 2)
-zero_val = expected[..., 0] #Just takes index 0 
-one_val = expected[..., 1] #Just takes index 1
-evidence_strengths = np.argmax(np.concatenate(gen[1], axis=0), axis=2) + 1
-
-print(expected)
-print(zero_val)
-print(one_val)
-print(evidence_strengths)
-# We compute for both placeholders (0,1) as we're not sure which one corresponds most to evidence of mechanistic reasoning
-# We'll take the higher one of the two scores 
-
-#Computing monotonicity 
-rho, p_value = compute_monotonicity_correlation(zero_val, evidence_strengths)
-print("zero rho: " + str(rho))
-print("zero p-value: " + str(p_value))
-
-rho, p_value = compute_monotonicity_correlation(one_val, evidence_strengths)
-print("one rho: " + str(rho))
-print("one p-value: " + str(p_value))
-
-# We compute for both placeholders (0,1) as we're not sure which one corresponds most to evidence of mechanistic reasoning
-# We'll take the higher one of the two scores 
-
-#Computing contextual monotonicity: correlation between probabilities of the "no evidence" labels in a set of 20 
-# and the mean evidence across all sets of 20 in an episode; discarding the <20 observations at the end. 
-
-rho, p_value = windowed_spearman_no_evidence_prob(
-    zero_val,
-    evidence_strengths,
-    evidence_strengths,
-    example_end_times[1:],
-    window_size=20,
-    no_evidence_class=1,
-)
-print("zero cluster rho: " + str(rho))
-print("zero cluster p-value: " + str(p_value))
-
-rho, p_value = windowed_spearman_no_evidence_prob(
-    one_val,
-    evidence_strengths,
-    evidence_strengths,
-    example_end_times[1:],
-    window_size=20,
-    no_evidence_class=1,
-)
-print("one cluster rho: " + str(rho))
-print("one cluster p-value: " + str(p_value))
-
-def plot_vals_scatter(values, plots_dir, filename="vals_scatter.pdf"):
-    """
-    Purpose: Scatter plot the vals (T x J_max), where each J_max is plotted
-        in a different color over time steps.
-
-    Arguments: 
-        values : np.ndarray
-            Array of shape (T, J_max) containing max values per student per time.
-        plots_dir : Path or str
-            Directory where to save the plot.
-        filename : str
-            Output file name.
-    """
-
-    values = np.asarray(values)
-    T, J_max = values.shape
-
-    plt.figure(figsize=(10, 6))
-
-    for j in range(J_max):
-        plt.scatter(
-            np.arange(T),
-            values[:, j],
-            s=20,
-            alpha=0.8,
-            label=f"Student {j}",
-        )
-
-    plt.xlabel("Time step (t)")
-    plt.ylabel("Probability")
-    plt.title("Mechanistic Reasoning Probability per Student Over Time")
-    plt.grid(True, linestyle="--", alpha=0.4)
-    plt.legend()
-
-    save_path = Path(plots_dir) / filename
-    plt.savefig(save_path, dpi=200, bbox_inches="tight")
-    plt.close()
-
-plot_vals_scatter(zero_val, plots_dir, filename="zero_vals_scatter.pdf")
-plot_vals_scatter(one_val, plots_dir, filename="one_vals_scatter.pdf")
+#Compute the mean posterior probabilities we care about 
+get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
 
 
-            
+#Get the post-training diagnostics
+save_state_frequency_counts(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities)
+save_maxprob_tables(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities, one_hot_evidence = evidence_strengths)
+save_posteriors_as_strings(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities)
 
 
-
-
-
+#Plot the trajectories of both the evidence strengths and the posterior probabilities 
+plot_speaking_and_evidence_boxes(evidence_strengths, DATA, colors = None, plot_dir=plots_dir) 
+plot_posteriors_per_entity(posterior_probabilities, colors = None, plot_dir=plots_dir)
+# Example end times [-1, 484, 721, 1297, 1625, 2233, 2624, 3417, 3691]
+plot_posteriors_per_entity(posterior_probabilities, plot_dir=plots_dir, t_start =1550, t_end = 1600,keep_original_time = False, filename = "entity_posteriors_short.pdf")
 
 

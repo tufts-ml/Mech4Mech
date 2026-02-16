@@ -9,7 +9,7 @@ import numpy as np
 from dynamax.utils.optimize import run_gradient_descent
 from statsmodels.regression.linear_model import WLS
 from statsmodels.tools.tools import add_constant
-
+from dataclasses import replace
 
 from utilities.util import (
     make_sample_weights_which_mask_the_initial_timestep_for_each_event,evaluate_log_probability_density_of_sticky_transition_matrix_up_to_constant, soften_tpm,normalize_log_potentials_by_axis_JAX,
@@ -17,6 +17,11 @@ from utilities.util import (
     eligible_transitions_to_next,
     get_initialization_times,
     get_non_initialization_times,
+    generate_silent_observation,
+    clamp_parameters,
+    _tile_shared_LKDe_to_JLKDe, 
+    _tile_shared_LKK_to_JLKK,
+    weighted_ridge_fit_multioutput
 )
 from utilities.types import (
     JaxNumpyArray2D,
@@ -71,7 +76,8 @@ ETP: Likelihood: E_q log p(z^{1:J}_{1:T}|...) Prior: 1 (uniform) -> Parameters e
 
 CSP: Likelihood: E_q log p(x^{1:J}_{1:T}|...) Prior: 1 (uniform) -> Parameters estimated via Maximumum Likelihood Estimation/Minimize Weighted Mean Squared Error with closed form. 
 
-IP: E_q log p(s_0) + E_q log p(z_0^{1:J}|...) + E_q log p(x_0^{1:J}|...) 
+IP: E_q log p(s_0) + E_q log p(z_0^{1:J}|...) + E_q log p(x_0^{1:J}|...)  -> Pi_system and Pi_entities updated via the mean of the posterior expected regimes, mu updated via the mean of the 
+observations, and isotropic covariance sigmas updated via the variance of the observations for each entity across examples. 
 
 Why we do it: 
 Optimizing the MODEL parameters is akin to optimizing the full Evidence Lower Bound (ELBO) given the observations and 
@@ -251,6 +257,7 @@ def compute_expected_log_continuous_state_dynamics_after_initial_timestep_JAX(
         model.compute_log_continuous_state_emissions_after_initial_timestep_JAX(
             CSP,
             observations,
+            
         )
     )
     # log_continuous_state_dynamics is (T-1,J,K)
@@ -630,6 +637,7 @@ def run_M_step_for_CSP_in_closed_form__Gaussian_case(
     observations: JaxNumpyArray3D,
     example_end_times: NumpyArray1D,
     mask_observations: Optional[JaxNumpyArray2D] = None,
+    individualized_params: Optional[bool] = False
 ) -> ContinuousStateParameters_JAX:
     """
     Purpose: The M-step for CSP for this model is just the solution for a vector auto-regression (VAR) model
@@ -652,7 +660,9 @@ def run_M_step_for_CSP_in_closed_form__Gaussian_case(
         mask_observations: If None, we assume all states should be utilized in inference.
             Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
             observations[t,j] should be utilized in inference and False otherwise.
-
+        individualized_params: Optional[bool] = False,
+            If true, then the parameters of the model are not shared by all entities. Each entity has their own individual parameters.
+            If False, all entities share parameters. Very useful in limited data contexts and when you don't have consistent entities over sequences. 
     Returns: 
         The CSP parameters. 
     """
@@ -672,30 +682,110 @@ def run_M_step_for_CSP_in_closed_form__Gaussian_case(
     Qs = np.zeros((J, K, D, D))
 
     MIN_SUM_WEIGHTS_TO_UPDATE_PARAMS = 0.5
-    for j in range(J):
-        xs = np.asarray(observations[:, j, :])
-        for k in range(K):
-            response_weights = np.asarray(VEZ_expected_regimes[:, j, k] * sample_weights[:, j])[1:]
-            sum_of_response_weights = np.sum(response_weights)
-            if sum_of_response_weights >= MIN_SUM_WEIGHTS_TO_UPDATE_PARAMS:
-                responses = xs[1:]
-                predictors = add_constant(xs[:-1], prepend=False)
-                wls_model = WLS(responses, predictors, hasconst=True, weights=response_weights)
-                results = wls_model.fit()
-                # WLS returns parameters where the d-th column gives the weights for predicting d-th element of response vector.
-                # So we need to transpose to get a state transition matrix
-                As[j, k] = results.params[:-1].T
-                bs[j, k] = results.params[-1]
-                residuals = results.resid
-                # CONFIRM: I need a weighted estimate of covariance if I already used weights to create the wls model.
-                Qs[j, k] = np.cov(residuals.T, aweights=response_weights)
-            else:
-                print(
-                    f"\tState {k} for entity {j} has a summed response weights of {sum_of_response_weights:.02f} "
-                    "which is insufficient for updating the CSP parameters."
-                )
+    RIDGE_ALPHA = 1
+    PENALIZE_INTERCEPT = True
 
-    return ContinuousStateParameters_JAX(jnp.asarray(As), jnp.asarray(bs), jnp.asarray(Qs))
+    if individualized_params == True: 
+
+        for j in range(J):
+            xs = np.asarray(observations[:, j, :])
+            for k in range(K):
+                response_weights = np.asarray(VEZ_expected_regimes[:, j, k] * sample_weights[:, j])[1:]
+                sum_of_response_weights = np.sum(response_weights)
+                if sum_of_response_weights >= MIN_SUM_WEIGHTS_TO_UPDATE_PARAMS:
+                    responses = xs[1:]
+                    predictors = add_constant(xs[:-1], prepend=False)
+                    # ---- ridge fit ----
+                    B = weighted_ridge_fit_multioutput(
+                        predictors,
+                        responses,
+                        response_weights,
+                        alpha=RIDGE_ALPHA,
+                        penalize_intercept=PENALIZE_INTERCEPT,
+                    )  # (D+1, D)
+
+                    # match your parameter shapes
+                    As[j, k] = B[:-1].T   # (D, D)
+                    bs[j, k] = B[-1]      # (D,)
+
+                    # residuals for Q
+                    fitted = predictors @ B          # (T-1, D)
+                    residuals = responses - fitted   # (T-1, D)
+
+                    # CONFIRM: I need a weighted estimate of covariance if I already used weights to create the wls model.
+                    Q = np.cov(residuals.T, aweights=response_weights)
+                    Q = Q + 1e-4* np.eye(D) #Floors the diagonal variances to 1e^-4 so that they can never get too small 
+                    Qs[j, k] = Q
+                    diag_Q = jnp.diagonal(Q, axis1=-2, axis2=-1)
+                
+                else:
+                    print(
+                        f"\tState {k} for entity {j} has a summed response weights of {sum_of_response_weights:.02f} "
+                        "which is insufficient for updating the CSP parameters."
+                    )
+
+    elif individualized_params == False: 
+        for k in range(K):
+            # Pool across entities j
+            pooled_predictors = []
+            pooled_responses = []
+            pooled_weights = []
+
+            for j in range(J):
+                xs = np.asarray(observations[:, j, :])  # (T, D)
+
+                response_weights = np.asarray(VEZ_expected_regimes[:, j, k] * sample_weights[:, j])[1:]  # (T-1,)
+                sum_of_response_weights = np.sum(response_weights)
+
+                # You can keep this check (it prevents adding nearly-empty entities)
+                if sum_of_response_weights >= MIN_SUM_WEIGHTS_TO_UPDATE_PARAMS:
+                    responses = xs[1:]                               # (T-1, D)
+                    predictors = add_constant(xs[:-1], prepend=False) # (T-1, D+1)
+
+                    pooled_predictors.append(predictors)
+                    pooled_responses.append(responses)
+                    pooled_weights.append(response_weights)
+
+            # If nothing to fit for this k, skip
+            if len(pooled_weights) == 0:
+                continue
+
+            predictors_all = np.vstack(pooled_predictors)   # (N_pool, D+1)
+            responses_all  = np.vstack(pooled_responses)    # (N_pool, D)
+            weights_all    = np.concatenate(pooled_weights) # (N_pool,)
+
+
+            # ---- ridge fit ----
+            B = weighted_ridge_fit_multioutput(
+                predictors_all,
+                responses_all,
+                weights_all,
+                alpha=RIDGE_ALPHA,
+                penalize_intercept=PENALIZE_INTERCEPT,
+            )  # (D+1, D)
+
+            A_k = B[:-1].T  # (D, D)
+            b_k = B[-1]     # (D,)
+
+            fitted    = predictors_all @ B
+            residuals = responses_all - fitted
+
+            Q = np.cov(residuals.T, aweights=weights_all)
+            Q = Q + 1e-4 * np.eye(D)      # floor diagonal
+
+            # Broadcast shared params to all entities so downstream code doesn't change
+            As[:, k] = A_k
+            bs[:, k] = b_k
+            Qs[:, k] = Q
+
+            diag_Q = jnp.diagonal(Q, axis1=-2, axis2=-1)
+
+        
+    As, bs, Qs = clamp_parameters(observations, jnp.asarray(As), jnp.asarray(bs), jnp.asarray(Qs)) #Clamp the parameters for the first silent state k =0. In this state, I want this emission. 
+    As, bs, Qs = clamp_parameters(observations, jnp.asarray(As), jnp.asarray(bs), jnp.asarray(Qs), K_SPECIAL=1) #Clamp the parameters for the second silent state k = 1. In this state, I want this emission. 
+
+
+    return ContinuousStateParameters_JAX(As, bs, Qs)
 
 
 def run_M_step_for_ETP_via_gradient_descent(
@@ -709,7 +799,8 @@ def run_M_step_for_ETP_via_gradient_descent(
     example_end_times: NumpyArray1D,
     outside_recurrence: Optional[JaxNumpyArray3D] = None,
     mask_observations: Optional[JaxNumpyArray2D] = None,
-    verbose: bool = True,
+    individualized_params: Optional[bool] = False,
+    train_Psis: bool = False, 
 ) -> EntityTransitionParameters_MetaSwitch_JAX:
     """
     Purpose: The M-step for ETP with gradient descent optimized on the cost function (likelihood + prior) on the 
@@ -735,7 +826,8 @@ def run_M_step_for_ETP_via_gradient_descent(
         mask_observations: If None, we assume all states should be utilized in inference.
             Otherwise, this is a (T,J) boolean vector such that the (t,j)-th element is True if
             observations[t,j] should be utilized in inference and False otherwise.
-        verbose:  True boolean if we want to print loss statements during training 
+        individualized_params: Flags true is we have individual parameters for each entity; if false, parameters are shared 
+        train_Psis: Flags true if we want to train the recurrence parameters; false and we do not 
 
     Returns: 
         The UNCONSTRAINED ETP parameters. 
@@ -744,36 +836,129 @@ def run_M_step_for_ETP_via_gradient_descent(
     if mask_observations is None:
         mask_observations = np.full((T, J), True)
 
-    ### Do gradient descent on unconstrained parameters.
-    ETP_WUC = ETP_MetaSwitch_with_unconstrained_tpms_from_ordinary_ETP_MetaSwitch(ETP)
+    # Unconstrained version
+    ETP_WUC_init = ETP_MetaSwitch_with_unconstrained_tpms_from_ordinary_ETP_MetaSwitch(ETP)
+
+    Psis_init_JLKDe = getattr(ETP_WUC_init, "Psis")                  # (J,L,K,D_e)
+    Ps_init_JLKK    = getattr(ETP_WUC_init, "PTildes_Unconstrained")  # (J,L,K,K)
+
+    # Shared inits
+    Psis_shared_init = jnp.mean(Psis_init_JLKDe, axis=0)  # (L,K,D_e)
+    Ps_shared_init   = jnp.mean(Ps_init_JLKK, axis=0)     # (L,K,K)
 
     cost_function_ETP = functools.partial(
         compute_cost_for_entity_transition_parameters_with_unconstrained_tpms_JAX,
         observations=observations,
         VES_summary=VES_summary,
         VEZ_summaries=VEZ_summaries,
-        model= model,
+        model=model,
         example_end_times=example_end_times,
-        outside_recurrence=outside_recurrence, 
+        outside_recurrence=outside_recurrence,
         mask_observations=mask_observations,
     )
-    
-    optimizer_state_for_entity_transitions = None
-    (
-        ETP_WUC_new,
-        optimizer_state_for_entity_transitions,
-        losses_for_entity_transitions,
-    ) = run_gradient_descent(
-        cost_function_ETP,
-        ETP_WUC,
-        optimizer_state=optimizer_state_for_entity_transitions,
-        num_mstep_iters=num_M_step_iters,
-    )
 
-    if verbose:
-        print(
-            f"For iteration {iteration+1} of the M-step with entity transitions, First 5 Losses are {losses_for_entity_transitions[:5]}. Last 5 losses are {losses_for_entity_transitions[-5:]}"
-        )
+    optimizer_state_for_entity_transitions = None
+
+    if individualized_params == False:
+        # -------- SHARED PARAMETERS ACROSS ENTITIES --------
+
+        if train_Psis:
+            # Optimize BOTH Psis_shared and Ps_shared
+            def cost_function_shared(params_shared):
+                Psis_shared, Ps_shared = params_shared  # (L,K,D_e), (L,K,K)
+
+                Psis = _tile_shared_LKDe_to_JLKDe(Psis_shared, J)  # (J,L,K,D_e)
+                Ps   = _tile_shared_LKK_to_JLKK(Ps_shared, J)      # (J,L,K,K)
+
+                ETP_WUC = replace(ETP_WUC_init, **{
+                    "Psis": Psis,
+                    "PTildes_Unconstrained": Ps,
+                })
+                return cost_function_ETP(ETP_WUC)
+
+            params_shared_init = (Psis_shared_init, Ps_shared_init)
+
+            (params_shared_new,
+             optimizer_state_for_entity_transitions,
+             losses) = run_gradient_descent(
+                cost_function_shared,
+                params_shared_init,
+                optimizer_state=optimizer_state_for_entity_transitions,
+                num_mstep_iters=num_M_step_iters,
+            )
+
+            Psis_shared_new, Ps_shared_new = params_shared_new
+            Psis_new = _tile_shared_LKDe_to_JLKDe(Psis_shared_new, J)
+            Ps_new   = _tile_shared_LKK_to_JLKK(Ps_shared_new, J)
+
+        else:
+            # Optimize ONLY Ps_shared; keep Psis fixed at initialization
+            Psis_fixed_JLKDe = Psis_init_JLKDe
+
+            def cost_function_shared(Ps_shared):
+                Ps = _tile_shared_LKK_to_JLKK(Ps_shared, J)  # (J,L,K,K)
+
+                ETP_WUC = replace(ETP_WUC_init, **{
+                    "Psis": Psis_fixed_JLKDe,
+                    "PTildes_Unconstrained": Ps,
+                })
+                return cost_function_ETP(ETP_WUC)
+
+            (Ps_shared_new,
+             optimizer_state_for_entity_transitions,
+             losses) = run_gradient_descent(
+                cost_function_shared,
+                Ps_shared_init,
+                optimizer_state=optimizer_state_for_entity_transitions,
+                num_mstep_iters=num_M_step_iters,
+            )
+
+            Psis_new = Psis_fixed_JLKDe
+            Ps_new   = _tile_shared_LKK_to_JLKK(Ps_shared_new, J)
+
+        # Build final unconstrained object
+        ETP_WUC_new = replace(ETP_WUC_init, **{
+            "Psis": Psis_new,
+            "PTildes_Unconstrained": Ps_new,
+        })
+
+    else:
+        # -------- INDIVIDUALIZED PARAMETERS PER ENTITY --------
+
+        if train_Psis:
+            # Optimize whole ETP_WUC_init (Psis and PTildes_Unconstrained)
+            (ETP_WUC_new,
+             optimizer_state_for_entity_transitions,
+             losses_for_entity_transitions) = run_gradient_descent(
+                cost_function_ETP,
+                ETP_WUC_init,
+                optimizer_state=optimizer_state_for_entity_transitions,
+                num_mstep_iters=num_M_step_iters,
+            )
+        else:
+            # Optimize ONLY PTildes_Unconstrained; keep Psis fixed
+            Psis_fixed_JLKDe = Psis_init_JLKDe
+
+            def cost_function_individualized(Ps_JLKK):
+                ETP_WUC = replace(ETP_WUC_init, **{
+                    "Psis": Psis_fixed_JLKDe,
+                    "PTildes_Unconstrained": Ps_JLKK,
+                })
+                return cost_function_ETP(ETP_WUC)
+
+            (Ps_new,
+             optimizer_state_for_entity_transitions,
+             losses_for_entity_transitions) = run_gradient_descent(
+                cost_function_individualized,
+                Ps_init_JLKK,
+                optimizer_state=optimizer_state_for_entity_transitions,
+                num_mstep_iters=num_M_step_iters,
+            )
+
+            ETP_WUC_new = replace(ETP_WUC_init, **{
+                "Psis": Psis_fixed_JLKDe,
+                "PTildes_Unconstrained": Ps_new,
+            })
 
     return ordinary_ETP_MetaSwitch_from_ETP_MetaSwitch_with_unconstrained_tpms(ETP_WUC_new)
 
@@ -837,7 +1022,6 @@ def run_M_step_for_ETP(
             example_end_times,
             outside_recurrence,
             mask_observations,
-            verbose,
         )
     else:
         raise ValueError("I do not know what to do with ETP for the M-step.")
@@ -982,7 +1166,7 @@ def run_M_step_for_STP_via_gradient_descent(
     example_end_times: NumpyArray1D,
     outside_recurrence: Optional[JaxNumpyArray2D],
     observations: Optional[JaxNumpyArray3D],
-    verbose: bool = True,
+    train_Upsilon: bool =False , 
 ) -> SystemTransitionParameters_JAX:
     
     """
@@ -1005,13 +1189,19 @@ def run_M_step_for_STP_via_gradient_descent(
         outside_recurrence: The recurrence features (T-1, D_s) are provided, which are computed from the observations/continuous states
             outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
         observations:  np.array of shape (T,J,D) where the (t,j)-th entry isin R^D
-        verbose: True boolean if we want to print loss statements during training 
-
+        train_Upsilon: Flags whether the recurrence parameters are trained or not; if false, the parameters are hard coded. 
     Returns: 
         The UNCONSTRAINED STP parameters.
     """
 
     STP_WUC = STP_with_unconstrained_tpms_from_ordinary_STP(STP)
+
+    # Pull out initial values
+    Upsilon_init_LDs = getattr(STP_WUC, "Upsilon")  # (L, D_s)
+
+
+    Pi_init_LL = getattr(STP_WUC, "PiTilde_Unconstrained")  
+
     cost_function_STP = functools.partial(
         compute_cost_for_system_transition_parameters_with_unconstrained_tpms_JAX,
         VES_summary=VES_summary,
@@ -1022,25 +1212,48 @@ def run_M_step_for_STP_via_gradient_descent(
         observations=observations,
     )
 
-    
     optimizer_state_for_system_transitions = None
-    (
-        STP_WUC_new,
-        optimizer_state_for_system_transitions,
-        losses_for_system_transitions,
-    ) = run_gradient_descent(
-        cost_function_STP,
-        STP_WUC,
-        optimizer_state=optimizer_state_for_system_transitions,
-        num_mstep_iters=num_M_step_iters,
-    )
+
+    if train_Upsilon:
+        (
+            STP_WUC_new,
+            optimizer_state_for_system_transitions,
+            losses_for_system_transitions,
+        ) = run_gradient_descent(
+            cost_function_STP,
+            STP_WUC,
+            optimizer_state=optimizer_state_for_system_transitions,
+            num_mstep_iters=num_M_step_iters,
+        )
+    else:
+        # Freeze Upsilon: optimize only unconstrained TPM params
+        Upsilon_fixed_LDs = Upsilon_init_LDs
+
+        def cost_function_freeze_upsilon(PiTildes_Unconstrained_LL):
+            STP_WUC_tmp = replace(STP_WUC, **{
+                "Upsilon": Upsilon_fixed_LDs,
+                "PiTilde_Unconstrained": PiTildes_Unconstrained_LL,  
+            })
+            return cost_function_STP(STP_WUC_tmp)
+
+        (
+            Pi_new_LL,
+            optimizer_state_for_system_transitions,
+            losses_for_system_transitions,
+        ) = run_gradient_descent(
+            cost_function_freeze_upsilon,
+            Pi_init_LL,
+            optimizer_state=optimizer_state_for_system_transitions,
+            num_mstep_iters=num_M_step_iters,
+        )
+
+        STP_WUC_new = replace(STP_WUC, **{
+            "Upsilon": Upsilon_fixed_LDs,
+            "PiTilde_Unconstrained": Pi_new_LL, 
+        })
+
 
     STP_new = ordinary_STP_from_STP_with_unconstrained_tpms(STP_WUC_new)
-
-    if verbose:
-        print(
-            f"For iteration {iteration+1} of the M-step with system transitions, First 5 Losses are {losses_for_system_transitions[:5]}. Last 5 losses are {losses_for_system_transitions[-5:]}"
-        )
     return STP_new
 
 
@@ -1100,7 +1313,6 @@ def run_M_step_for_STP(
             example_end_times,
             outside_recurrence,
             observations,
-            verbose,
         )
     else:
         raise ValueError(
@@ -1157,9 +1369,11 @@ def run_M_step_for_CSP(
             example_end_times,
             mask_observations,
         )
+
     elif M_step_toggles_CSP == M_Step_Toggle_Value.GRADIENT_DESCENT:
         warnings.warn(
-            f"Learning the CSP parameters by gradient descent.  Performance seems to be worse than with the closed-form approach. "
+            f"Learning the CSP parameters by gradient descent.  Performance seems to be worse than with the closed-form approach." 
+            f"Does not support clamping the parameters to a specific state."
             f"We should do the analogue to ETP, STP steps which used tensorflow.probability to convert simplex-valued parameters to unconstrained rep and back."
             f"that is, we should rely upon tensorflow.probability to convert covariance parameters to unconstrained representation and back."
         )
@@ -1189,9 +1403,6 @@ def run_M_step_for_CSP(
 
         CSP_new = ordinary_CSP_Gaussian_from_CSP_Gaussian_with_unconstrained_covariances(CSP_WUC_new)
 
-        print(
-            f"For iteration {iteration+1} of the M-step with continuous state dynamics, First 5 Losses are {losses_for_state_dynamics[:5]}. Last 5 losses are {losses_for_state_dynamics[-5:]}"
-        )
     else:
         raise ValueError(
             "I don't understand the specification for how to do the M-step with continuous state parameters."
@@ -1207,6 +1418,7 @@ def run_M_step_for_IP_in_closed_form__Gaussian_case(
     VES_summary: HMM_Posterior_Summary_JAX,
     observations: JaxNumpyArray3D,
     example_end_times: NumpyArray1D,
+    individualized_params: Optional[bool] = False, 
 ) -> InitializationParameters_JAX:
     """
     Purpose: Exectutes the M-step for the IP params in the closed form Gaussian case. 
@@ -1223,7 +1435,9 @@ def run_M_step_for_IP_in_closed_form__Gaussian_case(
             as (T_grand,J,:), where T_grand is the sum of the number of timesteps across N i.i.d "examples".
             If there are N examples, then along with the observations, we store
             end_times=[-1, t_1, …, t_N], where t_n is the timestep at which the n-th example ended.
-    
+        individualized_params: Optional[bool] = False,
+            If true, then the parameters of the model are not shared by all entities. Each entity has their own individual parameters.
+            If False, all entities share parameters. Very useful in limited data contexts and when you don't have consistent entities over sequences. 
     Returns: 
         IP parameters. 
     """
@@ -1237,36 +1451,84 @@ def run_M_step_for_IP_in_closed_form__Gaussian_case(
     pi_system = normalize_potentials_by_axis_JAX(expected_system_regime_init_probs + EPSILON, axis=0)
 
     expected_entity_regime_init_probs = jnp.mean(VEZ_summaries.expected_regimes[init_times], axis=0)
-    pi_entities = normalize_potentials_by_axis_JAX(expected_entity_regime_init_probs + EPSILON, axis=1)
 
-    J, K = jnp.shape(pi_entities)
+    if individualized_params == True: 
+        pi_entities = normalize_potentials_by_axis_JAX(expected_entity_regime_init_probs + EPSILON, axis=1)
 
-    # set mu_0s to be equal to observed x's.
-    empirical_continuous_state_init_means = jnp.mean(observations[init_times], axis=0)  # (J,D)
-    # TODO: We are assuming that the initial means are identical across the K regimes.  No reason for this.
-    # Take the (expected-regime-)weighted mean above instead of the arithmetic mean.
-    mu_0s = jnp.tile(empirical_continuous_state_init_means[:, None, :], (1, K, 1))
+        J, K = jnp.shape(pi_entities)
 
-    empirical_continuous_state_init_vars = jnp.var(observations[init_times], axis=0)  # (J,D)
-    CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES = 5
-    if len(init_times) < CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES:
-        # if len(init_idxs)=1, keep Sigma_0s to tbe the same as initialized... not clear how to learn these
-        # although could do a Bayesian update (of the prior) even with only one observation.
-        Sigma_0s = IP.Sigma_0s
+        # set mu_0s to be equal to observed x's.
+        empirical_continuous_state_init_means = jnp.mean(observations[init_times], axis=0)  # (J,D)
+        # TODO: We are assuming that the initial means are identical across the K regimes.  No reason for this.
+        # Take the (expected-regime-)weighted mean above instead of the arithmetic mean.
+        mu_0s = jnp.tile(empirical_continuous_state_init_means[:, None, :], (1, K, 1))
 
-    else:
-        D = np.shape(IP.Sigma_0s)[-1]
-        Sigma_0s = np.zeros((J, K, D, D))
-        # TODO: Vectorize this
-        for j in range(J):
-            cov_empirical_across_examples = empirical_continuous_state_init_vars[j] * np.eye(D)
-            for k in range(K):
-                # TODO: We are currently forcing the init covs to be diagonal.  There's no reason for this at all -
-                # just implementational haste.  Go back and do it correctly
-                #
-                # TODO: We are assuming that the initial covs are identical across the K regimes.  No reason for this.
-                # Take the (expected-regime-)weighted mean above, instead of the arithmetic mean.
-                Sigma_0s[j, k] = cov_empirical_across_examples
+        empirical_continuous_state_init_vars = jnp.var(observations[init_times], axis=0)  # (J,D)
+        CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES = 5
+        if len(init_times) < CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES:
+            # if len(init_idxs)=1, keep Sigma_0s to tbe the same as initialized... not clear how to learn these
+            # although could do a Bayesian update (of the prior) even with only one observation.
+            Sigma_0s = IP.Sigma_0s
+
+        else:
+            D = np.shape(IP.Sigma_0s)[-1]
+            Sigma_0s = np.zeros((J, K, D, D))
+            # TODO: Vectorize this
+            for j in range(J):
+                cov_empirical_across_examples = np.maximum(empirical_continuous_state_init_vars[j], 1e-4) * np.eye(D) #Flooring the variance so that it never gets too low; stops degeneracy 
+                for k in range(K):
+                    # TODO: We are currently forcing the init covs to be diagonal.  There's no reason for this at all -
+                    # just implementational haste.  Go back and do it correctly
+                    #
+                    # TODO: We are assuming that the initial covs are identical across the K regimes.  No reason for this.
+                    # Take the (expected-regime-)weighted mean above, instead of the arithmetic mean.
+                    Sigma_0s[j, k] = cov_empirical_across_examples
+
+    elif individualized_params == False:
+
+        # Mean over all entities initial probabilities 
+        expected_entity_regime_init_probs_shared = jnp.mean(expected_entity_regime_init_probs, axis=0)
+
+        # normalize over k, then broadcast back to (J,K)
+        pi_entities_shared_row = normalize_potentials_by_axis_JAX(expected_entity_regime_init_probs_shared + EPSILON, axis=0)  # (K,)
+        J, K = expected_entity_regime_init_probs.shape
+        pi_entities = jnp.tile(pi_entities_shared_row[None, :], (J, 1))  # (J,K)
+
+        # --- mu_0s -> MAKE SHARED ACROSS ENTITIES ---
+        empirical_continuous_state_init_means = jnp.mean(observations[init_times], axis=0)  # (J,D)
+        empirical_mean_shared = jnp.mean(empirical_continuous_state_init_means, axis=0)    # (D,)
+
+        # (J,K,D), shared across j and (as before) across k
+        mu_0s = jnp.tile(empirical_mean_shared[None, None, :], (J, K, 1))
+
+        # --- Sigma_0s -> MAKE SHARED ACROSS ENTITIES ---
+        empirical_continuous_state_init_vars = jnp.var(observations[init_times], axis=0)   # (J,D)
+        empirical_var_shared = jnp.mean(empirical_continuous_state_init_vars, axis=0)     # (D,)
+
+        CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES = 5
+        if len(init_times) < CUTOFF_NUM_OF_INIT_EXAMPLES_TO_USE_ML_ESTIMATE_OF_INIT_VARIANCES:
+            # If your IP.Sigma_0s is (J,K,D,D) but you want it shared across entities too:
+            # take the mean over J and broadcast it back.
+            Sigma0_shared = jnp.mean(IP.Sigma_0s, axis=0)         # (K,D,D)
+            Sigma_0s = jnp.tile(Sigma0_shared[None, ...], (J, 1, 1, 1))  # (J,K,D,D)
+        else:
+            D = np.shape(IP.Sigma_0s)[-1]
+            diag = jnp.maximum(empirical_var_shared, 1e-4)  # (D,)
+            cov_empirical_across_examples = jnp.diag(diag)  # (D,D)
+
+            # shared across j and k
+            Sigma_0s = jnp.tile(cov_empirical_across_examples[None, None, :, :], (J, K, 1, 1))
+
+
+    K_SPECIAL = 0 
+    fixed_means_per_entity, fixed_cov = generate_silent_observation(observations) #Fixing the silent observation latent state k = 0 to a fixed emission 
+    mu_0s = jnp.asarray(mu_0s).at[:, K_SPECIAL, :].set(fixed_means_per_entity)
+    Sigma_0s = jnp.asarray(Sigma_0s).at[:, K_SPECIAL, :, :].set(fixed_cov)
+
+    K_SPECIAL = 1
+    mu_0s = jnp.asarray(mu_0s).at[:, K_SPECIAL, :].set(fixed_means_per_entity) #Fixing the silent observation latent state k = 1 to a fixed emission 
+    Sigma_0s = jnp.asarray(Sigma_0s).at[:, K_SPECIAL, :, :].set(fixed_cov)
+
     return InitializationParameters_JAX(pi_system, pi_entities, mu_0s, jnp.array(Sigma_0s))
 
 
