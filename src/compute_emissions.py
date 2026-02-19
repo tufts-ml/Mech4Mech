@@ -5,6 +5,7 @@ import numpy as np
 from jax.scipy.stats import multivariate_normal as mvn_JAX
 from scipy.stats import multivariate_normal as mvn
 from typing import Optional
+from pathlib import Path
 
 from utilities.types import (
     JaxNumpyArray2D,
@@ -85,7 +86,12 @@ def compute_log_continuous_state_emissions_after_initial_timestep_JAX(
 
     K_SPECIALS = jnp.array([0, 1])  # <-- your two special states
 
-    silent_observation = observations[0][1]
+    repo_root = Path(__file__).resolve().parents[1]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+  
+    silent_observation = silence
     all_silent_obs = jnp.all(
         observations[1:] == silent_observation[None, None, :],
         axis=-1
@@ -251,7 +257,11 @@ def compute_log_initial_continuous_state_emissions_JAX(
     log_pdfs_init_time = mvn_JAX.logpdf(initial_observations[:, None, :], means_init_time, covs_init_time)
 
     K_SPECIAL = 0 #Make it such that for each silent observation and each state that is not k=0, the probability is very small 
-    silent_observation = initial_observations[1]
+    repo_root = Path(__file__).resolve().parents[1]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+    silent_observation = silence
     is_silent = jnp.all(initial_observations == silent_observation, axis=-1)
     K = log_pdfs_init_time.shape[1]
     is_non_special_state = (jnp.arange(K) != K_SPECIAL)  # (K,)

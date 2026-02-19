@@ -67,6 +67,11 @@ def mechanisticfeedback_recurrence_transformation(
         = "entity": the output is a (T-1)xJx1 3D numpy array. 
     """
 
+    repo_root = Path(__file__).resolve().parents[1]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
     device = torch.device("cpu")
 
     model = torch.nn.Sequential(
@@ -112,7 +117,7 @@ def mechanisticfeedback_recurrence_transformation(
             y_TJ_np = y_TJ.cpu().numpy()
 
         elif latent_variable == "system": 
-            v = observations[0][1]
+            v = silence
             X8 = torch.as_tensor(y_TJ)
             XD = torch.as_tensor(observations)
             v  = torch.as_tensor(v)
@@ -134,7 +139,7 @@ def mechanisticfeedback_recurrence_transformation(
             y_TJ_np = X8.cpu().numpy()
 
         elif latent_variable == "system": 
-            v = observations[0][1]
+            v = silence
             X8 = torch.as_tensor(evidence_strengths[:-1])
             XD = torch.as_tensor(observations)
             v  = torch.as_tensor(v)

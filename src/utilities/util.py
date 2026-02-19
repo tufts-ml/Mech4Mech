@@ -40,7 +40,12 @@ def generate_silent_observation(observations: JaxNumpyArray3D
     Returns: 
         List of fixed means and fixed covariances per entity for gaussian distrubtions that I want to clamp when an entity is in a certain state 
     """
-    mu_fixed = jnp.array(observations[0][1])  # set to an example silence vector 
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    mu_fixed = silence  # set to an example silence vector 
     J = observations.shape[1]
 
     fixed_means_per_entity = jnp.tile(mu_fixed[None, :], (J, 1)) # (J, D) fixed means for each entity 
@@ -148,7 +153,12 @@ def speaker_index_per_t(
     """
     obs = np.asarray(observations)
     T, J, D = obs.shape
-    silent_embedding = observations[0][1]
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference"
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silent_embedding = silence
     silent = np.asarray(silent_embedding).reshape(1, 1, D)
 
     diff = np.linalg.norm(obs - silent, axis=-1)  # (T,J)
@@ -555,7 +565,12 @@ def sample_emissions_for_transition_types(
     # ------------------------------------------------------------
     # SILENCE LOGIC (exact match to observations[0][1])
     # ------------------------------------------------------------
-    silent_vec = obs[0, 1]                        # (D,)
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silent_vec = silence                       # (D,)
     is_silent = np.all(obs == silent_vec, axis=2)  # (T, J)
     is_talk = ~is_silent
 
@@ -701,8 +716,12 @@ def sample_transitions_for_transition_types_TJLKk(
 
     rng = np.random.default_rng(seed)
 
-    # Silence logic: exact match to observations[0,1]
-    silent_vec = obs[0, 1]
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silent_vec = silence
     is_silent = np.all(obs == silent_vec, axis=2)  # (T,J)
     is_talk = ~is_silent
 
@@ -825,8 +844,12 @@ def save_embedding_similarity_metrics(
     T, J, D = X.shape
     C = Y.shape[2]
 
-    # ---- masks: silent / talk ----
-    silent_vec = X[0, 1, :]  # your convention
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silent_vec = silence
     is_silent = np.all(X == silent_vec.reshape(1, 1, D), axis=2)  # (T,J)
     is_talk = ~is_silent
 
@@ -942,8 +965,12 @@ def save_transition_type_counts_per_entity(
 
     T, J, D = obs.shape
 
-    # Silence logic: exact match to observations[0,1]
-    silent_vec = obs[0, 1]
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silent_vec = silence
     is_silent = np.all(obs == silent_vec.reshape(1, 1, D), axis=2)  # (T,J)
     is_talk = ~is_silent
 
@@ -1668,8 +1695,8 @@ def extract_pooled_ar_pairs_by_evidence_with_silent_predictor(
     """
     Purpose: Returns pooled predictors/outcomes/weights across all entities j for AR training,
         using ONLY pairs where:
-            - predictor x_{t-1} is SILENT (exact match to observations[0][1])
-            - outcome   x_t     is NON-SILENT (not equal to observations[0][1])
+            - predictor x_{t-1} is SILENT 
+            - outcome   x_t     is NON-SILENT 
             - label at time t matches the requested bucket:
                 * want_evidence=False: evid_onehot[t,j,0] == 1  (no evidence)
                 * want_evidence=True:  evid_onehot[t,j,0] == 0  (evidence in any non-zero class; assumes true one-hot)
@@ -1703,8 +1730,11 @@ def extract_pooled_ar_pairs_by_evidence_with_silent_predictor(
     T, J, D = obs.shape
     assert evid.shape[0] == T and evid.shape[1] == J, "evid_onehot must match (T,J,*) of observations"
 
-    # Silent template (exact)
-    silent_vec = np.asarray(observations[0][1])
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference"
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+    silent_vec = np.asarray(silence)
 
     sample_weights = make_sample_weights_which_mask_the_initial_timestep_for_each_event(
         obs, example_end_times, mask_observations

@@ -260,7 +260,6 @@ def make_data_free_preinitialization_of_STP_JAX(
         ramp2 = 1 * (jnp.arange(D_s-1) + 2)  # length D_s-1
         Upsilon = Upsilon.at[0, 0].set(hard_code_scale)
         Upsilon = Upsilon.at[1, 1:].set(ramp2)
-        print("Upsilon")
         print(Upsilon)
       
         
@@ -536,7 +535,12 @@ def make_label_cluster_preinit_CSP_shared_across_entities_JAX(
     bs = np.zeros((J, K, D))
     Qs = np.tile(np.eye(D)[None, None, :, :], (J, K, 1, 1))
 
-    silence_vec = np.asarray(obs[0, 1, :])  # (D,)
+    repo_root = Path(__file__).resolve().parents[1]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silence = z["silence"]
+
+    silence_vec = np.asarray(silence)  # (D,)
 
         # -----------------------------
     # Clamp fixed states
