@@ -1,3 +1,4 @@
+from typing import Literal
 import numpy as np
 import jax.numpy as jnp
 from pathlib import Path
@@ -48,7 +49,8 @@ Main script to train the HSRDM.
 ###
 repo_root = Path(__file__).resolve().parents[1]
 data_dir = repo_root / "data" / "unsupervised_inference" / "training"
-data = np.load(data_dir / "training_dataset.npz", allow_pickle=True)
+data_filename = data_dir / "training_dataset.npz"
+data = np.load(data_filename, allow_pickle=True)
 all_X = data["X"].tolist()     
 all_Y = data["Y"].tolist()
 DATA = np.concatenate(all_X, axis=0)
@@ -66,7 +68,7 @@ evidence_strengths = np.concatenate(all_Y , axis=0)
 n_train_sequences = 8 #Number of training segments 
 J = 4 #Max number of students
 K = 4 #The zero and one states are the silent observation states; The other 2 are for no evidence of mechanistic reasoning, evidence of mechanistic reasoning in the specific dialogue 
-L = 2 #Tunable
+L = 2 #Number of system states
 
 
 model = Model(
@@ -78,6 +80,7 @@ model = Model(
     internal_system_recurrence_JAX= None,
 )
 model_adjustment = "None"
+perfect_evidence = True
 
 # Initialization
 seed_for_initialization = 126
@@ -95,8 +98,49 @@ num_M_step_iters = 50
 alpha_system_prior, kappa_system_prior = 1, 0
 show_system_states = False 
 
+###
+# MODEL ADJUSTMENTS
+###
+# Remove system and/or Internal recurrence 
+
+outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system", data_filename, perfect_evidence)
+outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity", data_filename, perfect_evidence)
+
+evidence_desc = None
+
+if model_adjustment == "one_system_regime":
+    L = 1
+    
+    evidence_desc = f"_{'full' if perfect_evidence else 'noisy'}_evidence"
+    
+elif model_adjustment == "remove_recurrence":
+    model.internal_entity_recurrence_JAX = (
+        lambda x_vec: np.zeros(DIMS.D_e) 
+    )
+    outside_entity_recurrence = None
+    outside_system_recurrence = None
+    
+    evidence_desc = f"_no_evidence"
+    
+elif model_adjustment == "no_recurrence_and_system":
+    L = 1
+    model.internal_entity_recurrence_JAX = (
+        lambda x_vec: np.zeros(DIMS.D_e)  
+    )
+    outside_entity_recurrence = None
+    outside_system_recurrence = None
+    
+    evidence_desc = f"_no_evidence"
+elif model_adjustment == "None":
+    evidence_desc = f"_{'full' if perfect_evidence else 'noisy'}_evidence"
+
 # Create directories
-run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}_full_evidence"
+run_description = f"seed_{seed_for_initialization}_system_size_{L}_n_iterations_{n_cavi_iterations}_adjustment_{model_adjustment}"
+
+if evidence_desc is not None:
+    run_description += evidence_desc
+
+
 prepare_run_directories(run_description)
 
 repo_root = Path(__file__).resolve().parents[1]
@@ -116,28 +160,7 @@ D_e = 8
 D_s = 8
 DIMS = Dims(J, K, L, D, D_e, D_s)
 
-###
-# MODEL ADJUSTMENTS
-###
-# Remove system and/or Internal recurrence 
-if model_adjustment == "one_system_regime":
-    DIMS.L = 1
-elif model_adjustment == "remove_recurrence":
-    model.internal_entity_recurrence_JAX = (
-        lambda x_vec: np.zeros(DIMS.D_e) 
-    )
-elif model_adjustment == "no_recurrence_and_system":
-    DIMS.L = 1
-    model.internal_entity_recurrence_JAX = (
-        lambda x_vec: np.zeros(DIMS.D_e)  
-    )
 
-# External recurrence 
-outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system",True)
-# mechanisticfeedback_recurrence_transformation(DATA, "system")
-outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity", True)
-
-#  mechanisticfeedback_recurrence_transformation(DATA, "entity")
 
 # Masking
 mask_observations = None  
