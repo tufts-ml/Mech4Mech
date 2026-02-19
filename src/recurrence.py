@@ -47,6 +47,7 @@ def identity_recurrence_system(
 def mechanisticfeedback_recurrence_transformation(
     observations: NumpyArray3D,
     latent_variable: str, 
+    data_filename: str,
     perf_evidence: bool
 ) -> Union[NumpyArray2D, NumpyArray3D]:
 
@@ -60,6 +61,7 @@ def mechanisticfeedback_recurrence_transformation(
     Arguments:
         observations: has shape (T, J, D). 
         latent_variable: string that specifies the "system"or the "entity" recurrence.
+        data_filename: the filename for the data, which is needed to load the evidence strengths if perf_evidence = True.
         perf_evidence: if True the evidence is from the perfect annotations. If False, the evidence is from the classifier 
 
     Returns: the scalar class value of each embedding in TxJxD (observations), predicted by a previously trained NN torch model (in feedback mechanism). 
@@ -128,9 +130,7 @@ def mechanisticfeedback_recurrence_transformation(
             y_TJ_np = X_T8.cpu().numpy()
 
     if perf_evidence == True: 
-        repo_root = Path(__file__).resolve().parents[1]
-        data_dir = repo_root / "data" / "unsupervised_inference" / "training"
-        data = np.load(data_dir / "training_dataset.npz", allow_pickle=True)   
+        data = np.load(data_filename, allow_pickle=True)   
         all_Y = data["Y"].tolist()
         evidence_strengths = np.concatenate(all_Y , axis=0)
 
