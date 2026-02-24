@@ -79,7 +79,7 @@ model = Model(
     internal_entity_recurrence_JAX=None,
     internal_system_recurrence_JAX= None,
 )
-model_adjustment = "None"
+model_adjustment = "None" # "one_system_regime" or "remove_recurrence" or "None"
 perfect_evidence = True
 
 # Initialization
@@ -131,7 +131,7 @@ elif model_adjustment == "no_recurrence_and_system":
     outside_system_recurrence = None
     
     evidence_desc = f"_no_evidence"
-elif model_adjustment == "None":
+else:
     evidence_desc = f"_{'full' if perfect_evidence else 'noisy'}_evidence"
 
 # Create directories
