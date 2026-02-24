@@ -63,6 +63,7 @@ def get_entity_correlation_table(
     probs: np.ndarray,         # (T,J,K)
     evid_onehot: np.ndarray,   # (T,J,C)
     ks=(0, 1,2,3),
+    spearman: bool = True,
     out_csv: str | None = None,
 ) -> pd.DataFrame:
     """
@@ -88,7 +89,8 @@ def get_entity_correlation_table(
         row = {"entity": j}
         for k in ks:
             x = probs[1:, j, k]    # (T-1,)
-            row[f"spearman_corr_next_p_k{k}_vs_prev_evidence_self"] = spearman_corr_safe(x, y)
+            if spearman:
+                row[f"spearman_corr_next_p_k{k}_vs_prev_evidence_self"] = spearman_corr_safe(x, y)
             row[f"pearson_corr_next_p_k{k}_vs_prev_evidence_self"] = pearson_corr(x,y)
         rows.append(row)
 
