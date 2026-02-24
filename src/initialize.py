@@ -1288,6 +1288,37 @@ def initialize_HSRDM(
         CSP_JAX = params_frozen.CSP
         ETP_JAX = params_frozen.ETP
         IP_JAX = params_frozen.IP
+        
+        # Broadcast the first row across all entities.
+        CSP_JAX = ContinuousStateParameters_JAX(
+            As=jnp.tile(CSP_JAX.As[0:1, :, :, :], (DIMS.J, 1, 1, 1)),
+            bs=jnp.tile(CSP_JAX.bs[0:1, :, :], (DIMS.J, 1, 1)),
+            Qs=jnp.tile(CSP_JAX.Qs[0:1, :, :, :], (DIMS.J, 1, 1, 1)),
+        )
+        
+        ETP_JAX = EntityTransitionParameters_MetaSwitch_JAX(
+            Psis=jnp.tile(ETP_JAX.Psis[0:1, :, :, :], (DIMS.J, 1, 1, 1)),
+            Ps=jnp.tile(ETP_JAX.Ps[0:1, :, :, :], (DIMS.J, 1, 1, 1)),
+        )
+        
+        IP_JAX = InitializationParameters_JAX(
+            pi_system=IP_JAX.pi_system,
+            pi_entities=jnp.tile(IP_JAX.pi_entities[0:1, :], (DIMS.J, 1)),
+            mu_0s=jnp.tile(IP_JAX.mu_0s[0:1, :, :], (DIMS.J, 1, 1)),
+            Sigma_0s=jnp.tile(IP_JAX.Sigma_0s[0:1, :, :, :], (DIMS.J, 1, 1, 1))
+        )
+        
+        assert (CSP_JAX.As[0:1] == params_frozen.CSP.As[-2:-1]).all()
+        assert (CSP_JAX.bs[0:1] == params_frozen.CSP.bs[-2:-1]).all()
+        assert (CSP_JAX.Qs[0:1] == params_frozen.CSP.Qs[-2:-1]).all()
+        assert (ETP_JAX.Ps[0:1] == params_frozen.ETP.Ps[-2:-1]).all()
+        assert (ETP_JAX.Psis[0:1] == params_frozen.ETP.Psis[-2:-1]).all()
+        assert (IP_JAX.pi_entities[0:1] == params_frozen.IP.pi_entities[-2:-1]).all()
+        assert (IP_JAX.mu_0s[0:1] == params_frozen.IP.mu_0s[-2:-1]).all()
+        assert (IP_JAX.Sigma_0s[0:1] == params_frozen.IP.Sigma_0s[-2:-1]).all()
+        
+        params_frozen = AllParameters_JAX(STP=params_frozen.STP, ETP=ETP_JAX, CSP=CSP_JAX, IP=IP_JAX)
+        
 
     else:
         repo_root = Path(__file__).resolve().parents[1]
