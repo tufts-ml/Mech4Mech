@@ -217,7 +217,12 @@ def silent_mask_from_observations(observations: np.ndarray) -> np.ndarray:
         silent_mask: (T,J) boolean
     """
     obs = np.asarray(observations)
-    silent_embedding = obs[0, 1, :]              
+    
+    repo_root = Path(__file__).resolve().parents[2]
+    data_dir = repo_root / "data" / "unsupervised_inference" 
+    z = np.load(data_dir / "silence_embedding.npz")
+    silent_embedding = z["silence"]
+    
     silent_mask = np.all(np.isclose(obs, silent_embedding[None, None, :]), axis=-1)
     return silent_mask
 
