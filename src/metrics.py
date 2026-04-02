@@ -212,6 +212,7 @@ def get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(
     observations: np.ndarray, # (T, J, D)
     k_target: int = 1,
     require_not_silent_at_t: bool = True,
+    std_dev: bool = False,
     out_csv: str | None = None,
 ) -> pd.DataFrame:
     """
@@ -270,6 +271,9 @@ def get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(
             "k_target": int(k_target),
             "n_events": int(arr.size),
             "mean_posterior_k": float(np.mean(arr)) if arr.size else np.nan,
+            "std_posterior_k": float(np.std(arr)) if std_dev and arr.size else np.nan,
+            "min_count": (arr < 0.01).sum(),
+            "max_count": (arr > 0.99).sum(),
         }
 
     df = pd.DataFrame([
@@ -289,6 +293,7 @@ def get_transition_posteriors_conditioned_on_speaker_evidence(
     observations: np.ndarray, # (T, J, D)
     k_silent_to_talk: int = 3,
     k_silent_to_silent: int = 1,
+    std_dev: bool = False,
     out_csv: str | None = None,
 ) -> pd.DataFrame:
     """
@@ -369,6 +374,9 @@ def get_transition_posteriors_conditioned_on_speaker_evidence(
                 "k_used": (k_silent_to_talk if trans == "silent_to_talk" else k_silent_to_silent),
                 "n_pairs": int(vals.size),
                 "mean_posterior": float(np.mean(vals)) if vals.size else np.nan,
+                "std_posterior": float(np.std(vals)) if std_dev and vals.size else np.nan,
+                "min_count": (vals < 0.01).sum(),
+                "max_count": (vals > 0.99).sum(),
             })
 
     df = pd.DataFrame(rows)
