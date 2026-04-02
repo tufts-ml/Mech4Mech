@@ -1231,6 +1231,7 @@ def initialize_HSRDM(
     params_frozen: Optional[AllParameters_JAX] = None,
     outside_system_recurrence: Optional[JaxNumpyArray2D] = None,
     outside_entity_recurrence: Optional[JaxNumpyArray3D] = None,
+    kmeans: bool = False,
     verbose: bool = True,
 ) -> InitializationResults:
     """
@@ -1262,7 +1263,7 @@ def initialize_HSRDM(
         outside_entity_recurrence: The recurrence features (T-1, D_e) are provided, which are computed from the observations
             outside of the JAX tracer environment. This is useful for when the recurrence function is a pre-trained pytorch model.
         verbose: True boolean if we want to print update statements during training 
-        plotbose: Verbose in plotting 
+        kmeans: whether to use kmeans for initialization of CSP parameters. If False, then use the gaussian initialization.
 
     Return: Initialization results. 
     """
@@ -1330,14 +1331,25 @@ def initialize_HSRDM(
         init_example_end_times = init_data["example_end_times"].tolist()
         init_evid_onehot = np.concatenate(all_Y, axis=0)
 
-        CSP_JAX = make_label_cluster_preinit_CSP_shared_across_entities_JAX(
-            DIMS,
-            init_observations,
-            init_evid_onehot, 
-            init_example_end_times,
-            save_dir = save_dir,
-        )
-
+        if kmeans:
+            CSP_JAX, _ = make_kmeans_preinitialization_of_CSP_JAX(
+                DIMS,
+                observations,
+                init_example_end_times,
+                mask_observations,
+                seed,
+                save_dir,
+                False
+            )
+        else:
+            CSP_JAX = make_label_cluster_preinit_CSP_shared_across_entities_JAX(
+                DIMS,
+                init_observations,
+                init_evid_onehot, 
+                init_example_end_times,
+                save_dir = save_dir,
+            )
+        
         ETP_JAX = make_data_free_preinitialization_of_ETP_JAX(
             DIMS, method_for_Psis="hard_code", seed=seed, fixed_self_transition_prob=0.25,)
         IP_JAX = make_data_free_preinitialization_of_IP_JAX(DIMS, observations)
