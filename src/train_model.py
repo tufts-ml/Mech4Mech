@@ -79,11 +79,11 @@ model = Model(
     internal_entity_recurrence_JAX=None,
     internal_system_recurrence_JAX= None,
 )
-model_adjustment = "None" # "one_system_regime" or "remove_recurrence" or "None"
+model_adjustment = "kmeans" # "one_system_regime" or "remove_recurrence" or "None"
 perfect_evidence = True
 
 # Initialization
-seed_for_initialization = 126
+seed_for_initialization = 17
 num_em_iterations_for_bottom_half_init = 1
 num_em_iterations_for_top_half_init = 1
 
@@ -184,6 +184,8 @@ results_init = initialize_HSRDM(
     save_dir=artifacts_dir,
     outside_system_recurrence = outside_system_recurrence,
     outside_entity_recurrence= outside_entity_recurrence,
+    kmeans=(model_adjustment == "kmeans"),
+    verbose=False,
 )
 params_init = results_init.params
 VES_init, VEZ_init = results_init.ES_summary, results_init.EZ_summaries
@@ -237,6 +239,12 @@ save_transition_type_counts_per_entity(observations = DATA, one_hot_evidence = e
 
 #Plot the ELBO over time 
 elbo_history = [d["elbo"] for d in elbo_decomposed]
+
+# save elbo history to file
+with open(Path(artifacts_dir) / "elbo_history.txt", "w") as f:
+    for elbo in elbo_history:
+        f.write(f"{elbo}\n")
+
 plot_elbo(elbo_history, plots_dir, example_end_times, J)
 
 #Compute the correlations we care about 
