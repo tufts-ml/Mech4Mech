@@ -272,8 +272,8 @@ def compute_log_initial_continuous_state_emissions_JAX(
 
     log_pdfs_init_time = jnp.where(
     mask_JK,
-    BIG_NEG,                 # kill log-probabilities
-    log_pdfs_init_time       # leave everything else unchanged
+    BIG_NEG,                 
+    log_pdfs_init_time       
 )
 
     return log_pdfs_init_time

@@ -260,9 +260,8 @@ def make_data_free_preinitialization_of_STP_JAX(
         ramp2 = 1 * (jnp.arange(D_s-1) + 2)  # length D_s-1
         Upsilon = Upsilon.at[0, 0].set(hard_code_scale)
         Upsilon = Upsilon.at[1, 1:].set(ramp2)
-        print(Upsilon)
-      
-        
+
+            
     else:
         raise ValueError("What is the method for Upsilon?")
 
@@ -325,8 +324,7 @@ def make_data_free_preinitialization_of_ETP_JAX(
 
 
         # Tile across entities
-        Psis = jnp.broadcast_to(Psis_shared, (J, L, K, D_e))
-        
+        Psis = jnp.broadcast_to(Psis_shared, (J, L, K, D_e))     
     else:
         raise ValueError("What is the method for Psis?")
     return EntityTransitionParameters_MetaSwitch_JAX(Psis,Ps)
