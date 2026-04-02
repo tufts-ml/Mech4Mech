@@ -27,8 +27,8 @@ Main script to test the HSRDM.
 # DATA SPLITTING & PRE-PROCESSING
 ###
 
-dataset_no = 2
-model_adjustments = ["perf_ev", "class_ev", "class_ev_no_sys", "no_ev", "kmeans_init_full_ev"]
+dataset_no = 1
+model_adjustments = ["perf_ev", "class_ev", "class_ev_no_sys", "no_ev", "kmeans_init_full_ev", "kmeans_init_noisy_ev"]
 
 ###
 # DATA LOADING
@@ -50,12 +50,15 @@ DATA = np.concatenate(all_X, axis=0)
 example_end_times = data["example_end_times"].tolist()
 evidence_strengths = np.concatenate(all_Y , axis=0)
 
+seed = 17
+
 params_loc_dict = {
-    "perf_ev": "seed_166_system_size_2_n_iterations_15_adjustment_None_full_evidence",
-    "class_ev": "seed_166_system_size_2_n_iterations_15_adjustment_None_noisy_evidence",
-    "class_ev_no_sys": "seed_166_system_size_1_n_iterations_15_adjustment_one_system_regime_noisy_evidence",
-    "no_ev": "seed_166_system_size_2_n_iterations_15_adjustment_remove_recurrence_no_evidence",
-    "kmeans_init_full_ev": "seed_166_system_size_2_n_iterations_15_adjustment_kmeans_full_evidence"
+    "perf_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_None_full_evidence",
+    "class_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_None_noisy_evidence",
+    "class_ev_no_sys": f"seed_{seed}_system_size_1_n_iterations_15_adjustment_one_system_regime_noisy_evidence",
+    "no_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_remove_recurrence_no_evidence",
+    "kmeans_init_full_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_kmeans_full_evidence",
+    "kmeans_init_noisy_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_kmeans_noisy_evidence",
 }
 
 
@@ -159,5 +162,5 @@ for model_adjustment in model_adjustments:
     compute_entity_correlations = get_entity_correlation_table(posterior_probabilities, evidence_strengths, spearman = False, out_csv = artifacts_dir)
 
     #Compute the mean posterior probabilities we care about 
-    get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
-    get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
+    get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, std_dev=True, out_csv = artifacts_dir )
+    get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(posterior_probabilities, evidence_strengths, DATA, std_dev=True, out_csv = artifacts_dir )
