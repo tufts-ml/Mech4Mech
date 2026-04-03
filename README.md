@@ -1,4 +1,4 @@
-# in-moment-student-reasoning
+# Mech4Mech
 Learning the probabilities that students are engaging in mechanistic reasoning during a problem-solving conversation.
 
 Data: 
