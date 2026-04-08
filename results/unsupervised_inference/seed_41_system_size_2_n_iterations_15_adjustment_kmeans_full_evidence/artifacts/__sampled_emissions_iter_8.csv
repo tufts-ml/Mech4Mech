@@ -1,0 +1,16 @@
+transition_type,t_prev,t_curr,j,is_silent_prev,is_silent_curr,evid_class_prev,evid_class_curr,emiss_prev_json,emiss_curr_json,emiss_prev_argmax,emiss_curr_argmax,emiss_prev_maxprob,emiss_curr_maxprob
+silent_to_silent,3140,3141,0,True,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_silent,3140,3141,0,True,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_no_evidence,2415,2416,2,True,False,0,0,"[0.0, 0.0, 1.0, 0.0]","[0.5, 0.5, 0.0, 0.0]",2,0,1.0,0.5
+silent_to_silent,3140,3141,0,True,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_no_evidence,2415,2416,2,True,False,0,0,"[0.0, 0.0, 1.0, 0.0]","[0.5, 0.5, 0.0, 0.0]",2,0,1.0,0.5
+talk_no_evidence_to_silent,1943,1944,2,False,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_silent,3140,3141,0,True,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_no_evidence,2415,2416,2,True,False,0,0,"[0.0, 0.0, 1.0, 0.0]","[0.5, 0.5, 0.0, 0.0]",2,0,1.0,0.5
+talk_no_evidence_to_silent,1943,1944,2,False,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_with_evidence,847,848,3,True,False,0,2,"[0.0, 0.0, 2.3244738926220066e-41, 1.0]","[0.5, 0.5, 0.0, 0.0]",3,0,1.0,0.5
+silent_to_silent,3140,3141,0,True,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_no_evidence,2415,2416,2,True,False,0,0,"[0.0, 0.0, 1.0, 0.0]","[0.5, 0.5, 0.0, 0.0]",2,0,1.0,0.5
+talk_no_evidence_to_silent,1943,1944,2,False,True,0,0,"[0.5, 0.5, 0.0, 0.0]","[0.0, 0.0, 0.0, 1.0]",0,3,0.5,1.0
+silent_to_talk_with_evidence,847,848,3,True,False,0,2,"[0.0, 0.0, 2.3244738926220066e-41, 1.0]","[0.5, 0.5, 0.0, 0.0]",3,0,1.0,0.5
+talk_with_evidence_to_silent,929,930,3,False,True,2,0,"[0.5, 0.5, 0.0, 0.0]","[0.5, 0.5, 0.0, 0.0]",0,0,0.5,0.5

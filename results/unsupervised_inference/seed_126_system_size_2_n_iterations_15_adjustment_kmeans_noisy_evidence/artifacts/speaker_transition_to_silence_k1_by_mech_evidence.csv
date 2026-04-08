@@ -1,0 +1,3 @@
+scenario,k_target,n_events,mean_posterior_k,std_posterior_k,min_count,max_count
+mech_evidence,1,452,0.7957354418735588,0.1585806134835717,1,0
+no_mech_evidence,1,3210,0.4381955100507751,0.22390466645171783,6,0
