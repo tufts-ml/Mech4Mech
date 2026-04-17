@@ -206,7 +206,7 @@ def run_CAVI_with_JAX(
             one_hot_evid = evid_onehot,
             iteration = i, 
             save_dir = save_dir,
-            make_table = True, 
+            make_table = False, 
         )
         elbo_dict = local_calc_elbo(**locals())
         elbo_dict['status'] = f"iter {i:3d} after VEZ"

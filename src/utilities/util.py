@@ -15,6 +15,7 @@ import torch
 import tensorflow_probability.substrates.jax.bijectors as tfb
 from jax.scipy.special import logsumexp as logsumexp_JAX
 from scipy.special import logsumexp
+import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from utilities.types import NumpyArray1D, NumpyArray2D, JaxNumpyArray1D, JaxNumpyArray2D, JaxNumpyArray3D, JaxNumpyArray4D
@@ -358,10 +359,7 @@ def save_posteriors_as_strings(
 def save_maxprob_tables(
     *,
     save_dir: str,
-    iteration: int | None,
     posterior_probabilities: np.ndarray,          # (T,J,K)
-    system_posterior_probabilities: np.ndarray,   # (T,L) or (T,1,L)
-    one_hot_evidence: np.ndarray,                 # (T,J,C)
 ):
     """
     Purpose:
@@ -377,17 +375,8 @@ def save_maxprob_tables(
               - f"{save_dir}__entity_maxprob_by_tj.csv"
               - f"{save_dir}__system_maxprob_by_t.csv"
               - f"{save_dir}__evidence_class_by_tj.csv"
-        iteration:
-            Training iteration index. Use None to indicate the final posteriors after
-            training has completed.
         posterior_probabilities:
             Entity-level posterior probabilities of shape (T, J, K).
-        system_posterior_probabilities:
-            System-level posterior probabilities of shape (T, L) or (T, 1, L).
-        one_hot_evidence:
-            One-hot evidence labels of shape (T, J, C), where C is the number of evidence
-            classes. The index of the '1' is computed via argmax.
-
     Returns:
         None. Appends rows to the corresponding CSV files on disk.
     """
@@ -400,50 +389,180 @@ def save_maxprob_tables(
     max_prob = np.max(P, axis=2)      # (T,J)
 
     df_ent = pd.DataFrame({
-        "iter": None if iteration is None else int(iteration),
         "t": np.repeat(np.arange(T), J),
         "j": np.tile(np.arange(J), T),
         "argmax_state": argmax_k.reshape(-1),
         "max_prob": max_prob.reshape(-1),
     })
 
-    out_csv = f"{save_dir}__entity_maxprob.csv"
+    out_csv = save_dir/f"maxprob.csv"
     df_ent.to_csv(out_csv, mode="a", header=not Path(out_csv).exists(), index=False)
 
-    # ----- system-level posterior max prob per t -----
-    S = np.asarray(system_posterior_probabilities)
-    if S.ndim == 3 and S.shape[1] == 1:
-        S = S[:, 0, :]  # (T,L)
-    Ts, L = S.shape
 
-    df_sys = pd.DataFrame({
-        "iter": None if iteration is None else int(iteration),
-        "t": np.arange(Ts),
-        "argmax_state": np.argmax(S, axis=1),
-        "max_prob": np.max(S, axis=1),
-    })
 
-    out_csv = f"{save_dir}__system_maxprob.csv"
-    df_sys.to_csv(out_csv, mode="a", header=not Path(out_csv).exists(), index=False)
+def plot_top_evidence_windows(
+    probs: np.ndarray,
+    timesteps: int,
+    top_x: int,
+    save_dir: str,
+) -> None:
+    """
+   Purpose: 
+    Generate x plots for the top x moving average of a window of timesteps specified by the user. The plots contain the posterior 
+    probabilities of evidence of mechanistic reasoning (k=1,3) and of no evidence (k=0,2). In the user-script, we just set this to 1 
+    to give the top plot. 
+    
+    Arguments: 
+    probs : np.ndarray
+        Array of shape (T, J, K), with K=4.
+    timesteps : int
+        Window size for the moving average over time.
+    top_x : int
+        Number of top windows to plot, based on highest moving-average evidence.
+    save_dir : str
+        Directory to save CSVs and plots.
+    Returns: 
+    None. Saves plots. 
+    """
+    probs = np.asarray(probs)
 
-    # ----- evidence class index per (t,j) -----
-    E = np.asarray(one_hot_evidence)  # (T,J,C)
-    if E.shape[0] != T or E.shape[1] != J:
-        raise ValueError(f"one_hot_evidence shape {E.shape} does not match (T,J)=({T},{J})")
+    if probs.ndim != 3:
+        raise ValueError(f"`probs` must have shape (T, J, K), got {probs.shape}")
 
-    evidence_class = np.argmax(E, axis=2)   # (T,J)
-    evidence_sum = np.sum(E, axis=2)        # (T,J) should be 1 for proper one-hot
+    T, J, K = probs.shape
 
-    df_evid = pd.DataFrame({
-        "iter": None if iteration is None else int(iteration),
-        "t": np.repeat(np.arange(T), J),
-        "j": np.tile(np.arange(J), T),
-        "evidence_class": evidence_class.reshape(-1),
-        "evidence_is_onehot": (evidence_sum.reshape(-1) == 1),
-    })
+    if K != 4:
+        raise ValueError(f"K must be 4, got {K}")
+    if timesteps <= 0:
+        raise ValueError("`timesteps` must be a positive integer")
+    if timesteps > T:
+        raise ValueError(f"`timesteps` ({timesteps}) cannot exceed T ({T})")
+    if top_x <= 0:
+        raise ValueError("`top_x` must be a positive integer")
 
-    out_csv = f"{save_dir}__evidence_class_by_tj.csv"
-    df_evid.to_csv(out_csv, mode="a", header=not Path(out_csv).exists(), index=False)
+    save_dir = Path(save_dir)
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    # Step 1: combine k=1 and k=3 for each (t, j)
+    evidence = probs[:, :, 1] + probs[:, :, 3]   # shape (T, J)
+
+    # Step 2: average across entities at each time t
+    evidence_mean = evidence.mean(axis=1)        # shape (T,)
+    no_evidence_mean = 1.0 - evidence_mean       # shape (T,)
+
+    # Step 3: moving average over time
+    kernel = np.ones(timesteps, dtype=float) / timesteps
+    evidence_ma = np.convolve(evidence_mean, kernel, mode="valid")  # shape (T - timesteps + 1,)
+
+    # Each moving average value corresponds to a window [start, start+timesteps-1]
+    window_starts = np.arange(len(evidence_ma))
+    window_ends = window_starts + timesteps - 1
+
+    # Step 4: take top x windows
+    top_x = min(top_x, len(evidence_ma))
+    top_indices = np.argsort(evidence_ma)[::-1][:top_x]
+
+    results = []
+
+    for rank, idx in enumerate(top_indices, start=1):
+        start_t = int(window_starts[idx])
+        end_t = int(window_ends[idx])
+        max_avg = float(evidence_ma[idx])
+
+        # Data for just this selected window
+        time_window = np.arange(start_t, end_t + 1)
+        evidence_window = evidence_mean[start_t:end_t + 1]
+        no_evidence_window = no_evidence_mean[start_t:end_t + 1]
+
+        # Plot
+        plt.figure(figsize=(10, 5))
+        plt.plot(time_window, evidence_window, label="Evidence")
+        plt.plot(time_window, no_evidence_window, label="No Evidence")
+        plt.xlabel("Timesteps")
+        plt.ylabel("Average Probability Across Students")
+        plt.title(
+            f"Top Region {rank}: t={start_t} to t={end_t} | "
+        )
+        plt.ylim(0.0, 1.0)
+        plt.legend()
+        plt.tight_layout()
+
+        plot_path = save_dir / f"window_{rank}_start_{start_t}_end_{end_t}.pdf"
+        plt.savefig(plot_path, dpi=300)
+        plt.close()
+
+
+def plot_highest_evidence_window(system_probs: np.ndarray,
+                                 num_timesteps: int,
+                                 save_dir: str):
+    """
+    Purpose: Plot the window of length `num_timesteps` with the highest moving average
+    of the system evidence probability (l=1), and save the plot as a PDF.
+
+    Arguments: 
+    system_probs : np.ndarray
+        Array of shape (T, 2), where:
+        - system_probs[:, 0] = probability of l=0 ("No Evidence")
+        - system_probs[:, 1] = probability of l=1 ("Evidence")
+    num_timesteps : int
+        Length of the time window to plot and the moving-average window size.
+    save_path : str, optional
+        Path to save the PDF plot.
+
+    """
+    # --- validation ---
+    if system_probs.ndim != 2 or system_probs.shape[1] != 2:
+        raise ValueError("system_probs must have shape (T, 2).")
+
+    T = system_probs.shape[0]
+
+    if not isinstance(num_timesteps, int) or num_timesteps <= 0:
+        raise ValueError("num_timesteps must be a positive integer.")
+
+    if num_timesteps > T:
+        raise ValueError(
+            f"num_timesteps ({num_timesteps}) cannot be larger than T ({T})."
+        )
+
+    # Use l=1 ("Evidence") to compute the moving average
+    evidence_probs = system_probs[:, 1]
+
+    # Compute moving averages over windows of length num_timesteps
+    moving_avgs = np.array([
+        evidence_probs[i:i + num_timesteps].mean()
+        for i in range(T - num_timesteps + 1)
+    ])
+
+    # Find the best window
+    best_start = int(np.argmax(moving_avgs))
+    best_end = best_start + num_timesteps
+    best_avg = float(moving_avgs[best_start])
+
+    # Extract the selected window
+    window = system_probs[best_start:best_end]
+    x = np.arange(best_start, best_end)
+
+    # Plot
+    plt.figure(figsize=(10, 5))
+    #plt.plot(x, window[:, 0], label="No Evidence")
+    plt.plot(x, window[:, 1], label="Evidence")
+    plt.xlabel("Timesteps")
+    plt.ylabel("System-state probabilities")
+    plt.title(
+        f"Highest-evidence window (timesteps {best_start} to {best_end - 1})\n"
+    )
+    plt.ylim(0, 1)
+    plt.legend()
+    plt.tight_layout()
+
+    # Save as PDF
+    save_dir = Path(save_dir)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    plot_path = save_dir / f"system_probabilities_{best_start}_end_{best_end}.pdf"
+    plt.savefig(plot_path, dpi=300)
+    plt.close()
+
+
 
 def save_state_frequency_counts(
     *,

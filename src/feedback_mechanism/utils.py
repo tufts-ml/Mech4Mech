@@ -11,7 +11,7 @@ import torchvision
 import torchmetrics
 #Import the below when training the HSRDM. Comment out and just import layers when training the feedback mechanism 
 #import feedback_mechanism.layers as layers
-import layers
+import feedback_mechanism.layers as layers
 
 def inv_softplus(x):
     """

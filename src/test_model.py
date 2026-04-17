@@ -20,7 +20,7 @@ from metrics import get_entity_correlation_table, get_transition_posteriors_cond
 
 
 """
-Main script to test the HSRDM. 
+Main script to test the adapted-HSRDM. 
 """
 
 ###
@@ -28,7 +28,7 @@ Main script to test the HSRDM.
 ###
 
 dataset_no = 1
-model_adjustments = ["perf_ev", "class_ev", "class_ev_no_sys", "no_ev", "kmeans_init_full_ev", "kmeans_init_noisy_ev"]
+model_adjustments = ["perf_ev", "class_ev", "class_ev_no_sys", "no_ev"]
 
 ###
 # DATA LOADING
@@ -53,12 +53,10 @@ evidence_strengths = np.concatenate(all_Y , axis=0)
 seed = 17
 
 params_loc_dict = {
-    "perf_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_None_full_evidence",
-    "class_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_None_noisy_evidence",
-    "class_ev_no_sys": f"seed_{seed}_system_size_1_n_iterations_15_adjustment_one_system_regime_noisy_evidence",
-    "no_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_remove_recurrence_no_evidence",
-    "kmeans_init_full_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_kmeans_full_evidence",
-    "kmeans_init_noisy_ev": f"seed_{seed}_system_size_2_n_iterations_15_adjustment_kmeans_noisy_evidence",
+    "perf_ev": f"seed_{seed}_system_size_2_n_iterations_15_human",
+    "class_ev": f"seed_{seed}_system_size_2_n_iterations_15_classifier",
+    "class_ev_no_sys": f"seed_{seed}_system_size_1_n_iterations_15_classifier_nosystem",
+    "no_ev": f"seed_{seed}_system_size_2_n_iterations_15_no_feedback",
 }
 
 
@@ -97,7 +95,7 @@ for model_adjustment in model_adjustments:
     ###
     # Remove system and/or Internal recurrence 
 
-    perfect_evidence = model_adjustment in ["perf_ev", "kmeans_init_full_ev"]
+    perfect_evidence = model_adjustment in ["perf_ev"]
 
     outside_system_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "system", data_filename, perfect_evidence)
     outside_entity_recurrence = mechanisticfeedback_recurrence_transformation(DATA, "entity", data_filename, perfect_evidence)
@@ -153,7 +151,7 @@ for model_adjustment in model_adjustments:
     # MODEL VALIDATION 
     ####
 
-    #Compute the correlations we care about 
+    #Get the posterior probabilities
     posterior_probabilities = VEZ_summaries.expected_regimes
     system_posterior_probabilities = VES_summary.expected_regimes
 
@@ -164,3 +162,4 @@ for model_adjustment in model_adjustments:
     #Compute the mean posterior probabilities we care about 
     get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, std_dev=True, out_csv = artifacts_dir )
     get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(posterior_probabilities, evidence_strengths, DATA, std_dev=True, out_csv = artifacts_dir )
+

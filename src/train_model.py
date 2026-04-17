@@ -233,10 +233,6 @@ save_hmm_posterior_summary(VEZ_summaries, "qZ", artifacts_dir)
 # MODEL VALIDATION 
 ####
 
-#Get stats about the data
-save_embedding_similarity_metrics(X = DATA, Y = evidence_strengths, save_dir = artifacts_dir)
-save_transition_type_counts_per_entity(observations = DATA, one_hot_evidence = evidence_strengths, save_dir = artifacts_dir) 
-
 #Plot the ELBO over time 
 elbo_history = [d["elbo"] for d in elbo_decomposed]
 
@@ -253,20 +249,10 @@ system_posterior_probabilities = VES_summary.expected_regimes
 
 compute_entity_correlations = get_entity_correlation_table(posterior_probabilities, evidence_strengths, out_csv = artifacts_dir )
 
-#Compute the mean posterior probabilities we care about 
+#Compute the mean posterior probabilities we care about conditioned on mechanistic reasoning 
 get_transition_posteriors_conditioned_on_speaker_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
 get_k1_posterior_for_speaker_transition_to_silence_by_mech_evidence(posterior_probabilities, evidence_strengths, DATA, out_csv = artifacts_dir )
 
-#Get the post-training diagnostics
-save_state_frequency_counts(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities)
-save_maxprob_tables(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities, one_hot_evidence = evidence_strengths)
-save_posteriors_as_strings(save_dir = artifacts_dir, iteration = None, posterior_probabilities = posterior_probabilities , system_posterior_probabilities = system_posterior_probabilities)
 
-
-#Plot the trajectories of both the evidence strengths and the posterior probabilities 
-plot_speaking_and_evidence_boxes(evidence_strengths, DATA, colors = None, plot_dir=plots_dir) 
-plot_posteriors_per_entity(posterior_probabilities, colors = None, plot_dir=plots_dir)
-# Example end times [-1, 484, 721, 1297, 1625, 2233, 2624, 3417, 3691]
-plot_posteriors_per_entity(posterior_probabilities, plot_dir=plots_dir, t_start =1550, t_end = 1600,keep_original_time = False, filename = "entity_posteriors_short.pdf")
 
 
