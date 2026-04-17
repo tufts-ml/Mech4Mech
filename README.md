@@ -5,7 +5,32 @@ The associated ArXiv paper "Locating evidence of mechanistic reasoning in studen
 
 **For Users with New Data: Tool Instructions:** 
 
-Step 1: Git clone this repository and install the necessary dependencies (for Mainak to do). 
+Step 1: Environment Setup
+
+First, clone the repository:
+
+```bash
+git clone https://github.com/tufts-ml/Mech4Mech.git
+cd Mech4Mech
+```
+Install [micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html). It is a lightweight environment manager that works across platforms. Other tools like `conda` will also work, but commands may need slight adjustments.
+
+Create and activate the environment:
+
+```bash
+micromamba env create -f environment.yml
+micromamba activate mech4mech
+```
+
+Install `ssm` (Required)
+
+The `ssm` package must be installed separately because it does not declare all of its build dependencies.
+
+Run:
+
+```bash
+pip install --no-build-isolation git+https://github.com/lindermanlab/ssm.git@eb6c8aa33e5311d3564075807dec340759dd8081
+```
 
 Step 2: Make an account on HuggingFace and create an access token with READ permissions. Do pip install -U huggingface_hub transformers sentence-transformers -- then copy and paste the acccess token into the login and save to git. This is necessary to use the GemmaEmbedding model as an encoder for the data. 
 
