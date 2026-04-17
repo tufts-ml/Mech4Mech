@@ -3,7 +3,7 @@ An automated tool for learning latent probabilities from conversational data tha
 
 The associated ArXiv paper "Locating evidence of mechanistic reasoning in student team conversations with mechanistic machine learning" can be found at: 
 
-## **For Users with New Data: Tool Instructions:** 
+## **For Users with New Data: Tool Instructions** 
 
 **Step 1:** Environment Setup
 
