@@ -1,0 +1,5 @@
+condition,transition,k_used,n_pairs,mean_posterior,std_posterior,min_count,max_count
+evidence,silent_to_talk,3,75,0.22990280831767526,0.4029004503531826,55,11
+evidence,silent_to_silent,1,0,,,0,0
+no_evidence,silent_to_talk,3,296,0.17932267882346897,0.3705150211382967,230,42
+no_evidence,silent_to_silent,1,0,,,0,0
