@@ -1,8 +1,6 @@
 # Mech4Mech
 An automated tool for learning latent probabilities from conversational data that students are engaging in mechanistic reasoning. 
 
-The associated ArXiv paper "Locating evidence of mechanistic reasoning in student team conversations with mechanistic machine learning" can be found at: 
-
 ## **For Users with New Data: Tool Instructions** 
 
 **Step 1:** Environment Setup
@@ -42,13 +40,13 @@ The user has a choice to generate a csv file with per-student max posterior prob
 
 The user also has as choice to plot a segment of the data that has the highest density regions of mechanistic reasoning. The user can specify the the number of time steps in the region. 
 
-Please see the ArXiv paper Sec. V Tool demonstration and user recommendations for more details on considerations prior to tool use. 
+Please see the paper Sec. V Tool demonstration and user recommendations for more details on considerations prior to tool use. 
 
 ## **For Researchers: Replicating ArXiv Paper Results**
 
 **Train/Test data used in ArXiv paper:** 
 
-Our dataset MechTalk consists of 10 student problem-solving conversations consiting of 5 student groups. The problems are all from a Thermodynamics and Fluid Dynamics course at Tufts University. Each student group was presented with one specialized and one general problem (i.e. recieved by all student groups).
+Our dataset MechTalk consists of 10 student problem-solving conversations consiting of 5 student groups. The problems are all from a Thermodynamics and Fluid Dynamics course. Each student group was presented with one specialized and one general problem (i.e. recieved by all student groups).
 
 Training data from our paper can be found --> data/unsupervised_inference/training 
 Test data from our paper can be found --> data/unsupervised_inference/test_new_problem and data/unsupervised_inference/test_seen_problem
