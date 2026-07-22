@@ -42,16 +42,16 @@ The user also has as choice to plot a segment of the data that has the highest d
 
 Please see the paper Sec. V Tool demonstration and user recommendations for more details on considerations prior to tool use. 
 
-## **For Researchers: Replicating ArXiv Paper Results**
+## **For Researchers: Replicating Paper Results**
 
-**Train/Test data used in ArXiv paper:** 
+**Train/Test data used in paper:** 
 
 Our dataset MechTalk consists of 10 student problem-solving conversations consiting of 5 student groups. The problems are all from a Thermodynamics and Fluid Dynamics course. Each student group was presented with one specialized and one general problem (i.e. recieved by all student groups).
 
 Training data from our paper can be found --> data/unsupervised_inference/training 
 Test data from our paper can be found --> data/unsupervised_inference/test_new_problem and data/unsupervised_inference/test_seen_problem
 
-**ML Method detailed in RQ1 of ArXiv paper:**
+**ML Method detailed in RQ1 of paper:**
 
 We adapt the Hierarichal Switching Recurrent Dynamical Model (HSRDM) from (https://openreview.net/pdf/578aa0777465d1a9ef6af3f5cdccf09a0b4d619c.pdf). The original method uses a fully unsupervised Bayesian variational inference procedure to train a hierarichal (system and entity) time series state-space architecture with recurrent feedback. Model demonstrations were on time-series datasets with agent position/velocity-based features. 
 For our task, we incorporate the following: 
@@ -63,7 +63,7 @@ To model latent entity transitions at each time step, we assume an entity specif
 
 To model latent system transitions at each time step, we assume a categorical distribution over discrete states. The distribution is a linear sum of the probabilistic transitions from the previous state and a function of the outputs of the recurrent feedback from all entities.
 
-**Main Experiments included in RQ2 of ArXiv paper:**
+**Main Experiments included in RQ2 of paper:**
 
 All trained model parameters for various ablations in Sec. RQ2 can be found in results/unsupervised_inference  
 
